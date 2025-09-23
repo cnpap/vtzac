@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "dev": "tsdown watch",
+    "dev": "tsdown --watch",
     "lint": "eslint",
     "prepublishOnly": "nr build",
     "release": "bumpp",
