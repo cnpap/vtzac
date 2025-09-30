@@ -4,8 +4,8 @@ packages:
   - packages/*
   - examples/*
 
-ignoreWorkspaceRootCheck: true
-shellEmulator: true
+catalog:
+  fast-glob: ^3.3.3
 
 catalogs:
   cli:
@@ -27,7 +27,12 @@ catalogs:
     vitest-package-exports: ^0.1.1
     yaml: ^2.8.1
   types:
-    '@types/node': ^24.5.2
+    '@types/node': 24.5.2
+
+ignoreWorkspaceRootCheck: true
+
 onlyBuiltDependencies:
   - esbuild
   - simple-git-hooks
+
+shellEmulator: true
