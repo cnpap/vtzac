@@ -28,6 +28,7 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
+    "dev:backend": "tsx watch --tsconfig tsconfig.server.json src/backend/main.ts",
     "lint": "eslint",
     "prepublishOnly": "nr build",
     "release": "bumpp",
@@ -36,6 +37,13 @@
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
   },
+  "peerDependencies": {
+    "@nestjs/common": ">=9.0.0",
+    "@nestjs/core": ">=9.0.0",
+    "@nestjs/platform-express": ">=9.0.0",
+    "reflect-metadata": ">=0.1.0",
+    "rxjs": ">=7.0.0"
+  },
   "dependencies": {
     "fast-glob": "catalog:"
   },
@@ -43,10 +51,17 @@
     "@antfu/eslint-config": "catalog:cli",
     "@antfu/ni": "catalog:cli",
     "@antfu/utils": "catalog:inlined",
+    "@nestjs/cli": "catalog:",
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/platform-express": "catalog:",
     "@types/node": "catalog:types",
     "bumpp": "catalog:cli",
+    "concurrently": "catalog:",
     "eslint": "catalog:cli",
     "lint-staged": "catalog:cli",
+    "reflect-metadata": "catalog:",
+    "rxjs": "catalog:",
     "simple-git-hooks": "catalog:cli",
     "tinyexec": "catalog:testing",
     "tsdown": "catalog:cli",
