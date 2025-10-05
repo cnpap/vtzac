@@ -29,6 +29,8 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "dev:backend": "tsx watch --tsconfig tsconfig.server.json src/backend/main.ts",
+    "dev:html": "live-server src/backend/case --port=5173",
+    "format:html": "prettier --write \"src/backend/case/**/*.html\"",
     "lint": "eslint",
     "prepublishOnly": "nr build",
     "release": "bumpp",
@@ -41,10 +43,12 @@
     "@nestjs/common": ">=9.0.0",
     "@nestjs/core": ">=9.0.0",
     "@nestjs/platform-express": ">=9.0.0",
+    "multer": ">=2.0.2",
     "reflect-metadata": ">=0.1.0",
     "rxjs": ">=7.0.0"
   },
   "dependencies": {
+    "@nestjs/swagger": "catalog:",
     "fast-glob": "catalog:"
   },
   "devDependencies": {
@@ -55,11 +59,16 @@
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
     "@nestjs/platform-express": "catalog:",
+    "@types/express": "catalog:",
+    "@types/multer": "catalog:",
     "@types/node": "catalog:types",
     "bumpp": "catalog:cli",
     "concurrently": "catalog:",
     "eslint": "catalog:cli",
     "lint-staged": "catalog:cli",
+    "live-server": "catalog:",
+    "multer": "catalog:",
+    "prettier": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
     "simple-git-hooks": "catalog:cli",
