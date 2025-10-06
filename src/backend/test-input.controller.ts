@@ -9,7 +9,6 @@ import {
   Put,
   Query,
   Req,
-  Res,
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
@@ -25,11 +24,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger'
-import { Request, Response } from 'express'
+import { Request } from 'express'
 
 @ApiTags('test')
 @Controller('api/test')
-export class TestController {
+export class TestInputController {
   // === @Query 测试用例 ===
 
   // 具名查询参数（有key）
@@ -90,27 +89,6 @@ export class TestController {
     @Param() _allParams: any,
   ): any {
     return { success: true, type: 'mixed-param' }
-  }
-
-  // === @Body 测试用例 ===
-
-  // 请求体对象
-  @Post('body')
-  @ApiOperation({ summary: '请求体测试', description: '测试请求体的处理' })
-  @ApiBody({
-    description: '请求体数据',
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', example: '张三' },
-        age: { type: 'number', example: 25 },
-        email: { type: 'string', example: 'zhangsan@example.com' },
-      },
-    },
-  })
-  @ApiResponse({ status: 200, description: '成功返回', schema: { example: { success: true, type: 'body' } } })
-  testBody(@Body() _body: any): any {
-    return { success: true, type: 'body' }
   }
 
   // === @Headers 测试用例 ===
@@ -239,24 +217,6 @@ export class TestController {
     return { success: true, type: 'named-multiple-file-upload' }
   }
 
-  // === @Req 和 @Res 测试用例 ===
-
-  // 请求对象
-  @Get('context/request')
-  @ApiOperation({ summary: '请求上下文测试', description: '测试请求对象的处理' })
-  @ApiResponse({ status: 200, description: '成功返回', schema: { example: { success: true, type: 'request-context' } } })
-  testRequestContext(@Req() _request?: Request): any {
-    return { success: true, type: 'request-context' }
-  }
-
-  // 响应对象
-  @Get('context/response')
-  @ApiOperation({ summary: '响应上下文测试', description: '测试响应对象的处理' })
-  @ApiResponse({ status: 200, description: '成功返回', schema: { example: { success: true, type: 'response-context' } } })
-  testResponseContext(@Res() _response: Response): void {
-    _response.json({ success: true, type: 'response-context' })
-  }
-
   // === 复杂组合测试用例 ===
 
   // 综合测试：所有装饰器类型组合
@@ -282,7 +242,7 @@ export class TestController {
     @Query('version') _version?: string,
     @Headers('authorization') _auth?: string,
     @Req() _request?: Request,
-  ): any {
+  ): { success: true, type: 'complex' } {
     return { success: true, type: 'complex' }
   }
 
@@ -295,21 +255,5 @@ export class TestController {
   @ApiResponse({ status: 200, description: '成功删除', schema: { example: { success: true, method: 'DELETE' } } })
   testDeleteMethod(@Param('id') _id: string): any {
     return { success: true, method: 'DELETE' }
-  }
-
-  // === 边界情况测试 ===
-
-  // 无参数 + 所有可选参数
-  @Get('edge')
-  @ApiOperation({ summary: '边界情况测试', description: '测试边界情况和可选参数' })
-  @ApiQuery({ name: 'page', required: false, description: '页码', example: '1' })
-  @ApiHeader({ name: 'authorization', required: false, description: '授权令牌', example: 'Bearer token123' })
-  @ApiResponse({ status: 200, description: '成功返回', schema: { example: { success: true, type: 'edge-cases' } } })
-  testEdgeCases(
-    @Query('page') _page?: string,
-    @Headers('authorization') _auth?: string,
-    @Req() _request?: Request,
-  ): any {
-    return { success: true, type: 'edge-cases' }
   }
 }
