@@ -1,0 +1,55 @@
+import { TestInputController } from './backend/test-input.controller'
+
+// 类型工具：检测是否为构造函数
+type Constructor<T = object> = new (...args: any[]) => T
+
+// 类型工具：从构造函数中提取实例类型
+type ExtractInstance<T> = T extends Constructor<infer U> ? U : T
+
+// 类型工具：提取类的方法名
+type MethodNames<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
+}[keyof T]
+
+// 类型工具：提取方法的参数类型
+type MethodParameters<T, M extends MethodNames<T>> = T[M] extends (...args: infer P) => any ? P : never
+
+// 类型工具：提取方法的返回类型
+type MethodReturnType<T, M extends MethodNames<T>> = T[M] extends (...args: any[]) => infer R ? R : never
+
+// API 接口类型
+interface ZacAPI<T> {
+  call: <TMethod extends MethodNames<T>>(
+    _method: TMethod,
+    ..._args: MethodParameters<T, TMethod>
+  ) => MethodReturnType<T, TMethod>
+}
+
+// 主函数：统一处理构造函数和实例
+export function zac<T>(input: Constructor<T> | T): ZacAPI<ExtractInstance<T>> {
+  // 判断传入的是构造函数还是实例
+  const instance = (typeof input === 'function' ? new (input as Constructor<T>)() : input) as ExtractInstance<T>
+
+  return {
+    call<TMethod extends MethodNames<ExtractInstance<T>>>(
+      _method: TMethod,
+      ..._args: MethodParameters<ExtractInstance<T>, TMethod>
+    ): MethodReturnType<ExtractInstance<T>, TMethod> {
+      return (instance as any)[_method](..._args)
+    },
+  }
+}
+
+// 现在两种方式都支持了！
+const api1 = zac(TestInputController) // 直接传递类
+const api2 = zac(new TestInputController()) // 传递实例
+
+async function demo(): Promise<boolean> {
+  // 两种 API 都有完整的类型支持
+  const result1 = await api1.call('testComplex', '123', { name: 'test' }, 'v1.0', 'Bearer token')
+  const result2 = await api2.call('testComplex', '123', { name: 'test' }, 'v1.0', 'Bearer token')
+
+  return result1.success && result2.success
+}
+
+demo()
