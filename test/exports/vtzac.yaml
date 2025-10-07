@@ -1,3 +1,8 @@
 .:
   default: function
   vtzac: function
+./hook:
+  zac: function
+./fetch:
+  baseurl: function
+  default: function

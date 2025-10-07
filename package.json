@@ -17,6 +17,8 @@
   "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
+    "./hook": "./dist/hook.js",
+    "./fetch": "./dist/fetch.js",
     "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
@@ -44,12 +46,14 @@
     "@nestjs/core": ">=9.0.0",
     "@nestjs/platform-express": ">=9.0.0",
     "multer": ">=2.0.2",
+    "ofetch": ">=1.4.1",
     "reflect-metadata": ">=0.1.0",
     "rxjs": ">=7.0.0"
   },
   "dependencies": {
     "@nestjs/swagger": "catalog:",
-    "fast-glob": "catalog:"
+    "fast-glob": "catalog:",
+    "ofetch": "catalog:"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:cli",

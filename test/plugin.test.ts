@@ -15,7 +15,7 @@ describe('plugin Code Generation', () => {
 
     // 验证生成的代码
     expect(generatedCode).toBeTruthy()
-    expect(generatedCode).toContain('import httpZac from \'virtual:http-zac\';')
+    expect(generatedCode).toContain('import httpZac from \'vtzac/fetch\';')
     expect(generatedCode).toContain('class TestInputController')
     expect(generatedCode).toContain('testNamedQuery(...args)')
     expect(generatedCode).toContain('testQueryObject(...args)')

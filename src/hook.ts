@@ -1,4 +1,5 @@
-import { TestInputController } from './backend/test-input.controller'
+import type { FetchResponse } from 'ofetch'
+// import { TestInputController } from './backend/test-input.controller'
 
 // 类型工具：检测是否为构造函数
 type Constructor<T = object> = new (...args: any[]) => T
@@ -22,7 +23,7 @@ interface ZacAPI<T> {
   call: <TMethod extends MethodNames<T>>(
     _method: TMethod,
     ..._args: MethodParameters<T, TMethod>
-  ) => MethodReturnType<T, TMethod>
+  ) => Promise<FetchResponse<MethodReturnType<T, TMethod>>>
 }
 
 // 主函数：统一处理构造函数和实例
@@ -31,25 +32,27 @@ export function zac<T>(input: Constructor<T> | T): ZacAPI<ExtractInstance<T>> {
   const instance = (typeof input === 'function' ? new (input as Constructor<T>)() : input) as ExtractInstance<T>
 
   return {
-    call<TMethod extends MethodNames<ExtractInstance<T>>>(
+    async call<TMethod extends MethodNames<ExtractInstance<T>>>(
       _method: TMethod,
       ..._args: MethodParameters<ExtractInstance<T>, TMethod>
-    ): MethodReturnType<ExtractInstance<T>, TMethod> {
-      return (instance as any)[_method](..._args)
+    ): Promise<FetchResponse<MethodReturnType<ExtractInstance<T>, TMethod>>> {
+      return await (instance as any)[_method](..._args)
     },
   }
 }
 
-// 现在两种方式都支持了！
-const api1 = zac(TestInputController) // 直接传递类
-const api2 = zac(new TestInputController()) // 传递实例
+// // 现在两种方式都支持了！
+// const api1 = zac(TestInputController) // 直接传递类
+// const api2 = zac(new TestInputController()) // 传递实例
 
-async function demo(): Promise<boolean> {
-  // 两种 API 都有完整的类型支持
-  const result1 = await api1.call('testComplex', '123', { name: 'test' }, 'v1.0', 'Bearer token')
-  const result2 = await api2.call('testComplex', '123', { name: 'test' }, 'v1.0', 'Bearer token')
+// async function demo(): Promise<boolean> {
+//   // 两种 API 都有完整的类型支持
+//   const result1 = await api1.call('testComplex', '123', { name: 'test' }, 'v1.0', 'Bearer token')
+//   const result2 = await api2.call('testComplex', '123', { name: 'test' }, 'v1.0', 'Bearer token')
+//   const data = result1._data!
+//   const data2 = result2._data!
 
-  return result1.success && result2.success
-}
+//   return data.success && data2.success
+// }
 
-demo()
+// demo()

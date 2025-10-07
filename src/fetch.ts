@@ -1,3 +1,6 @@
+import type { FetchResponse } from 'ofetch'
+import { ofetch } from 'ofetch'
+
 /**
  * HTTP 请求配置接口
  */
@@ -46,62 +49,44 @@ export function baseurl(url: string): void {
  * httpZac 函数 - 构建并发送 HTTP 请求
  * @param config HTTP 配置对象
  * @param args 传入的参数数组
- * @returns Promise<Response>
+ * @returns Promise<any> ofetch 的原生返回
  */
-export default function httpZac(config: HttpConfig, args: any[]): Promise<Response> {
+export default async function httpZac<T>(config: HttpConfig, args: any[]): Promise<FetchResponse<T>> {
   const { method, path, parameters, fileUpload } = config
 
   // 构建请求 URL
-  let url = buildUrl(path, parameters, args)
-
-  // 添加基础 URL
-  if (!url.startsWith('http')) {
-    const baseUrl = BASE_URL
-    url = `${baseUrl}/${url}`.replace(/\/+/g, '/').replace(/:\//g, '://')
-  }
-
-  // 构建请求选项
-  const requestOptions: RequestInit = {
-    method: method.toUpperCase(),
-    headers: {},
-  }
+  const url = buildUrl(path, parameters, args)
 
   // 处理参数
   const { queryParams, headers, body, formData } = processParameters(parameters, args, fileUpload)
 
-  // 添加查询参数到 URL
-  if (queryParams.size > 0) {
-    const searchParams = new URLSearchParams()
-    queryParams.forEach((value, key) => {
-      if (Array.isArray(value)) {
-        value.forEach(v => searchParams.append(key, String(v)))
-      }
-      else {
-        searchParams.set(key, String(value))
-      }
-    })
-    url += (url.includes('?') ? '&' : '?') + searchParams.toString()
-  }
+  // 构建查询参数对象
+  const query: Record<string, any> = {}
+  queryParams.forEach((value, key) => {
+    query[key] = value
+  })
 
-  // 设置请求头
-  Object.assign(requestOptions.headers as Record<string, string>, headers)
+  // 构建 ofetch 选项
+  const options: any = {
+    method: method.toUpperCase(),
+    baseURL: BASE_URL,
+    headers,
+    query,
+    // 对于文件上传，禁用自动 JSON 解析
+    parseResponse: formData ? (txt: string) => txt : undefined,
+  }
 
   // 设置请求体
   if (formData) {
-    requestOptions.body = formData
-    // FormData 会自动设置 Content-Type，不需要手动设置
+    options.body = formData
   }
   else if (body !== undefined) {
-    if (typeof body === 'object' && body !== null) {
-      requestOptions.body = JSON.stringify(body)
-      ;(requestOptions.headers as Record<string, string>)['Content-Type'] = 'application/json'
-    }
-    else {
-      requestOptions.body = String(body)
-    }
+    options.body = body
   }
 
-  return fetch(url, requestOptions)
+  // 不直接返回 ofetch 的结果，而是使用 raw，这样返回值就不是直接的值了，而是 raw<T = any, R extends ResponseType = "json">(request: FetchRequest, options?: FetchOptions<R>): Promise<FetchResponse<MappedResponseType<R, T>>>;
+  // return await ofetch(url, options)
+  return ofetch.raw(url, options)
 }
 
 /**
@@ -165,6 +150,7 @@ function processParameters(
         // 路径参数已在 buildUrl 中处理
         break
 
+      case 'Header':
       case 'Headers':
         handleHeaderParameter(param, value, headers)
         break

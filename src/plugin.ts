@@ -12,7 +12,7 @@ export function generateJavaScriptClass(analysisResult: AnalysisResult): string 
   }
 
   // 生成导入语句
-  const importStatement = 'import httpZac from \'virtual:http-zac\';'
+  const importStatement = 'import httpZac from \'vtzac/fetch\';'
 
   // 生成所有控制器的代码
   const classesCode = controllers.map(controller => generateControllerClass(controller)).join('\n\n')

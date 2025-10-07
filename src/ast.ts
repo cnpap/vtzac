@@ -334,6 +334,35 @@ export function analyzeNestJSController(filePath: string): AnalysisResult {
 }
 
 /**
+ * 直接从代码字符串分析 NestJS 控制器
+ * @param code 代码字符串
+ * @param fileName 文件名（用于 TypeScript 编译器）
+ * @returns 分析结果
+ */
+export function analyzeNestJSControllerFromCode(code: string, fileName: string = 'virtual.ts'): AnalysisResult {
+  // 创建 TypeScript 源文件
+  const sourceFile = virtualSourceFile(fileName, code)
+
+  const controllers: ControllerInfo[] = []
+
+  // 遍历 AST 节点
+  function visit(node: ts.Node): void {
+    if (ts.isClassDeclaration(node)) {
+      const controllerInfo = analyzeController(node)
+      if (controllerInfo) {
+        controllers.push(controllerInfo)
+      }
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+
+  return { controllers }
+}
+
+/**
  * 解析文件参数类型信息
  */
 function parseFileParameterType(parameterType: string): {
