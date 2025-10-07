@@ -38,6 +38,7 @@
     "release": "bumpp",
     "start": "tsx src/index.ts",
     "test": "vitest",
+    "test:ci": "concurrently --kill-others --success first \"tsx --tsconfig tsconfig.server.json src/backend/main.ts\" \"wait-on http://localhost:3001/api/hello && vitest run\"",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
   },
@@ -83,6 +84,7 @@
     "vite": "catalog:cli",
     "vitest": "catalog:testing",
     "vitest-package-exports": "catalog:testing",
+    "wait-on": "catalog:",
     "yaml": "catalog:testing"
   },
   "simple-git-hooks": {
