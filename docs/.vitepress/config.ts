@@ -6,6 +6,11 @@ export default defineConfig({
   description: 'Vite + NestJS 全栈方案',
   lang: 'zh-CN',
 
+  // 忽略本地开发服务器的死链接
+  ignoreDeadLinks: [
+    /^http:\/\/localhost:\d+/,
+  ],
+
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
