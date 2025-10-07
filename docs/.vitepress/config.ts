@@ -18,11 +18,24 @@ export default defineConfig({
     ],
     sidebar: [
       {
+        text: '快速开始',
+        items: [
+          { text: '开始', link: '/getting-started' },
+          { text: '【步骤 1】集成 NestJS', link: '/nestjs-integration' },
+          { text: '【步骤 2】集成 Vite 插件', link: '/vite-plugin-integration' },
+        ],
+      },
+      {
+        text: '工作原理',
+        items: [
+          { text: '转换逻辑', link: '/how-it-works' },
+        ],
+      },
+      {
         text: '使用指南',
         items: [
-          { text: '集成 NestJS【步骤1】', link: '/nestjs-integration' },
-          { text: '集成 Vite 插件【步骤2】', link: '/vite-plugin-integration' },
-          { text: '注意事项【必读】', link: '/guide/notes' },
+
+          { text: '【必读】注意事项', link: '/guide/notes' },
           { text: '故障排除', link: '/troubleshooting' },
         ],
       },

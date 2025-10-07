@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\"",
     "dev:frontend": "vite",
-    "dev:backend": "tsx watch --tsconfig ./tsconfig.server.json src/backend/main.ts",
-    "dev:server": "tsx watch --tsconfig ./tsconfig.server.json src/backend/main.ts",
+    "dev:backend": "../node_modules/.bin/tsx watch --tsconfig ./tsconfig.server.json src/backend/main.ts",
+    "dev:server": "../node_modules/.bin/tsx watch --tsconfig ./tsconfig.server.json src/backend/main.ts",
     "build": "pnpm build:frontend && pnpm build:backend",
     "build:frontend": "tsc -b && vite build",
     "build:backend": "nest build",
@@ -55,6 +55,7 @@
     "typescript": "catalog:cli",
     "typescript-eslint": "catalog:",
     "vite": "catalog:cli",
+    "vite-plugin-inspect": "^11.3.3",
     "vtzac": "link:../"
   }
 }

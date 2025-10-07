@@ -1,6 +1,6 @@
 # Vite 集成指南
 
-vtzac 是一个专为 Vite + NestJS 全栈开发设计的插件，它能够自动生成前端 API 客户端代码，实现前后端类型安全的无缝集成。
+请确保已经在 Vite 项目中集成了 NestJS。如果还没有集成，请先参考 [NestJS 集成指南](/nestjs-integration)。
 
 ## 快速开始
 

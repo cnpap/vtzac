@@ -1,6 +1,6 @@
 # NestJS + Vite 前后端一体化集成
 
-vtzac 提供了一套完整的 NestJS 与 Vite 前后端一体化集成方案，让你可以在同一个项目中同时开发前端和后端代码。
+在使用 vtzac 之前，需要先集成 NestJS 到 Vite 项目中。
 
 ## 项目结构
 
