@@ -64,6 +64,9 @@ catalogs:
     fast-glob:
       specifier: ^3.0.0
       version: 3.3.3
+    globals:
+      specifier: ^16.4.0
+      version: 16.4.0
     live-server:
       specifier: ^1.2.2
       version: 1.2.2
@@ -160,6 +163,9 @@ importers:
       eslint:
         specifier: catalog:cli
         version: 9.36.0(jiti@2.6.0)
+      globals:
+        specifier: 'catalog:'
+        version: 16.4.0
       lint-staged:
         specifier: catalog:cli
         version: 16.2.0

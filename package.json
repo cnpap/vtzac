@@ -70,6 +70,7 @@
     "bumpp": "catalog:cli",
     "concurrently": "catalog:",
     "eslint": "catalog:cli",
+    "globals": "catalog:",
     "lint-staged": "catalog:cli",
     "live-server": "catalog:",
     "multer": "catalog:",
