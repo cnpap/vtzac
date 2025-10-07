@@ -96,6 +96,8 @@
     "pre-commit": "pnpm i --frozen-lockfile --ignore-scripts --offline && npx lint-staged"
   },
   "lint-staged": {
-    "*": "eslint --fix"
+    "playground/**/*.{ts,tsx,js,jsx,json,css,md}": "prettier --write",
+    "!(playground/**)": "eslint --fix",
+    "playground/**/*.{ts,tsx,js,jsx}": "eslint -c playground/eslint.config.js --fix"
   }
 }

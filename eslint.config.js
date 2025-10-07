@@ -8,7 +8,7 @@ export default antfu(
     pnpm: true,
   },
   {
-    files: ['src/backend/**/*.ts', 'docs/**/*.ts'],
+    files: ['src/backend/**/*.ts', 'docs/**/*.ts', '!playground/**/*'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.node,
