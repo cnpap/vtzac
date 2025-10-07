@@ -10,4 +10,8 @@ logs
 node_modules
 temp
 
+# VitePress cache and build output
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
 demo/

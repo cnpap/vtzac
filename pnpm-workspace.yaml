@@ -21,6 +21,7 @@ catalog:
   prettier: ^3.6.2
   reflect-metadata: 0.2.2
   rxjs: 7.8.2
+  vitepress: 2.0.0-alpha.12
   wait-on: ^9.0.1
 
 catalogs:

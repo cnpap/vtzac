@@ -17,6 +17,7 @@ describe('api Function Tests - Real HTTP Requests', () => {
       }
 
       const data = await api(config, [])
+      expect(data.status).toBe(200)
       expect(data._data).toEqual({ success: true, type: 'named-query' })
     })
   })

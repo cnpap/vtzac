@@ -32,7 +32,7 @@
     "dev": "tsdown --watch",
     "dev:backend": "tsx watch --tsconfig tsconfig.server.json src/backend/main.ts",
     "dev:html": "live-server src/backend/case --port=5173",
-    "format:html": "prettier --write \"src/backend/case/**/*.html\"",
+    "format": "prettier --write \"src/backend/case/**/*.html\" \"docs/**/*.md\" \"docs/**/*.css\"",
     "lint": "eslint",
     "prepublishOnly": "nr build",
     "release": "bumpp",
@@ -40,7 +40,10 @@
     "test": "vitest",
     "test:ci": "concurrently --kill-others --success first \"tsx --tsconfig tsconfig.server.json src/backend/main.ts\" \"wait-on http://localhost:3001/api/hello && vitest run\"",
     "typecheck": "tsc --noEmit",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "peerDependencies": {
     "@nestjs/common": ">=9.0.0",
@@ -83,6 +86,7 @@
     "tsx": "catalog:cli",
     "typescript": "catalog:cli",
     "vite": "catalog:cli",
+    "vitepress": "catalog:",
     "vitest": "catalog:testing",
     "vitest-package-exports": "catalog:testing",
     "wait-on": "catalog:",
