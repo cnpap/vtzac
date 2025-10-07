@@ -1,35 +1,35 @@
-# 注意事项
+# Important Notes
 
-## 参数顺序最佳实践
+## Parameter Order Best Practices
 
-在使用 vtzac 时，为了获得最佳的开发体验和类型安全，建议遵循以下参数顺序规范：
+When using vtzac, to achieve the best development experience and type safety, it is recommended to follow these parameter order conventions:
 
-### 参数顺序规则
+### Parameter Order Rules
 
-1. **必需参数在前**：`@Param`、`@Body`、`@Query` 等业务必需参数
-2. **可选参数在后**：`@Headers`、`@Res`、`@Req` 等框架相关参数
+1. **Required parameters first**: `@Param`, `@Body`, `@Query` and other business-required parameters
+2. **Optional parameters last**: `@Headers`, `@Res`, `@Req` and other framework-related parameters
 
-### Headers 参数处理
+### Headers Parameter Handling
 
-由于 Headers 通常可以通过中间件或全局配置写入，因此建议将 `@Headers` 参数放在最后，并设为可选参数：
+Since Headers can usually be injected through middleware or global configuration, it is recommended to place `@Headers` parameters last and make them optional:
 
 ```typescript
 @Controller('api/test')
 export class TestController {
-  // ✅ 推荐：Headers 参数放在最后且为可选
+  // ✅ Recommended: Headers parameter last and optional
   @Get('user/:id')
   getUser(
     @Param('id') id: string,
     @Query('include') include?: string,
-    @Headers('authorization') auth?: string // 可选，放在最后
+    @Headers('authorization') auth?: string // Optional, placed last
   ) {
     return { id, include, auth }
   }
 
-  // ❌ 不推荐：Headers 参数在前面
+  // ❌ Not recommended: Headers parameter in front
   @Get('user/:id')
   getUserBad(
-    @Headers('authorization') auth: string, // 不推荐的位置，因为有可能合格 header 是由拦截器传递，而不是函数调用传递
+    @Headers('authorization') auth: string, // Not recommended position, as valid headers might be passed by interceptors rather than function calls
     @Param('id') id: string,
     @Query('include') include?: string
   ) {
@@ -38,41 +38,41 @@ export class TestController {
 }
 ```
 
-### Response 和 Request 对象
+### Response and Request Objects
 
-当需要使用 `@Res` 或 `@Req` 时，必须遵循以下规则：
+When you need to use `@Res` or `@Req`, you must follow these rules:
 
-#### Response 对象使用
+#### Response Object Usage
 
 ```typescript
 @Controller('api/test')
 export class TestController {
-  // ✅ 正确：使用 passthrough: true 并设为可选参数
+  // ✅ Correct: Use passthrough: true and make it optional
   @Post('create')
   createItem(
     @Body() data: any,
     @Res({ passthrough: true }) response?: Response
   ) {
-    // 可以使用 response 对象设置状态码
+    // Can use response object to set status code
     response!.status(201)
 
-    // 必须使用 return 返回数据以保证类型安全
+    // Must use return to return data to ensure type safety
     return { success: true, data }
   }
 
-  // ❌ 错误：没有使用 passthrough: true
+  // ❌ Wrong: Not using passthrough: true
   @Post('create-bad')
   createItemBad(
     @Body() data: any,
-    @Res() response?: Response // 缺少 passthrough: true
+    @Res() response?: Response // Missing passthrough: true
   ) {
     response!.status(201).json({ success: true, data })
-    // 这样会失去类型安全
+    // This will lose type safety
   }
 }
 ```
 
-#### Request 对象使用
+#### Request Object Usage
 
 ```typescript
 @Controller('api/test')
@@ -80,7 +80,7 @@ export class TestController {
   @Get('info')
   getInfo(
     @Query('type') type?: string,
-    @Req() request?: Request // 可选参数，放在最后
+    @Req() request?: Request // Optional parameter, placed last
   ) {
     const userAgent = request?.headers['user-agent']
     return { type, userAgent }
@@ -88,9 +88,9 @@ export class TestController {
 }
 ```
 
-### 前端调用示例
+### Frontend Usage Example
 
-遵循参数顺序规则后，前端调用会更加直观：
+Following the parameter order rules, frontend calls become more intuitive:
 
 ```tsx
 import { zac } from 'vtzac/hook'
@@ -103,45 +103,45 @@ const testController = zac(TestController, {
 })
 
 async function handleGetUser() {
-  // 只传递必需参数，Headers 通过中间件处理
+  // Only pass required parameters, Headers handled by middleware
   const res = await testController.call('getUser', '123', 'profile')
-    .catch(error => console.error('请求失败:', error))
+    .catch(error => console.error('Request failed:', error))
 
   console.log(res._data)
 }
 
 async function handleCreateItem() {
-  // Response 对象不需要在前端传递
-  const res = await testController.call('createItem', { name: '新项目' })
-    .catch(error => console.error('请求失败:', error))
+  // Response object doesn't need to be passed from frontend
+  const res = await testController.call('createItem', { name: 'New project' })
+    .catch(error => console.error('Request failed:', error))
 
-  console.log(res._data) // 类型安全的返回数据
+  console.log(res._data) // Type-safe return data
 }
 ```
 
-## 类型安全要点
+## Type Safety Key Points
 
-### 使用 passthrough: true
+### Using passthrough: true
 
-当使用 `@Res` 装饰器时，必须设置 `{ passthrough: true }`，这样可以：
+When using the `@Res` decorator, you must set `{ passthrough: true }`, which allows:
 
-1. 保持 NestJS 的正常响应处理流程
-2. 允许使用 `return` 语句返回数据
-3. 确保前端能够获得正确的类型推断
+1. Maintaining NestJS's normal response handling flow
+2. Using `return` statements to return data
+3. Ensuring the frontend gets correct type inference
 
-### 可选参数的使用
+### Using Optional Parameters
 
-将框架相关参数设为可选（`?`）的好处：
+Benefits of making framework-related parameters optional (`?`):
 
-1. 前端调用时不需要传递这些参数
-2. 后端可以通过拦截器或其他方式注入这些值
-3. 提高代码的灵活性和可维护性
+1. Frontend doesn't need to pass these parameters when calling
+2. Backend can inject these values through interceptors or other means
+3. Improves code flexibility and maintainability
 
-## 总结
+## Summary
 
-遵循这些最佳实践可以：
+Following these best practices can:
 
-- 提高代码的可读性和维护性
-- 确保类型安全
-- 简化前端调用逻辑
-- 提供更好的开发体验
+- Improve code readability and maintainability
+- Ensure type safety
+- Simplify frontend calling logic
+- Provide better development experience

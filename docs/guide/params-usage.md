@@ -1,8 +1,8 @@
-# 参数处理用例
+# Parameter Handling Use Cases
 
-## 无参数接口
+## No Parameter Interface
 
-### 后端实现
+### Backend Implementation
 
 ```typescript
 @Controller('api/test')
@@ -14,7 +14,7 @@ export class TestController {
 }
 ```
 
-### 前端调用
+### Frontend Usage
 
 ```tsx
 import { zac } from 'vtzac/hook'
@@ -28,20 +28,20 @@ const testController = zac(TestController, {
 
 async function handleHello() {
   const res = await testController.call('getHello')
-    .catch(error => console.error('请求失败:', error))
+    .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { message: 'Hello World!' }
 }
 ```
 
-## 具名参数接口
+## Named Parameter Interface
 
-### 后端实现
+### Backend Implementation
 
 ```typescript
 @Controller('api/test')
 export class TestController {
-  // Query 具名参数
+  // Query named parameters
   @Get('query/named')
   testNamedQuery(
     @Query('page') page?: string,
@@ -50,7 +50,7 @@ export class TestController {
     return { success: true, page, limit }
   }
 
-  // Path 具名参数
+  // Path named parameters
   @Get('param/named/:userId/:postId')
   testNamedParam(
     @Param('userId') userId: string,
@@ -59,7 +59,7 @@ export class TestController {
     return { success: true, userId, postId }
   }
 
-  // Headers 具名参数
+  // Headers named parameters
   @Get('headers/named')
   testNamedHeaders(
     @Headers('authorization') auth?: string,
@@ -69,37 +69,37 @@ export class TestController {
 }
 ```
 
-### 前端调用
+### Frontend Usage
 
 ```tsx
-// Query 具名参数调用
+// Query named parameter call
 async function handleNamedQuery() {
   const res = await testController.call('testNamedQuery', '1', '10')
-    .catch(error => console.error('请求失败:', error))
+    .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { success: true, page: '1', limit: '10' }
 }
 
-// Path 具名参数调用
+// Path named parameter call
 async function handleNamedParam() {
   const res = await testController.call('testNamedParam', '123', '456')
-    .catch(error => console.error('请求失败:', error))
+    .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { success: true, userId: '123', postId: '456' }
 }
 
-// Headers 具名参数调用
+// Headers named parameter call
 async function handleNamedHeaders() {
   const res = await testController.call('testNamedHeaders', 'Bearer token123')
-    .catch(error => console.error('请求失败:', error))
+    .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { success: true, auth: 'Bearer token123' }
 }
 ```
 
-## 混合参数接口
+## Mixed Parameter Interface
 
-### 后端实现
+### Backend Implementation
 
 ```typescript
 @Controller('api/test')
@@ -114,7 +114,7 @@ export class TestController {
     return { success: true, id, body, version, auth }
   }
 
-  // 参数对象形式
+  // Parameter object form
   @Get('param/object/:type/:id/:action')
   testParamObject(@Param() params: any) {
     return { success: true, params }
@@ -127,29 +127,29 @@ export class TestController {
 }
 ```
 
-### 前端调用
+### Frontend Usage
 
 ```tsx
-// 复杂混合参数调用
+// Complex mixed parameter call
 async function handleComplex() {
   const res = await testController.call(
     'testComplex',
     '123', // @Param('id')
-    { name: '更新的名称', status: 'active' }, // @Body()
+    { name: 'Updated name', status: 'active' }, // @Body()
     'v1.0', // @Query('version')
     'Bearer token123' // @Headers('authorization')
-  ).catch(error => console.error('请求失败:', error))
+  ).catch(error => console.error('Request failed:', error))
 
   console.log(res._data)
 }
 
-// 参数对象调用
+// Parameter object call
 async function handleParamObject() {
   const res = await testController.call('testParamObject', {
     type: 'user',
     id: '123',
     action: 'edit'
-  }).catch(error => console.error('请求失败:', error))
+  }).catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { success: true, params: { type: 'user', id: '123', action: 'edit' } }
 }
@@ -159,7 +159,7 @@ async function handleQueryObject() {
     page: '1',
     limit: '10',
     search: 'test'
-  }).catch(error => console.error('请求失败:', error))
+  }).catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { success: true, query: { page: '1', limit: '10', search: 'test' } }
 }

@@ -1,18 +1,18 @@
-# Vite 集成指南
+# Vite Integration Guide
 
-请确保已经在 Vite 项目中集成了 NestJS。如果还没有集成，请先参考 [NestJS 集成指南](/nestjs-integration)。
+Please ensure that NestJS has been integrated into your Vite project. If not yet integrated, please refer to the [NestJS Integration Guide](/nestjs-integration) first.
 
-## 快速开始
+## Quick Start
 
-### 1. 安装 vtzac
+### 1. Install vtzac
 
 ```bash
 pnpm add -D vtzac
 ```
 
-### 2. 配置 Vite
+### 2. Configure Vite
 
-在你的 `vite.config.ts` 文件中添加 vtzac 插件：
+Add the vtzac plugin to your `vite.config.ts` file:
 
 ```typescript
 import tailwindcss from '@tailwindcss/vite'
@@ -32,28 +32,28 @@ export default defineConfig({
 })
 ```
 
-## 配置选项
+## Configuration Options
 
 ### glob
 
-- **类型**: `string[]`
-- **必需**: 是
-- **描述**: 指定 NestJS 控制器文件的匹配模式
+- **Type**: `string[]`
+- **Required**: Yes
+- **Description**: Specify the matching pattern for NestJS controller files
 
-`glob` 选项用于告诉 vtzac 在哪里查找你的 NestJS 控制器文件。插件会扫描这些文件并自动生成对应的前端 API 客户端代码。
+The `glob` option is used to tell vtzac where to find your NestJS controller files. The plugin will scan these files and automatically generate corresponding frontend API client code.
 
-#### 示例配置
+#### Example Configuration
 
 ```typescript
 vtzac({
-  // 扫描 src/backend 目录下所有的 .controller.ts 文件
+  // Scan all .controller.ts files in the src/backend directory
   glob: ['src/backend/**/*.controller.ts'],
 })
 ```
 
 ```typescript
 vtzac({
-  // 扫描多个目录
+  // Scan multiple directories
   glob: [
     'src/backend/**/*.controller.ts',
     'src/api/**/*.controller.ts',
@@ -63,7 +63,7 @@ vtzac({
 
 ```typescript
 vtzac({
-  // 更精确的匹配模式
+  // More precise matching patterns
   glob: [
     'src/backend/controllers/*.controller.ts',
     'src/backend/modules/*/*.controller.ts',
@@ -71,44 +71,44 @@ vtzac({
 })
 ```
 
-## 工作原理
+## How It Works
 
-1. **扫描控制器**: vtzac 根据 `glob` 配置扫描你的 NestJS 控制器文件
-2. **解析 API**: 分析控制器中的装饰器（如 `@Get`、`@Post` 等）和方法签名
-3. **生成客户端**: 自动生成类型安全的前端 API 客户端代码
-4. **热更新**: 在开发模式下，当控制器文件发生变化时自动重新生成客户端代码
+1. **Scan Controllers**: vtzac scans your NestJS controller files based on the `glob` configuration
+2. **Parse APIs**: Analyzes decorators (such as `@Get`, `@Post`, etc.) and method signatures in controllers
+3. **Generate Client**: Automatically generates type-safe frontend API client code
+4. **Hot Reload**: In development mode, automatically regenerates client code when controller files change
 
-## 项目结构建议
+## Recommended Project Structure
 
-为了更好地使用 vtzac，建议采用以下项目结构：
+For better use of vtzac, the following project structure is recommended:
 
 ```
 project-root/
 ├── src/
-│   ├── backend/           # NestJS 后端代码
-│   │   ├── controllers/   # 控制器文件
+│   ├── backend/           # NestJS backend code
+│   │   ├── controllers/   # Controller files
 │   │   │   ├── app.controller.ts
 │   │   │   ├── user.controller.ts
 │   │   │   └── file.controller.ts
-│   │   ├── services/      # 服务文件
-│   │   ├── modules/       # 模块文件
+│   │   ├── services/      # Service files
+│   │   ├── modules/       # Module files
 │   │   ├── app.module.ts
 │   │   ├── main.ts
 │   │   └── package.json
-│   ├── components/        # React 组件
-│   ├── pages/            # 页面组件
+│   ├── components/        # React components
+│   ├── pages/            # Page components
 │   ├── App.tsx
 │   ├── main.tsx
 │   └── ...
-├── vite.config.ts        # Vite 配置（包含 vtzac 插件）
+├── vite.config.ts        # Vite configuration (including vtzac plugin)
 └── package.json
 ```
 
-## 与其他插件集成
+## Integration with Other Plugins
 
-vtzac 可以与其他 Vite 插件无缝集成：
+vtzac can seamlessly integrate with other Vite plugins:
 
-### 与 React 集成
+### Integration with React
 
 ```typescript
 import react from '@vitejs/plugin-react-swc'

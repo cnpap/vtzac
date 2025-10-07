@@ -1,14 +1,14 @@
-# NestJS 集成常见问题与故障排除
+# NestJS Integration Common Issues and Troubleshooting
 
-本文档收集了在使用 vtzac 进行 NestJS + Vite 前后端一体化开发时的常见问题和解决方案。
+This document collects common issues and solutions when using vtzac for NestJS + Vite full-stack development.
 
-## 装饰器相关错误
+## Decorator-Related Errors
 
-### 问题：装饰器无法识别
-**错误信息**：`Experimental support for decorators is a feature that is subject to change in a future release.`
+### Issue: Decorators not recognized
+**Error message**: `Experimental support for decorators is a feature that is subject to change in a future release.`
 
-**解决方案**：
-确保在 `tsconfig.app.json` 和 `tsconfig.server.json` 中都添加了装饰器支持：
+**Solution**:
+Ensure decorator support is added in both `tsconfig.app.json` and `tsconfig.server.json`:
 
 ```json
 {
@@ -19,16 +19,16 @@
 }
 ```
 
-### 问题：Multer 类型错误
-**错误信息**：`命名空间"global.Express"没有已导出的成员"Multer"`
+### Issue: Multer type error
+**Error message**: `Namespace "global.Express" has no exported member "Multer"`
 
-**解决方案**：
-1. 安装必要的依赖：
+**Solution**:
+1. Install necessary dependencies:
    ```bash
    pnpm add multer @types/multer
    ```
 
-2. 在 `tsconfig.app.json` 中添加 multer 类型：
+2. Add multer types in `tsconfig.app.json`:
    ```json
    {
      "compilerOptions": {
@@ -37,28 +37,28 @@
    }
    ```
 
-### 问题：装饰器元数据丢失
-**错误信息**：`Cannot resolve dependency` 或依赖注入失败
+### Issue: Decorator metadata lost
+**Error message**: `Cannot resolve dependency` or dependency injection failure
 
-**解决方案**：
-确保安装了 `reflect-metadata` 并在应用入口处导入：
+**Solution**:
+Ensure `reflect-metadata` is installed and imported at the application entry point:
 
 ```bash
 pnpm add reflect-metadata
 ```
 
-在 `src/backend/main.ts` 顶部添加：
+Add at the top of `src/backend/main.ts`:
 ```typescript
 import 'reflect-metadata'
 ```
 
-## 模块系统配置
+## Module System Configuration
 
-### 问题：模块导入错误
-**错误信息**：`Cannot use import statement outside a module` 或 `require() of ES modules is not supported`
+### Issue: Module import error
+**Error message**: `Cannot use import statement outside a module` or `require() of ES modules is not supported`
 
-**解决方案**：
-确保后端使用 CommonJS 模块系统，在 `src/backend/package.json` 中设置：
+**Solution**:
+Ensure the backend uses CommonJS module system, set in `src/backend/package.json`:
 
 ```json
 {

@@ -1,71 +1,71 @@
-# 开始使用 vtzac
+# Getting Started with vtzac
 
-欢迎使用 vtzac！这是一个专为 Vite + NestJS 全栈开发设计的工具，能够自动生成前端 API 客户端代码，实现前后端类型安全的无缝集成。
+Welcome to vtzac! This is a tool specifically designed for Vite + NestJS full-stack development that automatically generates frontend API client code, enabling seamless type-safe integration between frontend and backend.
 
-## 什么是 vtzac？
+## What is vtzac?
 
-vtzac 提供了一套完整的解决方案，让你可以：
+vtzac provides a complete solution that allows you to:
 
-- 🚀 **极低学习成本** - 基于熟悉的 Vite 和 NestJS 技术栈
-- 🔒 **类型安全** - 自动生成类型安全的前端 API 客户端
-- 🎯 **一体化开发** - 在同一个项目中同时开发前端和后端
-- ⚡ **开发效率** - 自动同步 API 变更，无需手动维护接口文档
+- 🚀 **Minimal Learning Curve** - Built on familiar Vite and NestJS technology stack
+- 🔒 **Type Safety** - Automatically generates type-safe frontend API clients
+- 🎯 **Unified Development** - Develop both frontend and backend in the same project
+- ⚡ **Development Efficiency** - Automatically sync API changes without manual interface documentation maintenance
 
-## 文档导航
+## Documentation Navigation
 
-### 🏗️ 集成指南
+### 🏗️ Integration Guide
 
-#### [【步骤 1】NestJS 集成](/nestjs-integration)
-详细介绍如何在项目中集成 NestJS 后端，包括：
-- 项目结构设置
-- 依赖安装和配置
-- TypeScript 配置
-- 开发和构建流程
+#### [Step 1: NestJS Integration](/nestjs-integration)
+Detailed guide on integrating NestJS backend in your project, including:
+- Project structure setup
+- Dependency installation and configuration
+- TypeScript configuration
+- Development and build process
 
-#### [【步骤 2】Vite 插件集成](/vite-plugin-integration)
-了解如何配置 vtzac Vite 插件：
-- 插件安装和基本配置
-- glob 模式配置
-- 自动生成 API 客户端代码
+#### [Step 2: Vite Plugin Integration](/vite-plugin-integration)
+Learn how to configure the vtzac Vite plugin:
+- Plugin installation and basic configuration
+- Glob pattern configuration
+- Automatic API client code generation
 
-### 📚 使用指南
+### 📚 Usage Guide
 
-#### [参数处理用例](/guide/params-usage)
-学习如何处理各种类型的 API 参数：
-- 无参数接口
-- 路径参数 (`@Param`)
-- 查询参数 (`@Query`)
-- 请求体参数 (`@Body`)
-- 组合参数使用
+#### [Parameter Handling Examples](/guide/params-usage)
+Learn how to handle various types of API parameters:
+- No-parameter interfaces
+- Path parameters (`@Param`)
+- Query parameters (`@Query`)
+- Request body parameters (`@Body`)
+- Combined parameter usage
 
-#### [文件上传用例](/guide/file-upload-usage)
-掌握文件上传功能的实现：
-- 单文件上传
-- 多文件上传
-- 文件上传与其他参数组合
-- 前端文件选择和上传
+#### [File Upload Examples](/guide/file-upload-usage)
+Master file upload functionality implementation:
+- Single file upload
+- Multiple file upload
+- File upload combined with other parameters
+- Frontend file selection and upload
 
-#### [注意事项](/guide/notes)
-重要的开发注意事项和最佳实践：
-- 参数顺序最佳实践
-- Headers 参数处理
-- 类型安全建议
-- 性能优化提示
+#### [Important Notes](/guide/notes)
+Important development considerations and best practices:
+- Parameter order best practices
+- Headers parameter handling
+- Type safety recommendations
+- Performance optimization tips
 
-### 🔧 故障排除
+### 🔧 Troubleshooting
 
-#### [常见问题与解决方案](/troubleshooting)
-遇到问题时的解决指南：
-- 装饰器相关错误
-- TypeScript 配置问题
-- 依赖注入问题
-- 构建和运行时错误
+#### [Common Issues and Solutions](/troubleshooting)
+Problem-solving guide when encountering issues:
+- Decorator-related errors
+- TypeScript configuration issues
+- Dependency injection problems
+- Build and runtime errors
 
-## 下一步
+## Next Steps
 
-- 如果你是第一次使用，建议从 [NestJS 集成](/nestjs-integration) 开始
-- 如果你已经在 Vite 项目中集成了 NestJS，可以直接查看 [Vite 插件集成](/vite-plugin-integration)
-- 想了解具体用法，可以查看 [使用指南](/guide/params-usage) 部分
-- 遇到问题时，请参考 [故障排除](/troubleshooting) 文档
+- If you're using this for the first time, we recommend starting with [NestJS Integration](/nestjs-integration)
+- If you've already integrated NestJS in your Vite project, you can directly check [Vite Plugin Integration](/vite-plugin-integration)
+- To understand specific usage, check the [Usage Guide](/guide/params-usage) section
+- When encountering problems, please refer to the [Troubleshooting](/troubleshooting) documentation
 
-开始你的 vtzac 全栈开发之旅吧！🎉
+Start your vtzac full-stack development journey! 🎉

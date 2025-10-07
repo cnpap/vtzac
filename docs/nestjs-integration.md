@@ -1,57 +1,57 @@
-# NestJS + Vite 前后端一体化集成
+# NestJS + Vite Full-Stack Integration
 
-在使用 vtzac 之前，需要先集成 NestJS 到 Vite 项目中。
+Before using vtzac, you need to integrate NestJS into your Vite project.
 
-## 项目结构
+## Project Structure
 
-集成后的项目结构如下：
+The integrated project structure is as follows:
 
 ```
 project-root/
 ├── src/
-│   ├── backend/           # NestJS 后端代码
+│   ├── backend/           # NestJS backend code
 │   │   ├── app.controller.ts
 │   │   ├── app.module.ts
 │   │   ├── app.service.ts
 │   │   ├── main.ts
-│   │   └── package.json   # 指定 CommonJS 模块系统
-│   ├── App.tsx           # React 前端代码
+│   │   └── package.json   # Specify CommonJS module system
+│   ├── App.tsx           # React frontend code
 │   ├── main.tsx
 │   └── ...
-├── package.json          # 主项目配置
-├── tsconfig.json         # 主 TypeScript 配置
-├── tsconfig.app.json     # 前端 TypeScript 配置
-├── tsconfig.server.json  # 后端 TypeScript 配置
-├── nest-cli.json         # NestJS CLI 配置
-├── eslint.config.js      # ESLint 配置
-└── vite.config.ts        # Vite 配置
+├── package.json          # Main project configuration
+├── tsconfig.json         # Main TypeScript configuration
+├── tsconfig.app.json     # Frontend TypeScript configuration
+├── tsconfig.server.json  # Backend TypeScript configuration
+├── nest-cli.json         # NestJS CLI configuration
+├── eslint.config.js      # ESLint configuration
+└── vite.config.ts        # Vite configuration
 ```
 
-## 开始集成
+## Getting Started with Integration
 
-### 1. 安装依赖
+### 1. Install Dependencies
 
-首先安装 NestJS 核心依赖：
+First, install NestJS core dependencies:
 
 ```bash
 pnpm add @nestjs/common @nestjs/core @nestjs/platform-express reflect-metadata rxjs
 ```
 
-安装文件上传支持（如果需要）：
+Install file upload support (if needed):
 
 ```bash
 pnpm add multer @types/multer
 ```
 
-安装开发依赖：
+Install development dependencies:
 
 ```bash
 pnpm add -D @nestjs/cli tsx concurrently
 ```
 
-### 2. 创建后端目录结构
+### 2. Create Backend Directory Structure
 
-在 `src` 目录下创建 `backend` 文件夹，并创建以下文件：
+Create a `backend` folder under the `src` directory and create the following files:
 
 #### src/backend/package.json
 ```json
@@ -68,9 +68,9 @@ import { AppModule } from './app.module'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
-  // 启用 CORS 以支持前端访问
+  // Enable CORS to support frontend access
   app.enableCors({
-    origin: 'http://localhost:5173', // Vite 默认端口
+    origin: 'http://localhost:5173', // Vite default port
     credentials: true,
   })
 
@@ -133,9 +133,9 @@ export class AppService {
 }
 ```
 
-### 3. 配置 TypeScript
+### 3. Configure TypeScript
 
-#### tsconfig.server.json (后端配置)
+#### tsconfig.server.json (Backend Configuration)
 ```json
 {
   "compilerOptions": {
@@ -164,7 +164,7 @@ export class AppService {
 }
 ```
 
-#### 更新 tsconfig.json (主配置)
+#### Update tsconfig.json (Main Configuration)
 ```json
 {
   "files": [],
@@ -176,12 +176,12 @@ export class AppService {
 }
 ```
 
-#### 更新 tsconfig.app.json (前端配置)
-在现有配置基础上添加装饰器支持：
+#### Update tsconfig.app.json (Frontend Configuration)
+Add decorator support to the existing configuration:
 ```json
 {
   "compilerOptions": {
-    // ... 其他配置
+    // ... other configurations
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "types": ["vite/client", "multer"]
@@ -190,9 +190,9 @@ export class AppService {
 }
 ```
 
-> **重要提示**：`experimentalDecorators` 和 `emitDecoratorMetadata` 是使用 NestJS 装饰器的必要配置。`types` 数组中需要包含 `multer` 以支持文件上传功能。
+> **Important Note**: `experimentalDecorators` and `emitDecoratorMetadata` are necessary configurations for using NestJS decorators. The `types` array needs to include `multer` to support file upload functionality.
 
-### 4. 配置 NestJS CLI
+### 4. Configure NestJS CLI
 
 #### nest-cli.json
 ```json
@@ -207,7 +207,7 @@ export class AppService {
 }
 ```
 
-### 5. 更新 package.json 脚本
+### 5. Update package.json Scripts
 
 ```json
 {
@@ -227,43 +227,43 @@ export class AppService {
 }
 ```
 
-## 开发模式
+## Development Mode
 
-### 同时启动前后端
+### Start Both Frontend and Backend
 ```bash
 pnpm dev
 ```
 
-### 单独启动前端
+### Start Frontend Only
 ```bash
 pnpm dev:frontend
 ```
 
-### 单独启动后端
+### Start Backend Only
 ```bash
 pnpm dev:backend
 ```
 
-## 构建和部署
+## Build and Deployment
 
-### 构建前后端
+### Build Frontend and Backend
 ```bash
 pnpm build
 ```
 
-### 生产环境启动
+### Production Start
 ```bash
 pnpm start
 ```
 
-## API 访问
+## API Access
 
-- 前端：http://localhost:5173
-- 后端：http://localhost:3001
-- API 端点示例：
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3001
+- API endpoint examples:
   - GET http://localhost:3001/api/hello
   - POST http://localhost:3001/api/echo
 
-## 故障排除
+## Troubleshooting
 
-如果在集成过程中遇到问题，请参考 [NestJS 故障排除文档](./troubleshooting.md)，其中包含了常见问题的详细解决方案。
+If you encounter issues during the integration process, please refer to the [NestJS Troubleshooting Documentation](./troubleshooting.md), which contains detailed solutions for common problems.

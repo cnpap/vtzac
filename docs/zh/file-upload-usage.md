@@ -1,17 +1,10 @@
-# File Upload Use Cases
+# 文件上传用例
 
-## Single File Upload
+## 单文件上传
 
-### Backend Implementation
+### 后端实现
 
 ```typescript
-import {
-  Body,
-  Controller,
-  Post,
-  UploadedFile,
-  UseInterceptors
-} from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 
 @Controller('api/upload')
@@ -32,7 +25,7 @@ export class UploadController {
 }
 ```
 
-### Frontend Usage
+### 前端调用
 
 ```tsx
 import { zac } from 'vtzac/hook'
@@ -47,18 +40,18 @@ const uploadController = zac(UploadController, {
 async function handleSingleUpload(file: File) {
   const res = await uploadController.call(
     'uploadSingle',
-    file as unknown as Express.Multer.File, // File object
-    { description: 'Test file' } // Metadata
-  ).catch(error => console.error('Single file upload failed:', error))
+    file as unknown as Express.Multer.File, // 文件对象
+    { description: '测试文件' } // 元数据
+  ).catch(error => console.error('单文件上传失败:', error))
 
   console.log(res._data)
-  // Output: { success: true, filename: 'test.txt', size: 1024, metadata: { description: 'Test file' } }
+  // 输出: { success: true, filename: 'test.txt', size: 1024, metadata: { description: '测试文件' } }
 }
 ```
 
-## Multiple File Upload
+## 多文件上传
 
-### Backend Implementation
+### 后端实现
 
 ```typescript
 import { FilesInterceptor } from '@nestjs/platform-express'
@@ -66,7 +59,7 @@ import { FilesInterceptor } from '@nestjs/platform-express'
 @Controller('api/upload')
 export class UploadController {
   @Post('multiple')
-  @UseInterceptors(FilesInterceptor('files', 5)) // Maximum 5 files
+  @UseInterceptors(FilesInterceptor('files', 5)) // 最多5个文件
   uploadMultiple(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() metadata?: any,
@@ -84,24 +77,24 @@ export class UploadController {
 }
 ```
 
-### Frontend Usage
+### 前端调用
 
 ```tsx
 async function handleMultipleUpload(files: File[]) {
   const res = await uploadController.call(
     'uploadMultiple',
-    files as unknown as Express.Multer.File[], // File array
-    { description: 'Batch upload' } // Metadata
-  ).catch(error => console.error('Multiple file upload failed:', error))
+    files as unknown as Express.Multer.File[], // 文件数组
+    { description: '批量上传' } // 元数据
+  ).catch(error => console.error('多文件上传失败:', error))
 
   console.log(res._data)
-  // Output: { success: true, count: 3, files: [...], metadata: { description: 'Batch upload' } }
+  // 输出: { success: true, count: 3, files: [...], metadata: { description: '批量上传' } }
 }
 ```
 
-## Named Multiple File Upload
+## 具名多文件上传
 
-### Backend Implementation
+### 后端实现
 
 ```typescript
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
@@ -136,7 +129,7 @@ export class UploadController {
 }
 ```
 
-### Frontend Usage
+### 前端调用
 
 ```tsx
 async function handleNamedUpload(documents: File[], images: File[]) {
@@ -146,10 +139,10 @@ async function handleNamedUpload(documents: File[], images: File[]) {
       documents: documents as unknown as Express.Multer.File[],
       images: images as unknown as Express.Multer.File[]
     },
-    { description: 'Categorized upload' }
-  ).catch(error => console.error('Named multiple file upload failed:', error))
+    { description: '分类上传' }
+  ).catch(error => console.error('具名多文件上传失败:', error))
 
   console.log(res._data)
-  // Output: { success: true, documents: [...], images: [...], metadata: { description: 'Categorized upload' } }
+  // 输出: { success: true, documents: [...], images: [...], metadata: { description: '分类上传' } }
 }
 ```

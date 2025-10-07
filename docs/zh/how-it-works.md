@@ -1,12 +1,12 @@
-# Transformation Logic
+# 转换逻辑
 
-## Automatic Transformation Process
+## 自动转换过程
 
-vtzac scans your NestJS controller files, analyzes decorators and method signatures, and then automatically generates corresponding frontend calling code.
+vtzac 会扫描你的 NestJS 控制器文件，分析装饰器和方法签名，然后自动生成对应的前端调用代码。
 
-### Transformation Example
+### 转换示例
 
-#### Your Backend Code
+#### 你写的后端代码
 ```typescript
 @Controller('api/test')
 export class TestController {
@@ -20,9 +20,9 @@ export class TestController {
 }
 ```
 
-#### Auto-Generated Frontend Calling Code
+#### 自动生成的前端调用代码
 ```javascript
-// Auto-generated
+// 自动生成
 export class TestController {
   uploadFile(options, ...args) {
     const input = {
@@ -53,20 +53,20 @@ export class TestController {
 }
 ```
 
-## Supported Decorators
+## 支持的装饰器
 
-- `@Get()`, `@Post()`, `@Put()`, `@Delete()` - HTTP methods
-- `@Param()` - Path parameters
-- `@Query()` - Query parameters
-- `@Body()` - Request body
-- `@Headers()` - Request headers
-- `@UploadedFile()` - Single file upload
-- `@UploadedFiles()` - Multiple file upload
+- `@Get()`, `@Post()`, `@Put()`, `@Delete()` - HTTP 方法
+- `@Param()` - 路径参数
+- `@Query()` - 查询参数
+- `@Body()` - 请求体
+- `@Headers()` - 请求头
+- `@UploadedFile()` - 单文件上传
+- `@UploadedFiles()` - 多文件上传
 
-## Parameter Processing Rules
+## 参数处理规则
 
-1. **Path Parameters** - Passed in order, will replace placeholders in the URL
-2. **Query Parameters** - Will be added to the URL query string
-3. **Request Body** - Will be sent as JSON
-4. **File Upload** - Will be sent using FormData format
-5. **Request Headers** - Will be added to HTTP request headers
+1. **路径参数** - 按顺序传递，会替换 URL 中的占位符
+2. **查询参数** - 会添加到 URL 的查询字符串中
+3. **请求体** - 会作为 JSON 发送
+4. **文件上传** - 会使用 FormData 格式发送
+5. **请求头** - 会添加到 HTTP 请求头中
