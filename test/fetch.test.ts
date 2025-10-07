@@ -1,11 +1,11 @@
 import type { HttpConfig } from '../src/fetch'
 import { beforeAll, describe, expect, it } from 'vitest'
-import httpZac, { baseurl } from '../src/fetch'
+import api, { setGlobalZacOfetchOptions } from '../src/fetch'
 
-describe('httpZac Function Tests - Real HTTP Requests', () => {
+describe('api Function Tests - Real HTTP Requests', () => {
   beforeAll(() => {
     // 设置基础 URL 用于测试
-    baseurl('http://localhost:3001/api')
+    setGlobalZacOfetchOptions({ baseURL: 'http://localhost:3001/api' })
   })
 
   describe('基础功能测试', () => {
@@ -16,7 +16,7 @@ describe('httpZac Function Tests - Real HTTP Requests', () => {
         parameters: [],
       }
 
-      const data = await httpZac(config, [])
+      const data = await api(config, [])
       expect(data._data).toEqual({ success: true, type: 'named-query' })
     })
   })
@@ -40,7 +40,7 @@ describe('httpZac Function Tests - Real HTTP Requests', () => {
         ],
       }
 
-      const data = await httpZac(config, ['1', '10'])
+      const data = await api(config, ['1', '10'])
       expect(data._data).toEqual({ success: true, type: 'named-query' })
     })
 
@@ -57,7 +57,7 @@ describe('httpZac Function Tests - Real HTTP Requests', () => {
       }
 
       const queryObj = { page: '1', limit: '10', sort: 'name' }
-      const data = await httpZac(config, [queryObj])
+      const data = await api(config, [queryObj])
       expect(data._data).toEqual({ success: true, type: 'query-object' })
     })
   })
@@ -81,7 +81,7 @@ describe('httpZac Function Tests - Real HTTP Requests', () => {
         ],
       }
 
-      const data = await httpZac(config, ['123', '456'])
+      const data = await api(config, ['123', '456'])
       expect(data._data).toEqual({ success: true, type: 'named-param' })
     })
 
@@ -98,7 +98,7 @@ describe('httpZac Function Tests - Real HTTP Requests', () => {
       }
 
       const paramsObj = { type: 'user', id: '123', action: 'edit' }
-      const data = await httpZac(config, [paramsObj])
+      const data = await api(config, [paramsObj])
       expect(data._data).toEqual({ success: true, type: 'param-object' })
     })
   })
@@ -124,7 +124,7 @@ describe('httpZac Function Tests - Real HTTP Requests', () => {
       const headersObj = {
         'x-custom-header': 'custom-value',
       }
-      const data = await httpZac(config, ['Bearer token123', headersObj])
+      const data = await api(config, ['Bearer token123', headersObj])
       expect(data._data).toEqual({ success: true, type: 'headers' })
     })
   })
@@ -148,7 +148,7 @@ describe('httpZac Function Tests - Real HTTP Requests', () => {
       }
 
       const bodyData = { name: '更新的名称', status: 'active' }
-      const data = await httpZac(config, ['123', bodyData])
+      const data = await api(config, ['123', bodyData])
       expect(data._data).toEqual({ success: true, type: 'complex' })
     })
   })
@@ -177,8 +177,8 @@ describe('httpZac Function Tests - Real HTTP Requests', () => {
       const mockFile = new File(['test content'], 'test.txt', { type: 'text/plain' })
       const metadata = { description: '测试文件' }
 
-      const data = await httpZac(config, [mockFile, metadata])
-      expect(JSON.parse(data._data as string)).toEqual({ success: true, type: 'single-file-upload' })
+      const data = await api(config, [mockFile, metadata])
+      expect(data._data).toEqual({ success: true, type: 'single-file-upload' })
     })
 
     it('应该正确处理多文件上传', async () => {
@@ -208,8 +208,8 @@ describe('httpZac Function Tests - Real HTTP Requests', () => {
       ]
       const metadata = { description: '测试多文件上传' }
 
-      const data = await httpZac(config, [mockFiles, metadata])
-      expect(JSON.parse(data._data as string)).toEqual({ success: true, type: 'multiple-file-upload' })
+      const data = await api(config, [mockFiles, metadata])
+      expect(data._data).toEqual({ success: true, type: 'multiple-file-upload' })
     })
 
     it('应该正确处理具名多文件上传', async () => {
@@ -232,8 +232,8 @@ describe('httpZac Function Tests - Real HTTP Requests', () => {
         documents: [new File(['doc content'], 'doc.pdf', { type: 'application/pdf' })],
         images: [new File(['image content'], 'image.jpg', { type: 'image/jpeg' })],
       }
-      const data = await httpZac(config, [files])
-      expect(JSON.parse(data._data as string)).toEqual({ success: true, type: 'named-multiple-file-upload' })
+      const data = await api(config, [files])
+      expect(data._data).toEqual({ success: true, type: 'named-multiple-file-upload' })
     })
   })
 
@@ -266,7 +266,7 @@ describe('httpZac Function Tests - Real HTTP Requests', () => {
       }
 
       const bodyData = { name: 'John', status: 'active' }
-      const data = await httpZac(config, ['123', 'v1.0', 'Bearer token', bodyData])
+      const data = await api(config, ['123', 'v1.0', 'Bearer token', bodyData])
       expect(data._data).toEqual({ success: true, type: 'complex' })
     })
   })

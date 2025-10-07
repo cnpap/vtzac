@@ -1,4 +1,4 @@
-import type { FetchResponse } from 'ofetch'
+import type { FetchOptions, FetchResponse } from 'ofetch'
 import { ofetch } from 'ofetch'
 
 /**
@@ -9,6 +9,7 @@ export interface HttpConfig {
   path: string
   parameters: ParameterMapping[]
   fileUpload?: FileUploadConfig
+  ofetchOptions?: FetchOptions<any>
 }
 
 /**
@@ -39,19 +40,20 @@ export interface FileUploadConfig {
 }
 
 // 默认基础 URL，可以通过环境变量或配置覆盖
-let BASE_URL = 'http://localhost:3001/api'
+let globalZacOfetchOptions: FetchOptions<any> = {}
 
-export function baseurl(url: string): void {
-  BASE_URL = url
+export function setGlobalZacOfetchOptions(options: FetchOptions<any>): void {
+  globalZacOfetchOptions = options
 }
 
 /**
- * httpZac 函数 - 构建并发送 HTTP 请求
+ * _api 函数 - 构建并发送 HTTP 请求
+ *
  * @param config HTTP 配置对象
  * @param args 传入的参数数组
  * @returns Promise<any> ofetch 的原生返回
  */
-export default async function httpZac<T>(config: HttpConfig, args: any[]): Promise<FetchResponse<T>> {
+export default async function _api<T>(config: HttpConfig, args: any[]): Promise<FetchResponse<T>> {
   const { method, path, parameters, fileUpload } = config
 
   // 构建请求 URL
@@ -65,28 +67,23 @@ export default async function httpZac<T>(config: HttpConfig, args: any[]): Promi
   queryParams.forEach((value, key) => {
     query[key] = value
   })
-
-  // 构建 ofetch 选项
-  const options: any = {
-    method: method.toUpperCase(),
-    baseURL: BASE_URL,
-    headers,
-    query,
-    // 对于文件上传，禁用自动 JSON 解析
-    parseResponse: formData ? (txt: string) => txt : undefined,
-  }
+  let ofetchOptions = config.ofetchOptions || {}
+  ofetchOptions = { ...globalZacOfetchOptions, ...ofetchOptions }
+  ofetchOptions.method = method.toUpperCase()
+  ofetchOptions.headers = Object.assign({}, ofetchOptions.headers, headers)
+  ofetchOptions.query = Object.assign({}, ofetchOptions.query, query)
 
   // 设置请求体
   if (formData) {
-    options.body = formData
+    ofetchOptions.body = formData
   }
   else if (body !== undefined) {
-    options.body = body
+    ofetchOptions.body = body
   }
 
   // 不直接返回 ofetch 的结果，而是使用 raw，这样返回值就不是直接的值了，而是 raw<T = any, R extends ResponseType = "json">(request: FetchRequest, options?: FetchOptions<R>): Promise<FetchResponse<MappedResponseType<R, T>>>;
   // return await ofetch(url, options)
-  return ofetch.raw(url, options)
+  return ofetch.raw(url, ofetchOptions)
 }
 
 /**

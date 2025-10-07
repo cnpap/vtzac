@@ -15,19 +15,19 @@ describe('plugin Code Generation', () => {
 
     // 验证生成的代码
     expect(generatedCode).toBeTruthy()
-    expect(generatedCode).toContain('import httpZac from \'vtzac/fetch\';')
+    expect(generatedCode).toContain('import _api from \'vtzac/fetch\';')
     expect(generatedCode).toContain('class TestInputController')
-    expect(generatedCode).toContain('testNamedQuery(...args)')
-    expect(generatedCode).toContain('testQueryObject(...args)')
-    expect(generatedCode).toContain('testNamedParam(...args)')
-    expect(generatedCode).toContain('testParamObject(...args)')
-    expect(generatedCode).toContain('testMixedParam(...args)')
-    expect(generatedCode).toContain('testHeaders(...args)')
-    expect(generatedCode).toContain('testSingleFileUpload(...args)')
-    expect(generatedCode).toContain('testMultipleFileUpload(...args)')
-    expect(generatedCode).toContain('testNamedMultipleFileUpload(...args)')
-    expect(generatedCode).toContain('testComplex(...args)')
-    expect(generatedCode).toContain('testDeleteMethod(...args)')
+    expect(generatedCode).toContain('testNamedQuery(options, ...args)')
+    expect(generatedCode).toContain('testQueryObject(options, ...args)')
+    expect(generatedCode).toContain('testNamedParam(options, ...args)')
+    expect(generatedCode).toContain('testParamObject(options, ...args)')
+    expect(generatedCode).toContain('testMixedParam(options, ...args)')
+    expect(generatedCode).toContain('testHeaders(options, ...args)')
+    expect(generatedCode).toContain('testSingleFileUpload(options, ...args)')
+    expect(generatedCode).toContain('testMultipleFileUpload(options, ...args)')
+    expect(generatedCode).toContain('testNamedMultipleFileUpload(options, ...args)')
+    expect(generatedCode).toContain('testComplex(options, ...args)')
+    expect(generatedCode).toContain('testDeleteMethod(options, ...args)')
 
     // 验证生成的代码不包含TypeScript类型
     expect(generatedCode).not.toContain(': string')
@@ -36,8 +36,8 @@ describe('plugin Code Generation', () => {
     expect(generatedCode).not.toContain(': Request')
     expect(generatedCode).not.toContain(': Response')
 
-    // 验证生成的代码调用 httpZac 函数
-    expect(generatedCode).toContain('return httpZac(')
+    // 验证生成的代码调用 _api 函数
+    expect(generatedCode).toContain('return _api(')
     expect(generatedCode).toContain(', args);')
     expect(generatedCode).toContain('\'method\': \'GET\'')
     expect(generatedCode).toContain('\'method\': \'POST\'')

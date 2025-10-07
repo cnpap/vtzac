@@ -12,7 +12,7 @@ export function generateJavaScriptClass(analysisResult: AnalysisResult): string 
   }
 
   // 生成导入语句
-  const importStatement = 'import httpZac from \'vtzac/fetch\';'
+  const importStatement = 'import _api from \'vtzac/fetch\';'
 
   // 生成所有控制器的代码
   const classesCode = controllers.map(controller => generateControllerClass(controller)).join('\n\n')
@@ -25,7 +25,7 @@ export function generateJavaScriptClass(analysisResult: AnalysisResult): string 
  */
 function generateControllerClass(controller: ControllerInfo): string {
   const className = controller.name
-  const methods = controller.methods.map(method => generateMethod(method)).join('\n\n')
+  const methods = controller.methods.map(method => generateMethod(method, controller)).join('\n\n')
 
   return `export class ${className} {
 ${methods}
@@ -35,21 +35,37 @@ ${methods}
 /**
  * 生成方法代码
  */
-function generateMethod(method: HttpMethodInfo): string {
+function generateMethod(method: HttpMethodInfo, controller: ControllerInfo): string {
   const methodName = method.name
-  const httpZacCall = generateHttpZacCall(method)
+  const zacOfetchCall = generatezacOfetchCall(method, controller)
 
-  return `  ${methodName}(...args) {
-    return httpZac(${httpZacCall}, args);
+  return `  ${methodName}(options, ...args) {
+    const input = ${zacOfetchCall};
+    input.ofetchOptions = options.ofetchOptions
+    return _api(input, args);
   }`
 }
 
 /**
- * 生成 httpZac 函数调用参数
+ * 生成 zacOfetch 函数调用参数
  */
-function generateHttpZacCall(method: HttpMethodInfo): string {
+function generatezacOfetchCall(method: HttpMethodInfo, controller: ControllerInfo): string {
   const httpMethod = method.httpMethod
-  const path = method.path || ''
+  const methodPath = method.path || ''
+  const controllerPrefix = controller.prefix || ''
+
+  // 组合控制器前缀和方法路径
+  let path = ''
+  if (controllerPrefix && methodPath) {
+    path = `${controllerPrefix}/${methodPath}`
+  }
+  else if (controllerPrefix) {
+    path = controllerPrefix
+  }
+  else if (methodPath) {
+    path = methodPath
+  }
+
   const parameterMappings = method.parameters.map(param => generateParameterMapping(param, method)).filter(Boolean)
 
   // 获取文件上传信息

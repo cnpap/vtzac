@@ -1,8 +1,8 @@
-import httpZac from 'virtual:http-zac'
+import zacOfetch from 'virtual:http-zac'
 
 export class TestInputController {
   testNamedQuery(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'GET',
       path: 'query/named',
       parameters: [
@@ -21,7 +21,7 @@ export class TestInputController {
   }
 
   testQueryObject(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'GET',
       path: 'query/object',
       parameters: [
@@ -34,7 +34,7 @@ export class TestInputController {
   }
 
   testNamedParam(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'GET',
       path: 'param/named/:userId/:postId',
       parameters: [
@@ -53,7 +53,7 @@ export class TestInputController {
   }
 
   testParamObject(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'GET',
       path: 'param/object/:type/:id/:action',
       parameters: [
@@ -66,7 +66,7 @@ export class TestInputController {
   }
 
   testMixedParam(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'GET',
       path: 'param/mixed/:userId/:postId',
       parameters: [
@@ -84,7 +84,7 @@ export class TestInputController {
   }
 
   testHeaders(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'GET',
       path: 'headers',
       parameters: [
@@ -102,7 +102,7 @@ export class TestInputController {
   }
 
   testSingleFileUpload(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'POST',
       path: 'upload/single',
       parameters: [
@@ -134,7 +134,7 @@ export class TestInputController {
   }
 
   testMultipleFileUpload(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'POST',
       path: 'upload/multiple',
       parameters: [
@@ -168,7 +168,7 @@ export class TestInputController {
   }
 
   testNamedMultipleFileUpload(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'POST',
       path: 'upload/named-multiple',
       parameters: [
@@ -215,7 +215,7 @@ export class TestInputController {
   }
 
   testResponseContext(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'GET',
       path: 'context/response',
       parameters: [
@@ -228,7 +228,7 @@ export class TestInputController {
   }
 
   testComplex(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'PUT',
       path: 'complex/:id',
       parameters: [
@@ -260,7 +260,7 @@ export class TestInputController {
   }
 
   testDeleteMethod(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'DELETE',
       path: 'methods/delete/:id',
       parameters: [
@@ -274,7 +274,7 @@ export class TestInputController {
   }
 
   testEdgeCases(...args) {
-    return httpZac({
+    return zacOfetch({
       method: 'GET',
       path: 'edge',
       parameters: [
