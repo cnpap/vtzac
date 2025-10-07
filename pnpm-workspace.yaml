@@ -11,12 +11,12 @@ catalog:
   '@nestjs/platform-express': 11.1.6
   '@nestjs/swagger': ^11.2.0
   '@types/express': ^5.0.3
-  '@types/multer': ^2.0.0
+  '@types/multer': 2.0.0
   concurrently: 9.2.1
   fast-glob: ^3.0.0
   globals: ^16.4.0
   live-server: ^1.2.2
-  multer: ^2.0.2
+  multer: 2.0.2
   ofetch: ^1.4.1
   prettier: 3.6.2
   reflect-metadata: 0.2.2

@@ -3,25 +3,34 @@ import { defineConfig } from 'vitepress'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: 'vtzac',
-  description: 'vite + nestjs 全栈方案',
+  description: 'Vite + NestJS 全栈方案',
   lang: 'zh-CN',
 
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: '首页', link: '/' },
-      { text: '示例', link: '/markdown-examples' },
     ],
     sidebar: [
       {
-        text: '示例',
+        text: '使用指南',
         items: [
-          { text: 'Markdown 示例', link: '/markdown-examples' },
+          { text: '集成 NestJS【步骤1】', link: '/nestjs-integration' },
+          { text: '集成 Vite 插件【步骤2】', link: '/vite-plugin-integration' },
+          { text: '注意事项【必读】', link: '/guide/notes' },
+          { text: '故障排除', link: '/troubleshooting' },
+        ],
+      },
+      {
+        text: '使用用例',
+        items: [
+          { text: '参数处理用例', link: '/guide/params-usage' },
+          { text: '文件上传用例', link: '/guide/file-upload-usage' },
         ],
       },
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' },
+      { icon: 'github', link: 'https://github.com/cnpap/vtzac' },
     ],
   },
 })

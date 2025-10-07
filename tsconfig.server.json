@@ -20,12 +20,6 @@
     "forceConsistentCasingInFileNames": false,
     "skipLibCheck": true
   },
-  "include": ["src/backend/**/*"],
-  "exclude": ["node_modules", "dist", "src/frontend", "src/*.tsx", "src/*.ts", "src/assets"],
-  "ts-node": {
-    "esm": false,
-    "compilerOptions": {
-      "module": "commonjs"
-    }
-  }
+  "include": ["src/backend/**/*", "docs/**/*"],
+  "exclude": ["node_modules", "dist", "src/frontend", "src/*.tsx", "src/*.ts", "src/assets"]
 }

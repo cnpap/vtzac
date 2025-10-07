@@ -13,6 +13,7 @@ export default antfu(
       ecmaVersion: 2020,
       globals: globals.node,
     },
+    ignores: ['playground/**/*'],
     rules: {
       '@typescript-eslint/interface-name-prefix': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',

@@ -41,11 +41,11 @@ interface ZacAPI<T> {
 export function zac<T>(input: Constructor<T> | T, options?: ZacOptions): ZacAPI<ExtractInstance<T>> {
   // 判断传入的是构造函数还是实例
   const instance = (typeof input === 'function' ? new (input as Constructor<T>)() : input) as ExtractInstance<T>
+  if (!options) {
+    options = {}
+  }
   return {
     setOptions(newOptions: ZacOptions): ZacAPI<ExtractInstance<T>> {
-      if (!options) {
-        options = {}
-      }
       const newNestOptions = { ...options, ...newOptions }
       return zac(instance as T, newNestOptions)
     },
