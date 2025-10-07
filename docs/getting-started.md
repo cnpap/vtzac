@@ -16,14 +16,18 @@ vtzac provides a complete solution that allows you to:
 ### 🏗️ Integration Guide
 
 #### [Step 1: NestJS Integration](/nestjs-integration)
+
 Detailed guide on integrating NestJS backend in your project, including:
+
 - Project structure setup
 - Dependency installation and configuration
 - TypeScript configuration
 - Development and build process
 
 #### [Step 2: Vite Plugin Integration](/vite-plugin-integration)
+
 Learn how to configure the vtzac Vite plugin:
+
 - Plugin installation and basic configuration
 - Glob pattern configuration
 - Automatic API client code generation
@@ -31,7 +35,9 @@ Learn how to configure the vtzac Vite plugin:
 ### 📚 Usage Guide
 
 #### [Parameter Handling Examples](/guide/params-usage)
+
 Learn how to handle various types of API parameters:
+
 - No-parameter interfaces
 - Path parameters (`@Param`)
 - Query parameters (`@Query`)
@@ -39,14 +45,18 @@ Learn how to handle various types of API parameters:
 - Combined parameter usage
 
 #### [File Upload Examples](/guide/file-upload-usage)
+
 Master file upload functionality implementation:
+
 - Single file upload
 - Multiple file upload
 - File upload combined with other parameters
 - Frontend file selection and upload
 
 #### [Important Notes](/guide/notes)
+
 Important development considerations and best practices:
+
 - Parameter order best practices
 - Headers parameter handling
 - Type safety recommendations
@@ -55,7 +65,9 @@ Important development considerations and best practices:
 ### 🔧 Troubleshooting
 
 #### [Common Issues and Solutions](/troubleshooting)
+
 Problem-solving guide when encountering issues:
+
 - Decorator-related errors
 - TypeScript configuration issues
 - Dependency injection problems

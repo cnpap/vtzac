@@ -23,11 +23,12 @@ import { TestController } from './backend/test.controller'
 const testController = zac(TestController, {
   ofetchOptions: {
     baseURL: 'http://localhost:3001',
-  }
+  },
 })
 
 async function handleSayHello() {
-  const res = await testController.call('sayHello')
+  const res = await testController
+    .call('sayHello')
     .catch(error => console.error('请求失败:', error))
 
   console.log(res._data)
@@ -67,7 +68,8 @@ export class TestController {
 ```tsx
 async function handleSearch() {
   // Query 具名参数调用
-  const res = await testController.call('search', 'vtzac')
+  const res = await testController
+    .call('search', 'vtzac')
     .catch(error => console.error('请求失败:', error))
 
   console.log(res._data)
@@ -76,7 +78,8 @@ async function handleSearch() {
 
 async function handleGetUser() {
   // Path 具名参数调用
-  const res = await testController.call('getUser', '123')
+  const res = await testController
+    .call('getUser', '123')
     .catch(error => console.error('请求失败:', error))
 
   console.log(res._data)
@@ -85,7 +88,8 @@ async function handleGetUser() {
 
 async function handleGetProfile() {
   // Headers 具名参数调用
-  const res = await testController.call('getProfile', 'Bearer token123')
+  const res = await testController
+    .call('getProfile', 'Bearer token123')
     .catch(error => console.error('请求失败:', error))
 
   console.log(res._data)
@@ -106,7 +110,7 @@ export class TestController {
     @Param('id') id: string,
     @Body() data: { name: string, email: string },
     @Query('notify') notify?: boolean,
-    @Headers('authorization') auth?: string
+    @Headers('authorization') auth?: string,
   ) {
     return { id, data, notify, auth, updated: true }
   }
@@ -115,7 +119,7 @@ export class TestController {
   @Post('create')
   createUser(
     @Param() params: { id: string },
-    @Query() query: { type: string, active: boolean }
+    @Query() query: { type: string, active: boolean },
   ) {
     return { params, query, created: true }
   }
@@ -127,13 +131,15 @@ export class TestController {
 ```tsx
 async function handleUpdateUser() {
   // 复杂混合参数调用
-  const res = await testController.call(
-    'updateUser',
-    '123',
-    { name: '新名称', email: 'new@example.com' },
-    true,
-    'Bearer token123'
-  ).catch(error => console.error('请求失败:', error))
+  const res = await testController
+    .call(
+      'updateUser',
+      '123',
+      { name: '新名称', email: 'new@example.com' },
+      true,
+      'Bearer token123',
+    )
+    .catch(error => console.error('请求失败:', error))
 
   console.log(res._data)
   // 输出: { id: '123', data: { name: '新名称', email: 'new@example.com' }, notify: true, auth: 'Bearer token123', updated: true }
@@ -141,11 +147,9 @@ async function handleUpdateUser() {
 
 async function handleCreateUser() {
   // 参数对象调用
-  const res = await testController.call(
-    'createUser',
-    { id: '456' },
-    { type: 'admin', active: true }
-  ).catch(error => console.error('请求失败:', error))
+  const res = await testController
+    .call('createUser', { id: '456' }, { type: 'admin', active: true })
+    .catch(error => console.error('请求失败:', error))
 
   console.log(res._data)
   // 输出: { params: { id: '456' }, query: { type: 'admin', active: true }, created: true }

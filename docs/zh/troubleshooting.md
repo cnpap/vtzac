@@ -5,6 +5,7 @@
 ## 装饰器相关错误
 
 ### 问题：装饰器无法识别
+
 **错误信息**：`Experimental support for decorators is a feature that is subject to change in a future release.`
 
 **解决方案**：
@@ -20,10 +21,13 @@
 ```
 
 ### 问题：Multer 类型错误
+
 **错误信息**：`命名空间"global.Express"没有已导出的成员"Multer"`
 
 **解决方案**：
+
 1. 安装必要的依赖：
+
    ```bash
    pnpm add multer @types/multer
    ```
@@ -38,6 +42,7 @@
    ```
 
 ### 问题：装饰器元数据丢失
+
 **错误信息**：`Cannot resolve dependency` 或依赖注入失败
 
 **解决方案**：
@@ -48,6 +53,7 @@ pnpm add reflect-metadata
 ```
 
 在 `src/backend/main.ts` 顶部添加：
+
 ```typescript
 import 'reflect-metadata'
 ```
@@ -55,6 +61,7 @@ import 'reflect-metadata'
 ## 模块系统配置
 
 ### 问题：模块导入错误
+
 **错误信息**：`Cannot use import statement outside a module` 或 `require() of ES modules is not supported`
 
 **解决方案**：

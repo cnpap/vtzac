@@ -10,7 +10,7 @@ import {
   Controller,
   Post,
   UploadedFile,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 
@@ -26,7 +26,7 @@ export class UploadController {
       success: true,
       filename: file.originalname,
       size: file.size,
-      metadata
+      metadata,
     }
   }
 }
@@ -41,15 +41,17 @@ import { UploadController } from './backend/upload.controller'
 const uploadController = zac(UploadController, {
   ofetchOptions: {
     baseURL: 'http://localhost:3001',
-  }
+  },
 })
 
 async function handleSingleUpload(file: File) {
-  const res = await uploadController.call(
-    'uploadSingle',
-    file as unknown as Express.Multer.File, // File object
-    { description: 'Test file' } // Metadata
-  ).catch(error => console.error('Single file upload failed:', error))
+  const res = await uploadController
+    .call(
+      'uploadSingle',
+      file as unknown as Express.Multer.File, // File object
+      { description: 'Test file' }, // Metadata
+    )
+    .catch(error => console.error('Single file upload failed:', error))
 
   console.log(res._data)
   // Output: { success: true, filename: 'test.txt', size: 1024, metadata: { description: 'Test file' } }
@@ -76,9 +78,9 @@ export class UploadController {
       count: files.length,
       files: files.map(file => ({
         filename: file.originalname,
-        size: file.size
+        size: file.size,
       })),
-      metadata
+      metadata,
     }
   }
 }
@@ -88,11 +90,13 @@ export class UploadController {
 
 ```tsx
 async function handleMultipleUpload(files: File[]) {
-  const res = await uploadController.call(
-    'uploadMultiple',
-    files as unknown as Express.Multer.File[], // File array
-    { description: 'Batch upload' } // Metadata
-  ).catch(error => console.error('Multiple file upload failed:', error))
+  const res = await uploadController
+    .call(
+      'uploadMultiple',
+      files as unknown as Express.Multer.File[], // File array
+      { description: 'Batch upload' }, // Metadata
+    )
+    .catch(error => console.error('Multiple file upload failed:', error))
 
   console.log(res._data)
   // Output: { success: true, count: 3, files: [...], metadata: { description: 'Batch upload' } }
@@ -109,12 +113,15 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express'
 @Controller('api/upload')
 export class UploadController {
   @Post('named-multiple')
-  @UseInterceptors(FileFieldsInterceptor([
-    { name: 'documents', maxCount: 3 },
-    { name: 'images', maxCount: 2 },
-  ]))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'documents', maxCount: 3 },
+      { name: 'images', maxCount: 2 },
+    ]),
+  )
   uploadNamedMultiple(
-    @UploadedFiles() files: {
+    @UploadedFiles()
+    files: {
       documents?: Express.Multer.File[]
       images?: Express.Multer.File[]
     },
@@ -122,15 +129,17 @@ export class UploadController {
   ) {
     return {
       success: true,
-      documents: files.documents?.map(file => ({
-        filename: file.originalname,
-        size: file.size
-      })) || [],
-      images: files.images?.map(file => ({
-        filename: file.originalname,
-        size: file.size
-      })) || [],
-      metadata
+      documents:
+        files.documents?.map(file => ({
+          filename: file.originalname,
+          size: file.size,
+        })) || [],
+      images:
+        files.images?.map(file => ({
+          filename: file.originalname,
+          size: file.size,
+        })) || [],
+      metadata,
     }
   }
 }
@@ -140,14 +149,18 @@ export class UploadController {
 
 ```tsx
 async function handleNamedUpload(documents: File[], images: File[]) {
-  const res = await uploadController.call(
-    'uploadNamedMultiple',
-    {
-      documents: documents as unknown as Express.Multer.File[],
-      images: images as unknown as Express.Multer.File[]
-    },
-    { description: 'Categorized upload' }
-  ).catch(error => console.error('Named multiple file upload failed:', error))
+  const res = await uploadController
+    .call(
+      'uploadNamedMultiple',
+      {
+        documents: documents as unknown as Express.Multer.File[],
+        images: images as unknown as Express.Multer.File[],
+      },
+      { description: 'Categorized upload' },
+    )
+    .catch(error =>
+      console.error('Named multiple file upload failed:', error),
+    )
 
   console.log(res._data)
   // Output: { success: true, documents: [...], images: [...], metadata: { description: 'Categorized upload' } }

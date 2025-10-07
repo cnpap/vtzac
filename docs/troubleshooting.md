@@ -5,6 +5,7 @@ This document collects common issues and solutions when using vtzac for NestJS +
 ## Decorator-Related Errors
 
 ### Issue: Decorators not recognized
+
 **Error message**: `Experimental support for decorators is a feature that is subject to change in a future release.`
 
 **Solution**:
@@ -20,10 +21,13 @@ Ensure decorator support is added in both `tsconfig.app.json` and `tsconfig.serv
 ```
 
 ### Issue: Multer type error
+
 **Error message**: `Namespace "global.Express" has no exported member "Multer"`
 
 **Solution**:
+
 1. Install necessary dependencies:
+
    ```bash
    pnpm add multer @types/multer
    ```
@@ -38,6 +42,7 @@ Ensure decorator support is added in both `tsconfig.app.json` and `tsconfig.serv
    ```
 
 ### Issue: Decorator metadata lost
+
 **Error message**: `Cannot resolve dependency` or dependency injection failure
 
 **Solution**:
@@ -48,6 +53,7 @@ pnpm add reflect-metadata
 ```
 
 Add at the top of `src/backend/main.ts`:
+
 ```typescript
 import 'reflect-metadata'
 ```
@@ -55,6 +61,7 @@ import 'reflect-metadata'
 ## Module System Configuration
 
 ### Issue: Module import error
+
 **Error message**: `Cannot use import statement outside a module` or `require() of ES modules is not supported`
 
 **Solution**:

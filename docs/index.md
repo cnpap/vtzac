@@ -33,14 +33,21 @@ export class UserController {
     @Param('id') userId: string,
     @Query('version') version: string,
     @UploadedFile() file: Express.Multer.File,
-    @Body() metadata: { title: string }
+    @Body() metadata: { title: string },
   ) {
-    return { success: true, userId, version, filename: file.filename, metadata }
+    return {
+      success: true,
+      userId,
+      version,
+      filename: file.filename,
+      metadata,
+    }
   }
 }
 ```
 
 ### Frontend Usage
+
 ```tsx
 import { zac } from 'vtzac/hook'
 import { UserController } from './backend/user.controller'
@@ -60,7 +67,7 @@ function UploadComponent() {
       '123', // @Param('id')
       'v2', // @Query('version')
       file as unknown as Express.Multer.File, // @UploadedFile()
-      { title: 'Avatar' } // @Body()
+      { title: 'Avatar' }, // @Body()
     )
 
     console.log(result._data)

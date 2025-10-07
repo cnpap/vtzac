@@ -7,13 +7,14 @@ vtzac scans your NestJS controller files, analyzes decorators and method signatu
 ### Transformation Example
 
 #### Your Backend Code
+
 ```typescript
 @Controller('api/test')
 export class TestController {
   @Post('upload/single')
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body() metadata: { title: string, description: string }
+    @Body() metadata: { title: string, description: string },
   ) {
     return { success: true, filename: file.filename, metadata }
   }
@@ -21,6 +22,7 @@ export class TestController {
 ```
 
 #### Auto-Generated Frontend Calling Code
+
 ```javascript
 // Auto-generated
 export class TestController {

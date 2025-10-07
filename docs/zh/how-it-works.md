@@ -7,13 +7,14 @@ vtzac 会扫描你的 NestJS 控制器文件，分析装饰器和方法签名，
 ### 转换示例
 
 #### 你写的后端代码
+
 ```typescript
 @Controller('api/test')
 export class TestController {
   @Post('upload/single')
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body() metadata: { title: string, description: string }
+    @Body() metadata: { title: string, description: string },
   ) {
     return { success: true, filename: file.filename, metadata }
   }
@@ -21,6 +22,7 @@ export class TestController {
 ```
 
 #### 自动生成的前端调用代码
+
 ```javascript
 // 自动生成
 export class TestController {

@@ -27,7 +27,7 @@ export default defineConfig({
       glob: ['src/backend/**/*.controller.ts'],
     }),
     react(),
-    tailwindcss()
+    tailwindcss(),
   ],
 })
 ```
@@ -54,10 +54,7 @@ vtzac({
 ```typescript
 vtzac({
   // 扫描多个目录
-  glob: [
-    'src/backend/**/*.controller.ts',
-    'src/api/**/*.controller.ts',
-  ],
+  glob: ['src/backend/**/*.controller.ts', 'src/api/**/*.controller.ts'],
 })
 ```
 

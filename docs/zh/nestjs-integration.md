@@ -32,6 +32,7 @@ pnpm add -D @nestjs/cli @types/express
 ### 2. 创建后端目录结构
 
 #### src/backend/main.ts
+
 ```typescript
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
@@ -54,6 +55,7 @@ bootstrap()
 ```
 
 #### src/backend/app.module.ts
+
 ```typescript
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
@@ -68,6 +70,7 @@ export class AppModule {}
 ```
 
 #### src/backend/app.controller.ts
+
 ```typescript
 import { Body, Controller, Get, Post } from '@nestjs/common'
 import { AppService } from './app.service'
@@ -93,6 +96,7 @@ export class AppController {
 ```
 
 #### src/backend/app.service.ts
+
 ```typescript
 import { Injectable } from '@nestjs/common'
 
@@ -107,6 +111,7 @@ export class AppService {
 ### 3. 配置 TypeScript
 
 #### tsconfig.server.json (后端配置)
+
 ```json
 {
   "extends": "./tsconfig.json",
@@ -131,6 +136,7 @@ export class AppService {
 ```
 
 #### 更新 tsconfig.json (主配置)
+
 ```json
 {
   "files": [],
@@ -143,7 +149,9 @@ export class AppService {
 ```
 
 #### 更新 tsconfig.app.json (前端配置)
+
 在现有配置基础上添加装饰器支持：
+
 ```json
 {
   "compilerOptions": {
@@ -161,6 +169,7 @@ export class AppService {
 ### 4. 配置 NestJS CLI
 
 #### nest-cli.json
+
 ```json
 {
   "$schema": "https://json.schemastore.org/nest-cli",
@@ -193,16 +202,19 @@ export class AppService {
 ## 开发模式
 
 ### 同时启动前后端
+
 ```bash
 pnpm dev
 ```
 
 ### 单独启动前端
+
 ```bash
 pnpm dev:frontend
 ```
 
 ### 单独启动后端
+
 ```bash
 pnpm dev:backend
 ```
@@ -210,11 +222,13 @@ pnpm dev:backend
 ## 构建和部署
 
 ### 构建前后端
+
 ```bash
 pnpm build
 ```
 
 ### 生产环境启动
+
 ```bash
 pnpm start
 ```

@@ -23,11 +23,12 @@ import { TestController } from './backend/test.controller'
 const testController = zac(TestController, {
   ofetchOptions: {
     baseURL: 'http://localhost:3001',
-  }
+  },
 })
 
 async function handleHello() {
-  const res = await testController.call('getHello')
+  const res = await testController
+    .call('getHello')
     .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { message: 'Hello World!' }
@@ -43,10 +44,7 @@ async function handleHello() {
 export class TestController {
   // Query named parameters
   @Get('query/named')
-  testNamedQuery(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
+  testNamedQuery(@Query('page') page?: string, @Query('limit') limit?: string) {
     return { success: true, page, limit }
   }
 
@@ -61,9 +59,7 @@ export class TestController {
 
   // Headers named parameters
   @Get('headers/named')
-  testNamedHeaders(
-    @Headers('authorization') auth?: string,
-  ) {
+  testNamedHeaders(@Headers('authorization') auth?: string) {
     return { success: true, auth }
   }
 }
@@ -74,7 +70,8 @@ export class TestController {
 ```tsx
 // Query named parameter call
 async function handleNamedQuery() {
-  const res = await testController.call('testNamedQuery', '1', '10')
+  const res = await testController
+    .call('testNamedQuery', '1', '10')
     .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { success: true, page: '1', limit: '10' }
@@ -82,7 +79,8 @@ async function handleNamedQuery() {
 
 // Path named parameter call
 async function handleNamedParam() {
-  const res = await testController.call('testNamedParam', '123', '456')
+  const res = await testController
+    .call('testNamedParam', '123', '456')
     .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { success: true, userId: '123', postId: '456' }
@@ -90,7 +88,8 @@ async function handleNamedParam() {
 
 // Headers named parameter call
 async function handleNamedHeaders() {
-  const res = await testController.call('testNamedHeaders', 'Bearer token123')
+  const res = await testController
+    .call('testNamedHeaders', 'Bearer token123')
     .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { success: true, auth: 'Bearer token123' }
@@ -132,34 +131,40 @@ export class TestController {
 ```tsx
 // Complex mixed parameter call
 async function handleComplex() {
-  const res = await testController.call(
-    'testComplex',
-    '123', // @Param('id')
-    { name: 'Updated name', status: 'active' }, // @Body()
-    'v1.0', // @Query('version')
-    'Bearer token123' // @Headers('authorization')
-  ).catch(error => console.error('Request failed:', error))
+  const res = await testController
+    .call(
+      'testComplex',
+      '123', // @Param('id')
+      { name: 'Updated name', status: 'active' }, // @Body()
+      'v1.0', // @Query('version')
+      'Bearer token123', // @Headers('authorization')
+    )
+    .catch(error => console.error('Request failed:', error))
 
   console.log(res._data)
 }
 
 // Parameter object call
 async function handleParamObject() {
-  const res = await testController.call('testParamObject', {
-    type: 'user',
-    id: '123',
-    action: 'edit'
-  }).catch(error => console.error('Request failed:', error))
+  const res = await testController
+    .call('testParamObject', {
+      type: 'user',
+      id: '123',
+      action: 'edit',
+    })
+    .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { success: true, params: { type: 'user', id: '123', action: 'edit' } }
 }
 
 async function handleQueryObject() {
-  const res = await testController.call('testQueryObject', {
-    page: '1',
-    limit: '10',
-    search: 'test'
-  }).catch(error => console.error('Request failed:', error))
+  const res = await testController
+    .call('testQueryObject', {
+      page: '1',
+      limit: '10',
+      search: 'test',
+    })
+    .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { success: true, query: { page: '1', limit: '10', search: 'test' } }
 }

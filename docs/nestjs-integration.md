@@ -54,6 +54,7 @@ pnpm add -D @nestjs/cli tsx concurrently
 Create a `backend` folder under the `src` directory and create the following files:
 
 #### src/backend/package.json
+
 ```json
 {
   "type": "commonjs"
@@ -61,6 +62,7 @@ Create a `backend` folder under the `src` directory and create the following fil
 ```
 
 #### src/backend/main.ts
+
 ```typescript
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
@@ -83,6 +85,7 @@ void bootstrap()
 ```
 
 #### src/backend/app.module.ts
+
 ```typescript
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
@@ -97,6 +100,7 @@ export class AppModule {}
 ```
 
 #### src/backend/app.controller.ts
+
 ```typescript
 import { Body, Controller, Get, Post } from '@nestjs/common'
 import { AppService } from './app.service'
@@ -122,6 +126,7 @@ export class AppController {
 ```
 
 #### src/backend/app.service.ts
+
 ```typescript
 import { Injectable } from '@nestjs/common'
 
@@ -136,6 +141,7 @@ export class AppService {
 ### 3. Configure TypeScript
 
 #### tsconfig.server.json (Backend Configuration)
+
 ```json
 {
   "compilerOptions": {
@@ -160,11 +166,19 @@ export class AppService {
     "esModuleInterop": true
   },
   "include": ["src/backend/**/*"],
-  "exclude": ["node_modules", "dist", "src/frontend", "src/*.tsx", "src/*.ts", "src/assets"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/frontend",
+    "src/*.tsx",
+    "src/*.ts",
+    "src/assets"
+  ]
 }
 ```
 
 #### Update tsconfig.json (Main Configuration)
+
 ```json
 {
   "files": [],
@@ -177,7 +191,9 @@ export class AppService {
 ```
 
 #### Update tsconfig.app.json (Frontend Configuration)
+
 Add decorator support to the existing configuration:
+
 ```json
 {
   "compilerOptions": {
@@ -195,6 +211,7 @@ Add decorator support to the existing configuration:
 ### 4. Configure NestJS CLI
 
 #### nest-cli.json
+
 ```json
 {
   "$schema": "https://json.schemastore.org/nest-cli",
@@ -230,16 +247,19 @@ Add decorator support to the existing configuration:
 ## Development Mode
 
 ### Start Both Frontend and Backend
+
 ```bash
 pnpm dev
 ```
 
 ### Start Frontend Only
+
 ```bash
 pnpm dev:frontend
 ```
 
 ### Start Backend Only
+
 ```bash
 pnpm dev:backend
 ```
@@ -247,11 +267,13 @@ pnpm dev:backend
 ## Build and Deployment
 
 ### Build Frontend and Backend
+
 ```bash
 pnpm build
 ```
 
 ### Production Start
+
 ```bash
 pnpm start
 ```

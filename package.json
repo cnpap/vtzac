@@ -32,7 +32,7 @@
     "dev": "tsdown --watch",
     "dev:backend": "tsx watch --tsconfig tsconfig.server.json src/backend/main.ts",
     "dev:html": "live-server src/backend/case --port=5173",
-    "format": "prettier --write \"src/backend/case/**/*.html\" \"docs/**/*.md\" \"docs/**/*.css\"",
+    "format": "prettier --write \"src/backend/case/**/*.html\" \"docs/**/*.md\" \"docs/**/*.css\" \"README.md\" \"README.zh.md\"",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "prepublishOnly": "nr build",
     "release": "bumpp",
