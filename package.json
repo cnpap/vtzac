@@ -33,7 +33,7 @@
     "dev:backend": "tsx watch --tsconfig tsconfig.server.json src/backend/main.ts",
     "dev:html": "live-server src/backend/case --port=5173",
     "format": "prettier --write \"src/backend/case/**/*.html\" \"docs/**/*.md\" \"docs/**/*.css\"",
-    "lint": "eslint",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "prepublishOnly": "nr build",
     "release": "bumpp",
     "start": "tsx src/index.ts",
