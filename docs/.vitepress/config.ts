@@ -30,8 +30,8 @@ export default defineConfig({
             text: 'Getting Started',
             items: [
               { text: 'Quick Start', link: '/getting-started' },
-              { text: 'Step 1: NestJS Integration', link: '/nestjs-integration' },
-              { text: 'Step 2: Vite Plugin Integration', link: '/vite-plugin-integration' },
+              { text: '[Step 1] NestJS Integration', link: '/nestjs-integration' },
+              { text: '[Step 2] Vite Plugin Integration', link: '/vite-plugin-integration' },
             ],
           },
           {
@@ -43,7 +43,8 @@ export default defineConfig({
           {
             text: 'Guide',
             items: [
-              { text: 'Important Notes', link: '/guide/notes' },
+              { text: '[Important] Notes', link: '/guide/notes' },
+              { text: 'Configuration', link: '/guide/configuration' },
               { text: 'Troubleshooting', link: '/troubleshooting' },
             ],
           },
@@ -88,6 +89,7 @@ export default defineConfig({
             text: '使用指南',
             items: [
               { text: '【必读】注意事项', link: '/zh/guide/notes' },
+              { text: '配置说明', link: '/zh/guide/configuration' },
               { text: '故障排除', link: '/zh/troubleshooting' },
             ],
           },
