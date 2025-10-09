@@ -38,7 +38,7 @@
     "release": "bumpp",
     "start": "tsx src/index.ts",
     "test": "vitest",
-    "test:ci": "concurrently --kill-others --success first \"tsx --tsconfig tsconfig.server.json src/backend/main.ts\" \"wait-on http://localhost:3001/api/hello && vitest run\"",
+    "test:ci": "concurrently --kill-others --success first \"cd playground && tsx --tsconfig tsconfig.server.json src/backend/main.ts\" \"wait-on --http-get http://localhost:3001/api/hello && vitest run\"",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks",
     "docs:dev": "vitepress dev docs",

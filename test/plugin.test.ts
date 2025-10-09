@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { analyzeNestJSController } from '../src/ast'
@@ -5,13 +6,20 @@ import { generateJavaScriptClass } from '../src/plugin'
 
 describe('plugin Code Generation', () => {
   it('should generate JavaScript class from NestJS controller', () => {
-    const testControllerPath = path.resolve(__dirname, '../src/backend/test-input.controller.ts')
+    const testControllerPath = path.resolve(__dirname, '../playground/src/backend/test-input.controller.ts')
 
     // 分析控制器
     const analysisResult = analyzeNestJSController(testControllerPath)
 
     // 生成JavaScript代码
     const generatedCode = generateJavaScriptClass(analysisResult)
+
+    // 将生成的代码写入根目录 demo 文件夹
+    const outputDir = path.resolve(__dirname, '../demo')
+    fs.mkdirSync(outputDir, { recursive: true })
+    const controllerName = analysisResult.controllers[0]?.name ?? 'GeneratedController'
+    const outputFile = path.join(outputDir, `${controllerName}.js`)
+    fs.writeFileSync(outputFile, generatedCode, 'utf-8')
 
     // 验证生成的代码
     expect(generatedCode).toBeTruthy()
