@@ -75,7 +75,8 @@ export type TestCase =
   | 'headers'
   | 'upload'
   | 'complex'
-  | 'delete';
+  | 'delete'
+  | 'websocket';
 
 // 通用测试组件 Props 类型
 export interface TestComponentProps {

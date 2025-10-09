@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { setGlobalZacOfetchOptions } from 'vtzac/hook';
-import { Segmented, Typography, Space, Divider, Row, Col } from 'antd';
+import { Segmented, Typography, Space, Row, Col } from 'antd';
 import {
   SendOutlined,
   SearchOutlined,
@@ -8,6 +8,7 @@ import {
   SettingOutlined,
   UploadOutlined,
   DeleteOutlined,
+  WifiOutlined,
 } from '@ant-design/icons';
 import type { LoadingState, ResultsState, TestCase } from './types';
 import { HelloTest } from './components/HelloTest';
@@ -17,6 +18,7 @@ import { HeadersTest } from './components/HeadersTest';
 import { UploadTest } from './components/UploadTest';
 import ComplexTest from './components/ComplexTest';
 import { DeleteTest } from './components/DeleteTest';
+import { WebSocketTest } from './components/WebSocketTest';
 import 'antd/dist/reset.css';
 
 const { Title } = Typography;
@@ -38,6 +40,7 @@ function App() {
     { label: '文件上传', value: 'upload', icon: <UploadOutlined /> },
     { label: '复杂组合', value: 'complex', icon: <SettingOutlined /> },
     { label: 'DELETE 方法', value: 'delete', icon: <DeleteOutlined /> },
+    { label: 'WebSocket 测试', value: 'websocket', icon: <WifiOutlined /> },
   ];
 
   const renderTestComponent = () => {
@@ -63,6 +66,8 @@ function App() {
         return <ComplexTest {...commonProps} />;
       case 'delete':
         return <DeleteTest {...commonProps} />;
+      case 'websocket':
+        return <WebSocketTest {...commonProps} />;
       default:
         return <HelloTest {...commonProps} />;
     }
@@ -71,15 +76,6 @@ function App() {
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <div style={{ textAlign: 'center' }}>
-          <Title level={1}>vtzac 测试平台</Title>
-          <Title level={4} type="secondary">
-            测试各种 HTTP 请求类型和参数传递方式
-          </Title>
-        </div>
-
-        <Divider />
-
         <div>
           <Title level={3}>选择测试用例</Title>
           <Segmented
@@ -90,8 +86,6 @@ function App() {
             style={{ width: '100%' }}
           />
         </div>
-
-        <Divider />
 
         <Row gutter={[24, 24]}>
           <Col span={24}>{renderTestComponent()}</Col>
