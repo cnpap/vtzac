@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: "vtzac"
-  text: "vite + nestjs 全栈"
+  text: "vite + nestjs"
   tagline: 新一代的全栈解决方案
   actions:
     - theme: brand

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import './styles/example-card.css'
-
 defineProps<{ desc?: string, twoCol?: boolean, theme?: 'light' | 'dark' | 'auto' }>()
 </script>
 

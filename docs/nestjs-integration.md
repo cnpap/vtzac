@@ -9,22 +9,22 @@ The integrated project structure is as follows:
 ```
 project-root/
 ├── src/
-│   ├── backend/           # NestJS backend code
+│   ├── backend/              # NestJS backend code
 │   │   ├── app.controller.ts
 │   │   ├── app.module.ts
 │   │   ├── app.service.ts
 │   │   ├── main.ts
-│   │   └── package.json   # Specify CommonJS module system
-│   ├── App.tsx           # React frontend code
+│   │   └── package.json      # Specify CommonJS module system
+│   ├── App.tsx               # React frontend code
 │   ├── main.tsx
 │   └── ...
-├── package.json          # Main project configuration
-├── tsconfig.json         # Main TypeScript configuration
-├── tsconfig.app.json     # Frontend TypeScript configuration
-├── tsconfig.server.json  # Backend TypeScript configuration
-├── nest-cli.json         # NestJS CLI configuration
-├── eslint.config.js      # ESLint configuration
-└── vite.config.ts        # Vite configuration
+├── package.json              # Main project configuration
+├── tsconfig.json             # Main TypeScript configuration
+├── tsconfig.app.json         # Frontend TypeScript configuration
+├── tsconfig.server.json      # Backend TypeScript configuration
+├── nest-cli.json             # NestJS CLI configuration
+├── eslint.config.js          # ESLint configuration
+└── vite.config.ts            # Vite configuration
 ```
 
 ## Getting Started with Integration

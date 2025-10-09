@@ -20,7 +20,7 @@ export default defineConfig({
       label: 'English',
       lang: 'en-US',
       title: 'vtzac',
-      description: 'Vite + NestJS Full-Stack Solution',
+      description: 'Vite + NestJS Full-Stack',
       themeConfig: {
         nav: [
           { text: 'Home', link: '/' },
@@ -65,7 +65,7 @@ export default defineConfig({
       label: '简体中文',
       lang: 'zh-CN',
       title: 'vtzac',
-      description: 'Vite + NestJS 全栈方案',
+      description: 'Vite + NestJS 全栈',
       themeConfig: {
         nav: [
           { text: '首页', link: '/zh/' },

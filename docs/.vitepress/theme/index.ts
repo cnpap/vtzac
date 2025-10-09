@@ -4,8 +4,6 @@ import DefaultTheme from 'vitepress/theme'
 import { h } from 'vue'
 import ExampleCard from './ExampleCard.vue'
 import './style.css'
-import './global.css'
-import './styles/card.css'
 
 export default {
   extends: DefaultTheme,
