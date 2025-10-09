@@ -12,18 +12,32 @@ hero:
       link: /getting-started
 
 features:
-  - icon: ⚡
+  - icon:
+      src: "/typescript.svg"
+      width: "48"
+      height: "48"
     title: End-to-End Type Safety
     details: Complete type safety throughout frontend-backend communication, elegant TypeScript full-stack solution with compile-time error detection
-  - icon: 🔄
-    title: Fully Compatible
-    details: Fully compatible with NestJS + Vite ecosystem, zero learning curve, seamless integration with existing projects
-  - icon: 🚀
-    title: Developer Experience
-    details: Shortest call chain, fastest IDE feedback, AI-friendly, 5-minute setup, next-generation full-stack development experience
+  - icon:
+      src: "/nestjs_vitejs.svg"
+      width: "96"
+      height: "48"
+    title: Full Compatibility
+    details: Fully compatible with the NestJS + Vite ecosystem. Zero learning curve; file uploads, WebSocket—everything you need works out of the box.
+  - icon:
+      src: "/electron.svg"
+      width: "48"
+      height: "48"
+    title: Client Application Development
+    details: Built on NestJS + Vite a single codebase for Web and Electron clients. Run NestJS inside Electron with near-zero effort—no extra adaptation—and boost efficiency by at least 100%.
 ---
 
-### Backend Code
+<ExampleCard desc="NestJS backend and frontend example with end-to-end type safety." twoCol>
+  <template #title>
+    <span>End-to-end Example</span>
+  </template>
+
+<template #left>
 
 ```typescript
 @Controller('api/user')
@@ -46,7 +60,9 @@ export class UserController {
 }
 ```
 
-### Frontend Usage
+  </template>
+
+<template #right>
 
 ```tsx
 import { zac } from 'vtzac/hook'
@@ -77,3 +93,6 @@ function UploadComponent() {
   return <input type="file" onChange={handleUpload} />
 }
 ```
+
+  </template>
+</ExampleCard>

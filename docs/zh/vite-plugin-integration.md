@@ -1,6 +1,6 @@
 # Vite 集成指南
 
-请确保已经在 Vite 项目中集成了 NestJS。如果还没有集成，请先参考 [NestJS 集成指南](/nestjs-integration)。
+使用当前这套 NestJS + Vite 方案，几乎零成本即可适配为 Electron 桌面客户端：我们可以快速把 NestJS 运行在 Electron 中，无需额外适配或重构。若尚未在 Vite 项目中集成 NestJS，请先参考 [NestJS 集成指南](/nestjs-integration)。
 
 ## 快速开始
 

@@ -1,6 +1,6 @@
 # Vite Integration Guide
 
-Please ensure that NestJS has been integrated into your Vite project. If not yet integrated, please refer to the [NestJS Integration Guide](/nestjs-integration) first.
+With the combined strengths of NestJS + Vite, you can ship both Web and Electron clients from a single codebase. Run NestJS inside Electron with near‑zero adaptation—no extra refactors needed. If NestJS is not yet integrated into your Vite project, please refer to the [NestJS Integration Guide](/nestjs-integration) first.
 
 ## Quick Start
 

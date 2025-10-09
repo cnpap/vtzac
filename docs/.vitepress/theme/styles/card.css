@@ -1,0 +1,71 @@
+/* 卡片样式（VPFeature）与相关细节 */
+.VPFeature {
+  position: relative !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.7) 100%
+  ) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(22, 119, 255, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 12px 12px !important;
+  transition: none !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 4px 12px rgba(22, 119, 255, 0.04) !important;
+}
+
+.VPFeature:hover {
+  transform: none !important;
+  border-color: rgba(22, 119, 255, 0.08) !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 4px 12px rgba(22, 119, 255, 0.04) !important;
+}
+
+.VPFeature .title {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: var(--vp-c-text-1) !important;
+  margin: 0 0 12px 0 !important;
+  line-height: 1.4 !important;
+}
+
+.VPFeature .details {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  color: var(--vp-c-text-2) !important;
+  margin: 0 !important;
+}
+
+/* Example Card spacing on home page */
+.VPHome .vp-doc .example-card {
+  margin-top: 48px !important;
+}
+
+/* 暗色模式：卡片设计适配 */
+.dark .VPFeature {
+  background: linear-gradient(
+    135deg,
+    rgba(24, 24, 27, 0.72) 0%,
+    rgba(24, 24, 27, 0.58) 100%
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.35),
+    0 4px 14px rgba(0, 0, 0, 0.25) !important;
+}
+
+.dark .VPFeature:hover {
+  transform: none !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 6px 18px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* 仅亮色模式：首页广告卡片更白 */
+html:not(.dark) .VPFeature .box {
+  background-color: #ffffff !important;
+}

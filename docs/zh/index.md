@@ -12,18 +12,32 @@ hero:
       link: /zh/getting-started
 
 features:
-  - icon: ⚡
+  - icon:
+      src: "/typescript.svg"
+      width: "48"
+      height: "48"
     title: 全程类型安全
-    details: 前后端调用全过程类型安全，简约的 TypeScript 全栈方案，编译时发现错误
-  - icon: 🔄
+    details: 前后端调用全过程类型安全，调用链路最短、IDE 反馈最快、AI 最友好，简约的 TypeScript 全栈方案，编译时发现错误，全新一代的全栈开发体验
+  - icon:
+      src: "/nestjs_vitejs.svg"
+      width: "96"
+      height: "48"
     title: 完全兼容
-    details: 完全兼容 NestJS + Vite 生态，零学习成本，无缝集成现有项目
-  - icon: 🚀
-    title: 开发体验
-    details: 调用链路最短、IDE 反馈最快、AI 最友好、5 分钟上手，全新一代的全栈开发体验
+    details: 完全兼容 NestJS + Vite 生态，零学习成本，文件上传、websocket 你所需要的一切都默认适配兼容
+  - icon:
+      src: "/electron.svg"
+      width: "48"
+      height: "48"
+    title: 客户端应用开发
+    details: NestJS + Vite 为核心，一套代码同时适配 Web 与 Electron 客户端；几乎零成本把 NestJS 运行在 Electron 中，无需额外适配，效率至少提升 100%
 ---
 
-### 后端代码
+<ExampleCard desc="NestJS 后端与前端调用示例，端到端类型安全。" twoCol>
+  <template #title>
+    <span>端到端示例</span>
+  </template>
+
+<template #left>
 
 ```typescript
 @Controller('api/user')
@@ -46,7 +60,9 @@ export class UserController {
 }
 ```
 
-### 前端调用
+  </template>
+
+<template #right>
 
 ```tsx
 import { zac } from 'vtzac/hook'
@@ -77,3 +93,6 @@ function UploadComponent() {
   return <input type="file" onChange={handleUpload} />
 }
 ```
+
+  </template>
+</ExampleCard>
