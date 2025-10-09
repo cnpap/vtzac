@@ -81,28 +81,3 @@ h2:hover .title-icon {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--vp-c-divider);
 }
-
-/* Decorative Lines & Visual Effects */
-
-/**
- * Decorative Lines & Visual Effects
- * Inspired by Vercel & Next.js design philosophy
- * -------------------------------------------------------------------------- */
-
-/* 移除动画关键帧 */
-
-/* Hero 标题保持原始样式，不添加装饰线条 */
-
-/* 移除标题线条动画关键帧 */
-
-/* 移除过度装饰，保持简约 */
-
-/* 代码块样式 - 保持原始效果，不添加任何装饰 */
-
-/* 按钮保持简约设计 */
-
-/* 导航栏保持原始样式，不添加装饰 */
-
-/* 标题保持原始样式，不添加左侧装饰 */
-
-/* Light Mode Tweaks (non-card specific retained above) */
