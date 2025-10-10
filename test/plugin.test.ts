@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { analyzeNestJSController } from '../src/ast'
-import { generateHttpJavaScriptClass } from '../src/plugin'
+import { generateHttpJavaScriptClass } from '../src/generate-http'
 
 describe('plugin Code Generation', () => {
   it('should generate JavaScript class from NestJS controller', () => {

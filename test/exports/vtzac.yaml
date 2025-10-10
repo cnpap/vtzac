@@ -7,3 +7,7 @@
 ./fetch:
   default: function
   setGlobalZacOfetchOptions: function
+./typed-emit:
+  dispatch: object
+  Emit: function
+  emitWith: function

@@ -1,8 +1,5 @@
 import type { FetchOptions, FetchResponse } from 'ofetch'
 
-// import { TestInputController } from './backend/test-input.controller'
-// import { setGlobalZacOfetchOptions } from './fetch'
-
 // 类型工具：检测是否为构造函数
 type Constructor<T = object> = new (...args: any[]) => T
 
@@ -31,10 +28,12 @@ interface ZacOptions {
 // API 接口类型
 interface ZacAPI<T> {
   setOptions: (newOptions: ZacOptions) => ZacAPI<T>
-  call: <TMethod extends MethodNames<T>>(
-    _method: TMethod,
-    ..._args: MethodParameters<T, TMethod>
-  ) => Promise<FetchResponse<MethodReturnType<T, TMethod>>>
+  call: (<M extends MethodNames<T>>(
+    _method: M,
+    ..._args: MethodParameters<T, M>
+  ) => Promise<FetchResponse<MethodReturnType<T, M>>>) & (<F extends (...args: any[]) => any>(
+    selector: (c: T) => ReturnType<F>
+  ) => Promise<FetchResponse<ReturnType<F>>>)
 }
 
 // 主函数：统一处理构造函数和实例
@@ -49,56 +48,36 @@ export function zac<T>(input: Constructor<T> | T, options?: ZacOptions): ZacAPI<
       const newNestOptions = { ...options, ...newOptions }
       return zac(instance as T, newNestOptions)
     },
-    async call<TMethod extends MethodNames<ExtractInstance<T>>>(
-      _method: TMethod,
-      ..._args: MethodParameters<ExtractInstance<T>, TMethod>
-    ): Promise<FetchResponse<MethodReturnType<ExtractInstance<T>, TMethod>>> {
-      // 这里可以使用 createOfetchOptions 来创建自定义的 ofetch 实例
-      // 例如：const customFetch = createOfetchOptions ? ofetch.create(...createOfetchOptions) : ofetch
+    async call(
+      ...allArgs: any[]
+    ): Promise<any> {
+      const first = allArgs[0]
+      if (typeof first === 'function') {
+        let methodKey: keyof ExtractInstance<T> | undefined
+        let capturedArgs: any[] = []
+        const proxy = new Proxy({}, {
+          get(_target, prop) {
+            methodKey = prop as keyof ExtractInstance<T>
+            return (...args: any[]) => {
+              capturedArgs = args
+            }
+          },
+        }) as ExtractInstance<T>
+
+        ;(first as (c: ExtractInstance<T>) => any)(proxy)
+
+        if (!methodKey) {
+          throw new Error('无法解析方法名，请使用形如 c => c.method(args) 的选择器')
+        }
+
+        return await (instance as any)[methodKey!](options, ...capturedArgs)
+      }
+
+      const _method = first as keyof ExtractInstance<T>
+      const _args = allArgs.slice(1)
       return await (instance as any)[_method](options, ..._args)
     },
   }
 }
 
 export { setGlobalZacOfetchOptions } from './fetch'
-
-// setGlobalZacOfetchOptions({
-//   baseURL: 'https://api.example.com',
-//   timeout: 5000,
-// })
-
-// // 现在两种方式都支持了！
-// const api1 = zac(TestInputController, {
-//   // 可以在这里传递 options
-//   ofetchOptions: {
-//     baseURL: 'https://api.example.com',
-//     timeout: 5000,
-//   },
-// }) // 直接传递类
-// const api2 = zac(new TestInputController()) // 传递实例
-
-// async function demo(): Promise<boolean> {
-//   // 两种 API 都有完整的类型支持，不管是输入函数名称还是函数参数，都有完整的类型提示。
-//   // 返回值也有完整的类型提示。
-//   const result1 = await api1
-//     // 可以在这里调用 setOptions 来覆盖全局配置
-//     .setOptions({
-//       ofetchOptions: {
-//         baseURL: 'https://api.example.com',
-//         timeout: 5000,
-//       },
-//     })
-//     .call('testComplex', '123', { name: 'test' }, 'v1.0', 'Bearer token')
-//   const result2 = await api2.call('testComplex', '123', { name: 'test' }, 'v1.0', 'Bearer token')
-//   const data = result1._data!
-//   const data2 = result2._data!
-
-//   return data.success && data2.success
-// }
-
-// demo()
-
-// 配置优先级：
-// 1. 调用时配置（call 方法的参数）
-// 2. 实例配置（setOptions）
-// 3. 调用时配置（call 方法的参数）
