@@ -52,7 +52,7 @@ export class TestController {
   @Get('param/named/:userId/:postId')
   testNamedParam(
     @Param('userId') userId: string,
-    @Param('postId') postId: string,
+    @Param('postId') postId: string
   ) {
     return { success: true, userId, postId }
   }
@@ -108,7 +108,7 @@ export class TestController {
     @Param('id') id: string,
     @Body() body: any,
     @Query('version') version?: string,
-    @Headers('authorization') auth?: string,
+    @Headers('authorization') auth?: string
   ) {
     return { success: true, id, body, version, auth }
   }
@@ -137,7 +137,7 @@ async function handleComplex() {
       '123', // @Param('id')
       { name: 'Updated name', status: 'active' }, // @Body()
       'v1.0', // @Query('version')
-      'Bearer token123', // @Headers('authorization')
+      'Bearer token123' // @Headers('authorization')
     )
     .catch(error => console.error('Request failed:', error))
 

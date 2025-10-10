@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+*.log
+playground/dist
+playground/node_modules
+docs/.vitepress/cache
+docs/.vitepress/dist

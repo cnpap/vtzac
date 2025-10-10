@@ -5,20 +5,22 @@ import { analyzeNestJSControllerFromCode } from './ast'
 import { generateJavaScriptClass } from './plugin'
 
 export interface VtzacOptions {
-  glob: string | string[]
+  glob?: string | string[]
   templates?: {
     fetch?: string
   }
 }
 
-export function vtzac(options: VtzacOptions): Plugin {
+export function vtzac(options: VtzacOptions = {} as VtzacOptions): Plugin {
   let matchedFiles: string[] = []
 
   return {
     name: 'vtzac',
     configResolved() {
       // 插件配置解析完成后获取匹配的文件
-      const patterns = Array.isArray(options.glob) ? options.glob : [options.glob]
+      const patterns = options.glob
+        ? (Array.isArray(options.glob) ? options.glob : [options.glob])
+        : ['**/*controller.ts']
       matchedFiles = fg.sync(patterns, {
         cwd: cwd(),
         absolute: true,

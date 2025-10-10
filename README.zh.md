@@ -27,7 +27,7 @@ export class UserController {
     @Param('id') userId: string,
     @Query('version') version: string,
     @UploadedFile() file: Express.Multer.File,
-    @Body() metadata: { title: string },
+    @Body() metadata: { title: string }
   ) {
     return {
       success: true,
@@ -60,7 +60,7 @@ function UploadComponent() {
       '123', // @Param('id')
       'v2', // @Query('version')
       file as unknown as Express.Multer.File, // @UploadedFile()
-      { title: 'Avatar' }, // @Body()
+      { title: 'Avatar' } // @Body()
     )
 
     console.log(result._data)

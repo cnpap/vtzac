@@ -110,7 +110,7 @@ export class TestController {
     @Param('id') id: string,
     @Body() data: { name: string, email: string },
     @Query('notify') notify?: boolean,
-    @Headers('authorization') auth?: string,
+    @Headers('authorization') auth?: string
   ) {
     return { id, data, notify, auth, updated: true }
   }
@@ -119,7 +119,7 @@ export class TestController {
   @Post('create')
   createUser(
     @Param() params: { id: string },
-    @Query() query: { type: string, active: boolean },
+    @Query() query: { type: string, active: boolean }
   ) {
     return { params, query, created: true }
   }
@@ -137,7 +137,7 @@ async function handleUpdateUser() {
       '123',
       { name: '新名称', email: 'new@example.com' },
       true,
-      'Bearer token123',
+      'Bearer token123'
     )
     .catch(error => console.error('请求失败:', error))
 

@@ -22,13 +22,7 @@ import vtzac from 'vtzac'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vtzac({
-      glob: ['src/backend/**/*.controller.ts'],
-    }),
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [vtzac(), react(), tailwindcss()],
 })
 ```
 
@@ -36,13 +30,18 @@ export default defineConfig({
 
 ### glob
 
-- **类型**: `string[]`
-- **必需**: 是
-- **描述**: 指定 NestJS 控制器文件的匹配模式
+- **类型**: `string | string[]`
+- **必需**: 否
+- **描述**: 指定 NestJS 控制器文件的匹配模式。若不传递该参数，默认匹配所有以 `controller.ts` 结尾的文件。
 
 `glob` 选项用于告诉 vtzac 在哪里查找你的 NestJS 控制器文件。插件会扫描这些文件并自动生成对应的前端 API 客户端代码。
 
 #### 示例配置
+
+```typescript
+// 默认行为：匹配所有以 `controller.ts` 结尾的文件
+vtzac()
+```
 
 ```typescript
 vtzac({

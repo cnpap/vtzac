@@ -13,7 +13,7 @@ export class UploadController {
   @UseInterceptors(FileInterceptor('file'))
   uploadSingle(
     @UploadedFile() file: Express.Multer.File,
-    @Body() metadata?: any,
+    @Body() metadata?: any
   ) {
     return {
       success: true,
@@ -42,7 +42,7 @@ async function handleSingleUpload(file: File) {
     .call(
       'uploadSingle',
       file as unknown as Express.Multer.File, // 文件对象
-      { description: '测试文件' }, // 元数据
+      { description: '测试文件' } // 元数据
     )
     .catch(error => console.error('单文件上传失败:', error))
 
@@ -64,7 +64,7 @@ export class UploadController {
   @UseInterceptors(FilesInterceptor('files', 5)) // 最多5个文件
   uploadMultiple(
     @UploadedFiles() files: Express.Multer.File[],
-    @Body() metadata?: any,
+    @Body() metadata?: any
   ) {
     return {
       success: true,
@@ -87,7 +87,7 @@ async function handleMultipleUpload(files: File[]) {
     .call(
       'uploadMultiple',
       files as unknown as Express.Multer.File[], // 文件数组
-      { description: '批量上传' }, // 元数据
+      { description: '批量上传' } // 元数据
     )
     .catch(error => console.error('多文件上传失败:', error))
 
@@ -110,7 +110,7 @@ export class UploadController {
     FileFieldsInterceptor([
       { name: 'documents', maxCount: 3 },
       { name: 'images', maxCount: 2 },
-    ]),
+    ])
   )
   uploadNamedMultiple(
     @UploadedFiles()
@@ -118,7 +118,7 @@ export class UploadController {
       documents?: Express.Multer.File[]
       images?: Express.Multer.File[]
     },
-    @Body() metadata?: any,
+    @Body() metadata?: any
   ) {
     return {
       success: true,
@@ -149,7 +149,7 @@ async function handleNamedUpload(documents: File[], images: File[]) {
         documents: documents as unknown as Express.Multer.File[],
         images: images as unknown as Express.Multer.File[],
       },
-      { description: '分类上传' },
+      { description: '分类上传' }
     )
     .catch(error => console.error('具名多文件上传失败:', error))
 

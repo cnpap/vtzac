@@ -21,7 +21,7 @@ export class TestController {
   getUser(
     @Param('id') id: string,
     @Query('include') include?: string,
-    @Headers('authorization') auth?: string, // Optional, placed last
+    @Headers('authorization') auth?: string // Optional, placed last
   ) {
     return { id, include, auth }
   }
@@ -31,7 +31,7 @@ export class TestController {
   getUserBad(
     @Headers('authorization') auth: string, // Not recommended position, as valid headers might be passed by interceptors rather than function calls
     @Param('id') id: string,
-    @Query('include') include?: string,
+    @Query('include') include?: string
   ) {
     return { id, include, auth }
   }
@@ -51,7 +51,7 @@ export class TestController {
   @Post('create')
   createItem(
     @Body() data: any,
-    @Res({ passthrough: true }) response?: Response,
+    @Res({ passthrough: true }) response?: Response
   ) {
     // Can use response object to set status code
     response!.status(201)
@@ -64,7 +64,7 @@ export class TestController {
   @Post('create-bad')
   createItemBad(
     @Body() data: any,
-    @Res() response?: Response, // Missing passthrough: true
+    @Res() response?: Response // Missing passthrough: true
   ) {
     response!.status(201).json({ success: true, data })
     // This will lose type safety
@@ -80,7 +80,7 @@ export class TestController {
   @Get('info')
   getInfo(
     @Query('type') type?: string,
-    @Req() request?: Request, // Optional parameter, placed last
+    @Req() request?: Request // Optional parameter, placed last
   ) {
     const userAgent = request?.headers['user-agent']
     return { type, userAgent }

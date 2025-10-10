@@ -14,7 +14,7 @@ export class TestController {
   @Post('upload/single')
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body() metadata: { title: string, description: string },
+    @Body() metadata: { title: string, description: string }
   ) {
     return { success: true, filename: file.filename, metadata }
   }

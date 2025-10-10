@@ -21,7 +21,7 @@ export class TestController {
   getUser(
     @Param('id') id: string,
     @Query('include') include?: string,
-    @Headers('authorization') auth?: string, // 可选，放在最后
+    @Headers('authorization') auth?: string // 可选，放在最后
   ) {
     return { id, include, auth }
   }
@@ -31,7 +31,7 @@ export class TestController {
   getUserBad(
     @Headers('authorization') auth: string, // 不推荐的位置，因为有可能合格 header 是由拦截器传递，而不是函数调用传递
     @Param('id') id: string,
-    @Query('include') include?: string,
+    @Query('include') include?: string
   ) {
     return { id, include, auth }
   }
@@ -51,7 +51,7 @@ export class TestController {
   @Post('create')
   createItem(
     @Body() data: any,
-    @Res({ passthrough: true }) response?: Response,
+    @Res({ passthrough: true }) response?: Response
   ) {
     // 可以使用 response 对象设置状态码
     response!.status(201)
@@ -64,7 +64,7 @@ export class TestController {
   @Post('create-bad')
   createItemBad(
     @Body() data: any,
-    @Res() response?: Response, // 缺少 passthrough: true
+    @Res() response?: Response // 缺少 passthrough: true
   ) {
     response!.status(201).json({ success: true, data })
     // 这样会失去类型安全
@@ -80,7 +80,7 @@ export class TestController {
   @Get('info')
   getInfo(
     @Query('type') type?: string,
-    @Req() request?: Request, // 可选参数，放在最后
+    @Req() request?: Request // 可选参数，放在最后
   ) {
     const userAgent = request?.headers['user-agent']
     return { type, userAgent }

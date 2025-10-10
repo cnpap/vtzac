@@ -157,7 +157,7 @@
 
 /* 全局背景网格装饰 - 精致版本 */
 .Layout::before {
-  content: "";
+  content: '';
   position: fixed;
   top: 0;
   left: 0;
@@ -174,7 +174,7 @@
 
 /* Hero 区域装饰线条 */
 .VPHome::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 50%;
   left: 50%;
@@ -193,7 +193,7 @@
 }
 
 .VPHome::after {
-  content: "";
+  content: '';
   position: fixed;
   top: 0;
   left: 0;

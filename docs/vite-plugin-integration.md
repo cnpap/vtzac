@@ -22,13 +22,7 @@ import vtzac from 'vtzac'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vtzac({
-      glob: ['src/backend/**/*.controller.ts'],
-    }),
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [vtzac(), react(), tailwindcss()],
 })
 ```
 
@@ -36,19 +30,17 @@ export default defineConfig({
 
 ### glob
 
-- **Type**: `string[]`
-- **Required**: Yes
-- **Description**: Specify the matching pattern for NestJS controller files
+- **Type**: `string | string[]`
+- **Required**: No
+- **Description**: Specify the matching pattern for NestJS controller files. When omitted, all files ending with `controller.ts` are matched by default.
 
 The `glob` option is used to tell vtzac where to find your NestJS controller files. The plugin will scan these files and automatically generate corresponding frontend API client code.
 
 #### Example Configuration
 
 ```typescript
-vtzac({
-  // Scan all .controller.ts files in the src/backend directory
-  glob: ['src/backend/**/*.controller.ts'],
-})
+// Default behavior: match all files ending with `controller.ts`
+vtzac()
 ```
 
 ```typescript
@@ -113,11 +105,6 @@ import { defineConfig } from 'vite'
 import vtzac from 'vtzac'
 
 export default defineConfig({
-  plugins: [
-    vtzac({
-      glob: ['src/backend/**/*.controller.ts'],
-    }),
-    react(),
-  ],
+  plugins: [vtzac(), react()],
 })
 ```

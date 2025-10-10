@@ -20,7 +20,7 @@ export class UploadController {
   @UseInterceptors(FileInterceptor('file'))
   uploadSingle(
     @UploadedFile() file: Express.Multer.File,
-    @Body() metadata?: any,
+    @Body() metadata?: any
   ) {
     return {
       success: true,
@@ -49,7 +49,7 @@ async function handleSingleUpload(file: File) {
     .call(
       'uploadSingle',
       file as unknown as Express.Multer.File, // File object
-      { description: 'Test file' }, // Metadata
+      { description: 'Test file' } // Metadata
     )
     .catch(error => console.error('Single file upload failed:', error))
 
@@ -71,7 +71,7 @@ export class UploadController {
   @UseInterceptors(FilesInterceptor('files', 5)) // Maximum 5 files
   uploadMultiple(
     @UploadedFiles() files: Express.Multer.File[],
-    @Body() metadata?: any,
+    @Body() metadata?: any
   ) {
     return {
       success: true,
@@ -94,7 +94,7 @@ async function handleMultipleUpload(files: File[]) {
     .call(
       'uploadMultiple',
       files as unknown as Express.Multer.File[], // File array
-      { description: 'Batch upload' }, // Metadata
+      { description: 'Batch upload' } // Metadata
     )
     .catch(error => console.error('Multiple file upload failed:', error))
 
@@ -117,7 +117,7 @@ export class UploadController {
     FileFieldsInterceptor([
       { name: 'documents', maxCount: 3 },
       { name: 'images', maxCount: 2 },
-    ]),
+    ])
   )
   uploadNamedMultiple(
     @UploadedFiles()
@@ -125,7 +125,7 @@ export class UploadController {
       documents?: Express.Multer.File[]
       images?: Express.Multer.File[]
     },
-    @Body() metadata?: any,
+    @Body() metadata?: any
   ) {
     return {
       success: true,
@@ -156,11 +156,9 @@ async function handleNamedUpload(documents: File[], images: File[]) {
         documents: documents as unknown as Express.Multer.File[],
         images: images as unknown as Express.Multer.File[],
       },
-      { description: 'Categorized upload' },
+      { description: 'Categorized upload' }
     )
-    .catch(error =>
-      console.error('Named multiple file upload failed:', error),
-    )
+    .catch(error => console.error('Named multiple file upload failed:', error))
 
   console.log(res._data)
   // Output: { success: true, documents: [...], images: [...], metadata: { description: 'Categorized upload' } }

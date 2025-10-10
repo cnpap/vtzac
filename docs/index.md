@@ -3,8 +3,8 @@
 layout: home
 
 hero:
-  name: "vtzac"
-  text: "vite + nestjs full-stack"
+  name: 'vtzac'
+  text: 'vite + nestjs full-stack'
   tagline: Next-generation full-stack solution
   actions:
     - theme: brand
@@ -13,21 +13,21 @@ hero:
 
 features:
   - icon:
-      src: "/typescript.svg"
-      width: "48"
-      height: "48"
+      src: '/typescript.svg'
+      width: '48'
+      height: '48'
     title: End-to-End Type Safety
     details: Complete type safety throughout frontend-backend communication, elegant TypeScript full-stack solution with compile-time error detection
   - icon:
-      src: "/nestjs_vitejs.svg"
-      width: "96"
-      height: "48"
+      src: '/nestjs_vitejs.svg'
+      width: '96'
+      height: '48'
     title: Full Compatibility
     details: Fully compatible with the NestJS + Vite ecosystem. Zero learning curve; file uploads, WebSocket—everything you need works out of the box.
   - icon:
-      src: "/electron.svg"
-      width: "48"
-      height: "48"
+      src: '/electron.svg'
+      width: '48'
+      height: '48'
     title: Client Application Development
     details: Built on NestJS + Vite a single codebase for Web and Electron clients. Run NestJS inside Electron with near-zero effort—no extra adaptation—and boost efficiency by at least 100%.
 ---
@@ -47,7 +47,7 @@ export class UserController {
     @Param('id') userId: string,
     @Query('version') version: string,
     @UploadedFile() file: Express.Multer.File,
-    @Body() metadata: { title: string },
+    @Body() metadata: { title: string }
   ) {
     return {
       success: true,
@@ -83,7 +83,7 @@ function UploadComponent() {
       '123', // @Param('id')
       'v2', // @Query('version')
       file as unknown as Express.Multer.File, // @UploadedFile()
-      { title: 'Avatar' }, // @Body()
+      { title: 'Avatar' } // @Body()
     )
 
     console.log(result._data)

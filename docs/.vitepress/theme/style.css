@@ -3,10 +3,10 @@
  */
 
 /* 引入配色样式 */
-@import "./global.css";
-@import "./styles/color.css";
-@import "./styles/card.css";
-@import "./styles/example-card.css";
+@import './global.css';
+@import './styles/color.css';
+@import './styles/card.css';
+@import './styles/example-card.css';
 
 /**
  * Component: Monospace Font for Numbers and Letters
@@ -23,9 +23,9 @@
 
   /* 更好的等宽字体选择 */
   --vp-font-family-mono:
-    "Operator Mono", "Dank Mono", "Victor Mono", "Recursive", "Iosevka", "Hack",
-    "Input Mono", "Consolas", "Menlo", "DejaVu Sans Mono", "Liberation Mono",
-    "Courier New", monospace !important;
+    'Operator Mono', 'Dank Mono', 'Victor Mono', 'Recursive', 'Iosevka', 'Hack',
+    'Input Mono', 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Liberation Mono',
+    'Courier New', monospace !important;
 }
 
 /* 全局等宽字体，但保护中文字符 - 原有配置已注释 */
@@ -40,10 +40,10 @@
 
   /* 更好的等宽字体选择，保护中文字符 */
   font-family:
-    "Operator Mono", "Dank Mono", "Victor Mono", "Recursive", "Iosevka", "Hack",
-    "Input Mono", "Consolas", "Menlo", "DejaVu Sans Mono", "Liberation Mono",
-    "Courier New", "PingFang SC", "Microsoft YaHei", "微软雅黑", "SimSun",
-    "宋体", "Hiragino Sans GB", "Heiti SC", "WenQuanYi Micro Hei", sans-serif !important;
+    'Operator Mono', 'Dank Mono', 'Victor Mono', 'Recursive', 'Iosevka', 'Hack',
+    'Input Mono', 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Liberation Mono',
+    'Courier New', 'PingFang SC', 'Microsoft YaHei', '微软雅黑', 'SimSun',
+    '宋体', 'Hiragino Sans GB', 'Heiti SC', 'WenQuanYi Micro Hei', sans-serif !important;
   font-variant-numeric: tabular-nums !important;
 }
 
