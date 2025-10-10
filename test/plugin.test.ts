@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { analyzeNestJSController } from '../src/ast'
-import { generateJavaScriptClass } from '../src/plugin'
+import { generateHttpJavaScriptClass } from '../src/plugin'
 
 describe('plugin Code Generation', () => {
   it('should generate JavaScript class from NestJS controller', () => {
@@ -12,7 +12,7 @@ describe('plugin Code Generation', () => {
     const analysisResult = analyzeNestJSController(testControllerPath)
 
     // 生成JavaScript代码
-    const generatedCode = generateJavaScriptClass(analysisResult)
+    const generatedCode = generateHttpJavaScriptClass(analysisResult)
 
     // 将生成的代码写入根目录 demo 文件夹
     const outputDir = path.resolve(__dirname, '../demo')

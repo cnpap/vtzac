@@ -2,7 +2,7 @@ import type { Plugin } from 'vite'
 import { cwd } from 'node:process'
 import fg from 'fast-glob'
 import { analyzeNestJSControllerFromCode } from './ast'
-import { generateJavaScriptClass } from './plugin'
+import { generateHttpJavaScriptClass } from './generate-http'
 
 export interface VtzacOptions {
   glob?: string | string[]
@@ -33,7 +33,7 @@ export function vtzac(options: VtzacOptions = {} as VtzacOptions): Plugin {
         const analysisResult = analyzeNestJSControllerFromCode(code, id)
 
         // 生成 JavaScript 代码
-        const generatedCode = generateJavaScriptClass(analysisResult)
+        const generatedCode = generateHttpJavaScriptClass(analysisResult)
 
         return {
           code: generatedCode,

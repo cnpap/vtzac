@@ -4,7 +4,7 @@ import { getFileParameterInfo, getFileUploadInfo } from './ast'
 /**
  * 生成JavaScript类代码
  */
-export function generateJavaScriptClass(analysisResult: AnalysisResult): string {
+export function generateHttpJavaScriptClass(analysisResult: AnalysisResult): string {
   const controllers = analysisResult.controllers
 
   if (controllers.length === 0) {
