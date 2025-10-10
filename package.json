@@ -19,6 +19,7 @@
     ".": "./dist/index.js",
     "./hook": "./dist/hook.js",
     "./fetch": "./dist/fetch.js",
+    "./typed-emit": "./dist/typed-emit.js",
     "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
@@ -52,7 +53,8 @@
     "multer": ">=2.0.2",
     "ofetch": ">=1.4.1",
     "reflect-metadata": ">=0.1.0",
-    "rxjs": ">=7.0.0"
+    "rxjs": ">=7.0.0",
+    "socket.io": ">=4.0.0"
   },
   "dependencies": {
     "@nestjs/swagger": "catalog:",
@@ -81,6 +83,7 @@
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
     "simple-git-hooks": "catalog:cli",
+    "socket.io": "catalog:",
     "tinyexec": "catalog:testing",
     "tsdown": "catalog:cli",
     "tsx": "catalog:cli",

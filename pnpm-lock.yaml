@@ -130,6 +130,9 @@ catalogs:
     rxjs:
       specifier: 7.8.2
       version: 7.8.2
+    socket.io:
+      specifier: ^4.8.1
+      version: 4.8.1
     tailwindcss:
       specifier: ^4.1.14
       version: 4.1.14
@@ -241,6 +244,9 @@ importers:
       simple-git-hooks:
         specifier: catalog:cli
         version: 2.13.1
+      socket.io:
+        specifier: 'catalog:'
+        version: 4.8.1
       tinyexec:
         specifier: catalog:testing
         version: 1.0.1

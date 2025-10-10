@@ -5,6 +5,7 @@ export default defineConfig({
     'src/index.ts',
     'src/hook.ts',
     'src/fetch.ts',
+    'src/typed-emit.ts',
   ],
   dts: {
     build: true,
