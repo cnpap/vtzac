@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { setGlobalZacOfetchOptions } from 'vtzac/hook';
-import { Segmented, Typography, Space, Row, Col } from 'antd';
+import { Segmented, Space, Row, Col } from 'antd';
 import {
   SendOutlined,
   SearchOutlined,
@@ -18,17 +18,15 @@ import { HeadersTest } from './components/HeadersTest';
 import { UploadTest } from './components/UploadTest';
 import ComplexTest from './components/ComplexTest';
 import { DeleteTest } from './components/DeleteTest';
-import { WebSocketTest } from './components/WebSocketTest';
+import WebSocketTestRefactored from './components/WebSocketTestRefactored';
 import 'antd/dist/reset.css';
-
-const { Title } = Typography;
 
 setGlobalZacOfetchOptions({
   baseURL: 'http://localhost:3001',
 });
 
 function App() {
-  const [activeCase, setActiveCase] = useState<TestCase>('hello');
+  const [activeCase, setActiveCase] = useState<TestCase>('websocket');
   const [results, setResults] = useState<ResultsState>({});
   const [loading, setLoading] = useState<LoadingState>({});
 
@@ -67,7 +65,7 @@ function App() {
       case 'delete':
         return <DeleteTest {...commonProps} />;
       case 'websocket':
-        return <WebSocketTest {...commonProps} />;
+        return <WebSocketTestRefactored />;
       default:
         return <HelloTest {...commonProps} />;
     }
@@ -77,7 +75,6 @@ function App() {
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <div>
-          <Title level={3}>选择测试用例</Title>
           <Segmented
             options={testCases}
             value={activeCase}
