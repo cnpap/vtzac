@@ -176,10 +176,10 @@
 .VPHome::before {
   content: '';
   position: absolute;
-  top: 50%;
+  top: -10%;
   left: 50%;
-  width: 800px;
-  height: 800px;
+  width: 3200px;
+  height: 3200px;
   background: radial-gradient(
     circle,
     rgba(22, 119, 255, 0.15) 0%,
@@ -239,16 +239,16 @@
 /* 暗色模式适配 */
 .dark .Layout::before {
   background-image:
-    linear-gradient(rgba(105, 177, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(105, 177, 255, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(22, 119, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 119, 255, 0.05) 1px, transparent 1px);
 }
 
 .dark .VPHome::before {
   background: radial-gradient(
     circle,
-    rgba(105, 177, 255, 0.1) 0%,
-    rgba(105, 177, 255, 0.05) 30%,
-    rgba(105, 177, 255, 0.02) 60%,
+    rgba(22, 119, 255, 0.1) 0%,
+    rgba(22, 119, 255, 0.05) 30%,
+    rgba(22, 119, 255, 0.02) 60%,
     transparent 80%
   );
 }
@@ -257,12 +257,12 @@
  * Dark Mode Tweaks
  * -------------------------------------------------------------------------- */
 
-/* 暗色模式：适中的蓝色主题 */
+/* 暗色模式：更贴近亮色的蓝色主题 */
 .dark {
-  --vp-c-brand-1: #4096ff;
-  --vp-c-brand-2: #69b1ff;
-  --vp-c-brand-3: #4096ff;
-  --vp-c-brand-soft: rgba(64, 150, 255, 0.15);
+  --vp-c-brand-1: #1677ff;
+  --vp-c-brand-2: #4096ff;
+  --vp-c-brand-3: #1677ff;
+  --vp-c-brand-soft: rgba(22, 119, 255, 0.15);
 }
 
 .example-card__col > .language-typescript,
@@ -280,6 +280,6 @@
  * -------------------------------------------------------------------------- */
 
 /* 仅亮色模式：代码块背景更白 */
-html:not(.dark) .vp-doc pre.shiki {
+/* html:not(.dark) .vp-doc pre.shiki {
   background-color: #ffffff !important;
-}
+} */

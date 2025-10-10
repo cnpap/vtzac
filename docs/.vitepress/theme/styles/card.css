@@ -4,24 +4,24 @@
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.7) 100%
+    rgba(255, 255, 255, 0.8) 100%
   ) !important;
   backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(22, 119, 255, 0.08) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
   border-radius: 16px !important;
   padding: 12px 12px !important;
   transition: none !important;
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.05),
-    0 4px 12px rgba(22, 119, 255, 0.04) !important;
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.06) !important;
 }
 
 .VPFeature:hover {
   transform: none !important;
-  border-color: rgba(22, 119, 255, 0.08) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.05),
-    0 4px 12px rgba(22, 119, 255, 0.04) !important;
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 
 .VPFeature .title {
@@ -66,6 +66,6 @@
 }
 
 /* 仅亮色模式：首页广告卡片更白 */
-html:not(.dark) .VPFeature .box {
+/* html:not(.dark) .VPFeature .box {
   background-color: #ffffff !important;
-}
+} */

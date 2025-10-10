@@ -81,3 +81,105 @@ h2:hover .title-icon {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--vp-c-divider);
 }
+
+/**
+ * Custom Navigation Bar Styles
+ * -------------------------------------------------------------------------- */
+
+/* 导航栏始终不透明 */
+.VPNav {
+  background-color: var(--vp-c-bg) !important;
+  backdrop-filter: none !important;
+  border-bottom: none !important;
+}
+
+/* 导航栏容器样式 */
+.VPNav .VPNavBar {
+  background-color: var(--vp-c-bg) !important;
+  backdrop-filter: none !important;
+}
+
+/* 导航栏下方蓝色装饰线 */
+.VPNav::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
+  z-index: 1;
+}
+
+.VPNavBar .menu {
+  z-index: 2;
+}
+
+/* 暗色模式下的导航栏样式 */
+.dark .VPNav {
+  background-color: var(--vp-c-bg) !important;
+  border-bottom: none !important;
+}
+
+.dark .VPNav .VPNavBar {
+  background-color: var(--vp-c-bg) !important;
+}
+
+/* 确保导航栏在滚动时保持不透明 */
+.VPNav.has-sidebar {
+  background-color: var(--vp-c-bg) !important;
+  backdrop-filter: none !important;
+}
+
+.VPNav.fill {
+  background-color: var(--vp-c-bg) !important;
+  backdrop-filter: none !important;
+}
+
+/* .Layout > aside {
+  padding-top: var(--vp-nav-height) + 4 !important;
+} */
+
+.VPNavBarTitle .title {
+  /* 要减少 2 px */
+  /* height: var(--vp-nav-height) !important; */
+  height: calc(var(--vp-nav-height) - 4px) !important;
+}
+
+/**
+ * Header Font Size Customization
+ * -------------------------------------------------------------------------- */
+
+/* 增大导航栏标题字体 */
+.VPNavBarTitle .title {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+}
+
+/* 增大导航栏菜单项字体 */
+.VPNavBarMenuLink {
+  font-size: 1.1rem !important;
+}
+
+/* 增大侧边栏标题字体 */
+.VPSidebarItem .text {
+  font-size: 1.05rem !important;
+}
+
+/* 增大页面标题字体 */
+.vp-doc h1 {
+  font-size: 2.5rem !important;
+  font-weight: 700 !important;
+}
+
+/* 增大二级标题字体 */
+.vp-doc h2 {
+  font-size: 2rem !important;
+  font-weight: 600 !important;
+}
+
+/* 增大三级标题字体 */
+.vp-doc h3 {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+}

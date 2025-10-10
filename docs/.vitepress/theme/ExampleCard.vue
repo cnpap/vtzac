@@ -34,17 +34,17 @@ defineProps<{ desc?: string, twoCol?: boolean, theme?: 'light' | 'dark' | 'auto'
 .example-card {
   position: relative;
   width: 100%;
-  border: 1px solid rgba(22, 119, 255, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 12px;
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.7) 100%
+    rgba(255, 255, 255, 0.8) 100%
   );
   backdrop-filter: blur(10px);
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.05),
-    0 4px 12px rgba(22, 119, 255, 0.04);
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.06);
   box-sizing: border-box; /* include border in width to avoid overflow */
   max-width: 100%;
   overflow: hidden; /* prevent inner elements from pushing outside */
