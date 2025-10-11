@@ -3,14 +3,15 @@ import { WebSocketTestGateway } from '../playground/src/backend/websocket.gatewa
 import { _socket } from './hook-socket'
 
 // 初始化 socket 连接，类似于原始的 io('http://localhost:3001', { transports: ['websocket'] })
-const { createEmitter, createListener, socket, disconnect } = _socket('http://localhost:3001', {
-  socketIoOptions: {
-    transports: ['websocket'],
+const { emitter, createListener, socket, disconnect } = _socket(
+  'http://localhost:3001',
+  WebSocketTestGateway,
+  {
+    socketIoOptions: {
+      transports: ['websocket'],
+    },
   },
-})
-
-// 创建发送器，支持传入类或实例
-const _emit1 = createEmitter(WebSocketTestGateway) // 传入类
+)
 
 async function demo(): Promise<void> {
   // 等待连接建立
@@ -22,15 +23,15 @@ async function demo(): Promise<void> {
   })
 
   // 直接方法名风格：_emit1.handleXxx(...)，自动映射为对应事件名
-  _emit1.handleJoinChat({ nickname: 'Alice', avatar: 'avatar1.png' })
-  _emit1.handlePublicMessage({ text: 'Hello everyone!' })
-  _emit1.handlePrivateMessage({ text: '123', toUserId: 'user123' })
-  _emit1.handlePing()
+  emitter.handleJoinChat({ nickname: 'Alice', avatar: 'avatar1.png' })
+  emitter.handlePublicMessage({ text: 'Hello everyone!' })
+  emitter.handlePrivateMessage({ text: '123', toUserId: 'user123' })
+  emitter.handlePing()
   // 有返回值的会默认从 emit 调用改为 emitWithAck 调用，等待服务器响应
-  const counter = await _emit1.handleGetOnlineCount()
+  const counter = await emitter.handleGetOnlineCount()
   console.warn('当前在线人数:', counter)
-  _emit1.handleStartTyping({ toUserId: 'user123' })
-  _emit1.handleStopTyping({ toUserId: 'user123' })
+  emitter.handleStartTyping({ toUserId: 'user123' })
+  emitter.handleStopTyping({ toUserId: 'user123' })
 
   /**
    * createListener 方法：设计方案实现
@@ -38,11 +39,6 @@ async function demo(): Promise<void> {
    * 监听服务端的发送类，使用 createListener 创建类型安全的监听器
    */
   const _listener = createListener(WebSocketEventEmitter)
-
-  // 使用类型安全的监听器，这个获得的 data 就是对应方法的返回值类型
-  _listener.onConnected((data) => {
-    console.warn('服务器确认连接:', data)
-  })
 
   _listener.joinedChat((data) => {
     console.warn('加入聊天成功:', data)

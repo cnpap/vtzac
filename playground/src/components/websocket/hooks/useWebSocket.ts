@@ -3,7 +3,7 @@ import { notification } from 'antd';
 import { Socket } from 'socket.io-client';
 import type { User, Message } from '../types';
 import type { LoadingState } from '../../../types';
-import { _socket } from '../../../../../dist/hook';
+import { _socket } from 'vtzac/hook';
 import { WebSocketTestGateway } from '../../../backend/websocket.gateway';
 import { WebSocketEventEmitter } from '../../../backend/websocket.emitter';
 
@@ -44,8 +44,9 @@ export const useWebSocket = ({
     setLoading((prev: LoadingState) => ({ ...prev, connect: true }));
 
     try {
-      const { createEmitter, createListener, socket } = _socket(
+      const { emitter, createListener, socket } = _socket(
         'http://localhost:3001',
+        WebSocketTestGateway,
         {
           socketIoOptions: {
             transports: ['websocket'],
@@ -53,33 +54,22 @@ export const useWebSocket = ({
         }
       );
 
-      const newSocket = socket;
-      const emitter = createEmitter(WebSocketTestGateway);
       const listener = createListener(WebSocketEventEmitter);
 
       emitterRef.current = emitter;
       listenerRef.current = listener;
 
       // 连接成功
-      newSocket.on('connect', () => {
+      socket.on('connect', () => {
         setConnected(true);
-        setSocket(newSocket);
-        socketRef.current = newSocket;
+        setSocket(socket);
+        socketRef.current = socket;
         setLoading((prev: LoadingState) => ({ ...prev, connect: false }));
         onMessage({
           id: Date.now().toString(),
           type: 'connected',
           message: '已连接到服务器，请设置昵称加入聊天',
           timestamp: new Date().toISOString(),
-        });
-      });
-
-      // 服务器确认连接
-      listener.onConnected(data => {
-        onMessage({
-          id: Date.now().toString(),
-          type: 'connected',
-          ...data!,
         });
       });
 
@@ -105,7 +95,7 @@ export const useWebSocket = ({
           fromUserId: data.fromUserId,
           fromUserNickname: data.fromUserNickname,
           timestamp: data.timestamp,
-          isSent: data.fromUserId === newSocket.id,
+          isSent: data.fromUserId === socket.id,
         });
       });
 
@@ -209,7 +199,7 @@ export const useWebSocket = ({
       });
 
       // 连接断开
-      newSocket.on('disconnect', () => {
+      socket.on('disconnect', () => {
         setConnected(false);
         setSocket(null);
         socketRef.current = null;
@@ -222,7 +212,7 @@ export const useWebSocket = ({
       });
 
       // 连接错误
-      newSocket.on('connect_error', error => {
+      socket.on('connect_error', error => {
         setLoading((prev: LoadingState) => ({ ...prev, connect: false }));
         onMessage({
           id: Date.now().toString(),

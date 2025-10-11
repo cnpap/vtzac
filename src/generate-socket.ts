@@ -21,10 +21,19 @@ export function generateSocketJavaScriptClass(analysisResult: AnalysisResult): s
  */
 function generateGatewayClass(gateway: GatewayInfo): string {
   const className = gateway.name
+  const namespace = gateway.namespace || ''
   const methods = gateway.events.map(event => generateEventMethod(event, gateway)).join('\n\n')
 
   return `export class ${className} {
-  constructor(socket) {
+  constructor() {
+    this.socket = null;
+  }
+
+  getNamespace() {
+    return '${namespace}';
+  }
+
+  __setSocket(socket) {
     this.socket = socket;
   }
 

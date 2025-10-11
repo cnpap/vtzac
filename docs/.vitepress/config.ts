@@ -30,8 +30,8 @@ export default defineConfig({
             text: 'Getting Started',
             items: [
               { text: 'Quick Start', link: '/getting-started' },
-              { text: '[Step 1] NestJS Integration', link: '/nestjs-integration' },
-              { text: '[Step 2] Vite Plugin Integration', link: '/vite-plugin-integration' },
+              { text: '[Step1]NestJS Integration', link: '/nestjs-integration' },
+              { text: '[Step2]Vite Plugin Integration', link: '/vite-plugin-integration' },
             ],
           },
           {
@@ -43,7 +43,7 @@ export default defineConfig({
           {
             text: 'Guide',
             items: [
-              { text: '[Important] Notes', link: '/guide/notes' },
+              { text: '[Important]Notes', link: '/guide/notes' },
               { text: 'Configuration', link: '/guide/configuration' },
               { text: 'Troubleshooting', link: '/troubleshooting' },
             ],
@@ -53,6 +53,13 @@ export default defineConfig({
             items: [
               { text: 'Parameter Handling', link: '/guide/params-usage' },
               { text: 'File Upload', link: '/guide/file-upload-usage' },
+            ],
+          },
+          {
+            text: 'WebSocket',
+            items: [
+              { text: 'Backend Message Sending', link: '/guide/websocket-backend-emit' },
+              { text: 'Frontend-Backend Mutual Calls', link: '/guide/websocket-mutual-call' },
             ],
           },
         ],
@@ -98,6 +105,13 @@ export default defineConfig({
             items: [
               { text: '参数处理用例', link: '/zh/guide/params-usage' },
               { text: '文件上传用例', link: '/zh/guide/file-upload-usage' },
+            ],
+          },
+          {
+            text: 'WebSocket',
+            items: [
+              { text: '后端消息发送', link: '/zh/guide/websocket-backend-emit' },
+              { text: '前后端相互调用', link: '/zh/guide/websocket-mutual-call' },
             ],
           },
         ],

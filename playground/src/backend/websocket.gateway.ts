@@ -20,6 +20,7 @@ import { WebSocketEventEmitter } from './websocket.emitter';
   cors: {
     origin: '*',
   },
+  namespace: '/chat',
 })
 export class WebSocketTestGateway
   implements OnGatewayConnection, OnGatewayDisconnect
@@ -44,11 +45,6 @@ export class WebSocketTestGateway
 
     // 加入公共频道
     client.join('public');
-
-    emitWith(
-      this.eventEmitter.onConnected,
-      this.eventEmitter
-    )(client.id).toClient(client);
   }
 
   // 断开连接时触发

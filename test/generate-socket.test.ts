@@ -25,8 +25,12 @@ describe('socket.IO Code Generation', () => {
     expect(generatedCode).toBeTruthy()
 
     // 验证构造函数
-    expect(generatedCode).toContain('constructor(socket)')
-    expect(generatedCode).toContain('this.socket = socket')
+    expect(generatedCode).toContain('constructor()')
+    expect(generatedCode).toContain('this.socket = null')
+
+    // 验证新增的方法
+    expect(generatedCode).toContain('getNamespace()')
+    expect(generatedCode).toContain('__setSocket(socket)')
 
     // 验证生成的代码包含 socket 调用
     expect(generatedCode).toContain('return this.socket.')
@@ -64,8 +68,12 @@ export class SimpleGateway {
     expect(generatedCode).toContain('class SimpleGateway')
 
     // 验证构造函数
-    expect(generatedCode).toContain('constructor(socket)')
-    expect(generatedCode).toContain('this.socket = socket')
+    expect(generatedCode).toContain('constructor()')
+    expect(generatedCode).toContain('this.socket = null')
+
+    // 验证新增的方法
+    expect(generatedCode).toContain('getNamespace()')
+    expect(generatedCode).toContain('__setSocket(socket)')
 
     expect(generatedCode).toContain('handleTest(...args)')
     // 由于方法有返回值 any，应该生成 emitWithAck
@@ -98,5 +106,33 @@ export class VoidGateway {
     expect(generatedCode).toContain('handleVoidTest(...args)')
     // 由于方法返回 void，应该生成 emit
     expect(generatedCode).toContain('this.socket.emit(\'voidTest\'')
+  })
+
+  it('should generate getNamespace method with correct namespace', () => {
+    // 创建一个带有 namespace 的测试 Gateway 代码
+    const namespaceGatewayCode = `
+import { WebSocketGateway, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+
+@WebSocketGateway({ namespace: '/chat' })
+export class ChatGateway {
+  @SubscribeMessage('message')
+  handleMessage(@MessageBody() data: any): void {
+    console.log('message received');
+  }
+}
+`
+
+    // 分析代码
+    const analysisResult = analyzeNestJSControllerFromCode(namespaceGatewayCode)
+
+    // 生成JavaScript代码
+    const generatedCode = generateSocketJavaScriptClass(analysisResult)
+
+    // 验证生成的代码
+    expect(generatedCode).toBeTruthy()
+    expect(generatedCode).toContain('class ChatGateway')
+
+    // 验证 getNamespace 方法返回正确的 namespace
+    expect(generatedCode).toContain('getNamespace() {\n    return \'/chat\';')
   })
 })

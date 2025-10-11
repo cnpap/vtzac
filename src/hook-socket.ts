@@ -20,8 +20,8 @@ export type ZacSocketListener<T> = {
 }
 
 // Socket 初始化返回接口
-export interface ZacSocketInstance {
-  createEmitter: <T>(controller: Constructor<T>) => ZacSocketEmitter<T>
+export interface ZacSocketInstance<E> {
+  emitter: E
   createListener: <T>(eventEmitter: Constructor<T>) => ZacSocketListener<T>
   socket: Socket
   disconnect: () => void
@@ -30,8 +30,19 @@ export interface ZacSocketInstance {
 // 全局 socket 实例缓存
 const socketInstances = new Map<string, Socket>()
 
+function joinUrl(baseurl: string, namespace?: string): string {
+  const base = (baseurl || '').replace(/\/+$/, '')
+  const ns = (namespace || '').replace(/^\/+/, '')
+  if (!ns)
+    return base || '/'
+  return `${base}/${ns}`
+}
+
 // 主函数：初始化 socket 连接
-export function _socket(uri: string, options?: ZacSocketOptions): ZacSocketInstance {
+export function _socket<T>(baseurl: string, gateway: Constructor<T>, options?: ZacSocketOptions): ZacSocketInstance<T> {
+  const instance = new (gateway as Constructor<T>)()
+  const namespace = (instance as any).getNamespace()
+  const uri = joinUrl(baseurl, namespace)
   const cacheKey = `${uri}_${JSON.stringify(options?.socketIoOptions || {})}`
   // 检查是否已有相同配置的连接
   let socket = socketInstances.get(cacheKey)
@@ -40,14 +51,14 @@ export function _socket(uri: string, options?: ZacSocketOptions): ZacSocketInsta
     socket = io(uri, options?.socketIoOptions)
     socketInstances.set(cacheKey, socket)
   }
+  (instance as any).__setSocket(socket)
   return {
     socket,
+    emitter: instance,
     disconnect: () => {
       socket?.disconnect()
       socketInstances.delete(cacheKey)
     },
-    createEmitter: <T>(controller: Constructor<T>): ZacSocketEmitter<T> =>
-      new (controller as Constructor<T>)(socket) as ZacSocketEmitter<T>,
     createListener: <T>(eventEmitter: Constructor<T>): ZacSocketListener<T> =>
       new (eventEmitter as Constructor<T>)(socket) as ZacSocketListener<T>,
   }

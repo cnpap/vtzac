@@ -30,8 +30,11 @@ describe('socket.IO Listener Code Generation', () => {
     expect(generatedCode).toBeTruthy()
 
     // 验证构造函数
-    expect(generatedCode).toContain('constructor(socket)')
-    expect(generatedCode).toContain('this.socket = socket')
+    expect(generatedCode).toContain('constructor()')
+    expect(generatedCode).toContain('this.socket = null')
+
+    // 验证新增的方法
+    expect(generatedCode).toContain('__setSocket(socket)')
 
     // 验证生成的代码包含 socket.on 调用
     expect(generatedCode).toContain('this.socket.on(')
@@ -88,8 +91,11 @@ export class SimpleEventEmitter {
     expect(generatedCode).toContain('class SimpleEventEmitter')
 
     // 验证构造函数
-    expect(generatedCode).toContain('constructor(socket)')
-    expect(generatedCode).toContain('this.socket = socket')
+    expect(generatedCode).toContain('constructor()')
+    expect(generatedCode).toContain('this.socket = null')
+
+    // 验证新增的方法
+    expect(generatedCode).toContain('__setSocket(socket)')
 
     // 验证事件监听器方法
     expect(generatedCode).toContain('testMethod(callback)')
