@@ -82,9 +82,9 @@ export class WebSocketTestGateway
   @SubscribeMessage('joinChat')
   handleJoinChat(
     @MessageBody() data: { nickname: string; avatar?: string },
-    @ConnectedSocket() client: Socket
+    @ConnectedSocket() client?: Socket
   ): void {
-    const userId = client.id;
+    const userId = client!.id;
     const user: User = {
       id: userId,
       nickname: data.nickname || `用户${userId.slice(-4)}`,
@@ -95,7 +95,7 @@ export class WebSocketTestGateway
 
     // 存储用户信息
     this.onlineUsers.set(userId, user);
-    this.userSockets.set(userId, client);
+    this.userSockets.set(userId, client!);
 
     this.logger.log(`用户 ${user.nickname} (${userId}) 加入聊天`);
 
@@ -103,13 +103,13 @@ export class WebSocketTestGateway
     emitWith(
       this.eventEmitter.joinedChat,
       this.eventEmitter
-    )(user).toClient(client);
+    )(user).toClient(client!);
 
     // 通知其他用户有新用户加入
     emitWith(
       this.eventEmitter.userJoined,
       this.eventEmitter
-    )(user).toRoom(client, 'public');
+    )(user).toRoom(client!, 'public');
 
     // 广播更新的在线用户列表
     this.broadcastOnlineUsers();
@@ -119,14 +119,15 @@ export class WebSocketTestGateway
   @SubscribeMessage('publicMessage')
   handlePublicMessage(
     @MessageBody() data: { text: string },
-    @ConnectedSocket() client: Socket
+    @ConnectedSocket() client?: Socket
   ): void {
-    const user = this.onlineUsers.get(client.id);
+    const userId = client!.id;
+    const user = this.onlineUsers.get(userId);
     if (!user) {
       emitWith(
         this.eventEmitter.error,
         this.eventEmitter
-      )('请先设置昵称加入聊天').toClient(client);
+      )('请先设置昵称加入聊天').toClient(client!);
       return;
     }
 
@@ -155,9 +156,10 @@ export class WebSocketTestGateway
   @SubscribeMessage('privateMessage')
   handlePrivateMessage(
     @MessageBody() data: { text: string; toUserId: string },
-    @ConnectedSocket() client: Socket
+    @ConnectedSocket() client?: Socket
   ): void {
-    const fromUser = this.onlineUsers.get(client.id);
+    const userId = client!.id;
+    const fromUser = this.onlineUsers.get(userId);
     const toUser = this.onlineUsers.get(data.toUserId);
     const toSocket = this.userSockets.get(data.toUserId);
 
@@ -165,7 +167,7 @@ export class WebSocketTestGateway
       emitWith(
         this.eventEmitter.error,
         this.eventEmitter
-      )('请先设置昵称加入聊天').toClient(client);
+      )('请先设置昵称加入聊天').toClient(client!);
       return;
     }
 
@@ -173,7 +175,7 @@ export class WebSocketTestGateway
       emitWith(
         this.eventEmitter.error,
         this.eventEmitter
-      )('目标用户不在线').toClient(client);
+      )('目标用户不在线').toClient(client!);
       return;
     }
 
@@ -202,7 +204,7 @@ export class WebSocketTestGateway
     emitWith(
       this.eventEmitter.privateMessageSent,
       this.eventEmitter
-    )(message).toClient(client);
+    )(message).toClient(client!);
 
     // 更新用户最后活跃时间
     fromUser.lastActive = new Date().toISOString();
@@ -210,42 +212,43 @@ export class WebSocketTestGateway
 
   // 获取在线用户列表
   @SubscribeMessage('getOnlineUsers')
-  handleGetOnlineUsers(@ConnectedSocket() client: Socket): void {
+  handleGetOnlineUsers(@ConnectedSocket() client?: Socket): void {
     const users = Array.from(this.onlineUsers.values());
     emitWith(this.eventEmitter.onlineUsers, this.eventEmitter)(
       users,
       users.length
-    ).toClient(client);
+    ).toClient(client!);
   }
 
   // 处理心跳检测
   @SubscribeMessage('ping')
-  handlePing(@ConnectedSocket() client: Socket): void {
-    const user = this.onlineUsers.get(client.id);
+  handlePing(@ConnectedSocket() client?: Socket): void {
+    const userId = client!.id;
+    const user = this.onlineUsers.get(userId);
     if (user) {
       user.lastActive = new Date().toISOString();
     }
 
-    emitWith(this.eventEmitter.pong, this.eventEmitter)().toClient(client);
+    emitWith(this.eventEmitter.pong, this.eventEmitter)().toClient(client!);
   }
 
   // 获取在线用户数
   @SubscribeMessage('getOnlineCount')
-  handleGetOnlineCount(@ConnectedSocket() client: Socket): void {
+  handleGetOnlineCount(@ConnectedSocket() client?: Socket): void {
     const onlineCount = this.onlineUsers.size;
     emitWith(
       this.eventEmitter.onlineCount,
       this.eventEmitter
-    )(onlineCount).toClient(client);
+    )(onlineCount).toClient(client!);
   }
 
   // 用户开始输入（私聊）
   @SubscribeMessage('startTyping')
   handleStartTyping(
     @MessageBody() data: { toUserId: string },
-    @ConnectedSocket() client: Socket
+    @ConnectedSocket() client?: Socket
   ): void {
-    const fromUser = this.onlineUsers.get(client.id);
+    const fromUser = this.onlineUsers.get(client!.id);
     const toSocket = this.userSockets.get(data.toUserId);
 
     if (fromUser && toSocket) {
@@ -260,9 +263,9 @@ export class WebSocketTestGateway
   @SubscribeMessage('stopTyping')
   handleStopTyping(
     @MessageBody() data: { toUserId: string },
-    @ConnectedSocket() client: Socket
+    @ConnectedSocket() client?: Socket
   ): void {
-    const fromUser = this.onlineUsers.get(client.id);
+    const fromUser = this.onlineUsers.get(client!.id);
     const toSocket = this.userSockets.get(data.toUserId);
 
     if (fromUser && toSocket) {

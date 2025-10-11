@@ -17,10 +17,10 @@ export class TestController {
 ### Frontend Usage
 
 ```tsx
-import { zac } from 'vtzac/hook'
+import { _http } from 'vtzac/hook'
 import { TestController } from './backend/test.controller'
 
-const testController = zac(TestController, {
+const testController = _http(TestController, {
   ofetchOptions: {
     baseURL: 'http://localhost:3001',
   },

@@ -43,10 +43,10 @@ export class UserController {
 ### 前端
 
 ```tsx
-import { zac } from 'vtzac/hook'
+import { _http } from 'vtzac/hook'
 import { UserController } from './backend/user.controller'
 
-const api = zac(UserController)
+const api = _http(UserController)
 
 function UploadComponent() {
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {

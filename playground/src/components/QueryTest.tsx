@@ -2,14 +2,18 @@ import React from 'react';
 import { Button, Space, Typography, Alert, Card } from 'antd';
 import { SearchOutlined, SettingOutlined } from '@ant-design/icons';
 import { message } from 'antd';
-import { zac } from 'vtzac/hook';
+import { _http } from 'vtzac/hook';
 import { TestInputController } from '../backend/test-input.controller';
 import type { TestComponentProps, TestResult, QueryTestType } from '../types';
 
 const { Title, Text, Paragraph } = Typography;
 
 // 创建控制器实例
-const testController = zac(TestInputController);
+const testController = _http(TestInputController, {
+  ofetchOptions: {
+    baseURL: 'http://localhost:3001',
+  },
+});
 
 export const QueryTest: React.FC<TestComponentProps> = ({
   loading,
@@ -23,9 +27,9 @@ export const QueryTest: React.FC<TestComponentProps> = ({
     try {
       let res;
       if (type === 'named') {
-        res = await testController.call('testNamedQuery', '1', '10');
+        res = await testController.testNamedQuery('1', '10');
       } else {
-        res = await testController.call('testQueryObject', {
+        res = await testController.testQueryObject({
           page: '1',
           limit: '10',
           search: 'test',

@@ -2,14 +2,18 @@ import React from 'react';
 import { Button, Space, Typography, Alert, Card } from 'antd';
 import { LinkOutlined, SettingOutlined, SendOutlined } from '@ant-design/icons';
 import { message } from 'antd';
-import { zac } from 'vtzac/hook';
+import { _http } from 'vtzac/hook';
 import { TestInputController } from '../backend/test-input.controller';
 import type { TestComponentProps, TestResult, ParamTestType } from '../types';
 
 const { Title, Text, Paragraph } = Typography;
 
 // 创建控制器实例
-const testController = zac(TestInputController);
+const testController = _http(TestInputController, {
+  ofetchOptions: {
+    baseURL: 'http://localhost:3001',
+  },
+});
 
 export const ParamTest: React.FC<TestComponentProps> = ({
   loading,
@@ -23,15 +27,15 @@ export const ParamTest: React.FC<TestComponentProps> = ({
     try {
       let res;
       if (type === 'named') {
-        res = await testController.call('testNamedParam', '123', '456');
+        res = await testController.testNamedParam('123', '456');
       } else if (type === 'object') {
-        res = await testController.call('testParamObject', {
+        res = await testController.testParamObject({
           type: 'user',
           id: '123',
           action: 'edit',
         });
       } else {
-        res = await testController.call('testMixedParam', '123', {
+        res = await testController.testMixedParam('123', {
           userId: '123',
           postId: '456',
         });

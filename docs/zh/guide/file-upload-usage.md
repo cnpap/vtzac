@@ -28,10 +28,10 @@ export class UploadController {
 ### 前端调用
 
 ```tsx
-import { zac } from 'vtzac/hook'
+import { _http } from 'vtzac/hook'
 import { UploadController } from './backend/upload.controller'
 
-const uploadController = zac(UploadController, {
+const uploadController = _http(UploadController, {
   ofetchOptions: {
     baseURL: 'http://localhost:3001',
   },

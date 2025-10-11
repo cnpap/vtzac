@@ -9,11 +9,11 @@ This guide covers how to configure vtzac for optimal performance and customizati
 The `zac` function accepts two parameters: a controller class or instance, and optional configuration options.
 
 ```typescript
-import { setGlobalZacOfetchOptions, zac } from 'vtzac/hook'
+import { _http, setGlobalZacOfetchOptions } from 'vtzac/hook'
 import { UserController } from './controllers/user.controller'
 
 // Method 1: Pass controller class with options
-const api = zac(UserController, {
+const api = _http(UserController, {
   ofetchOptions: {
     baseURL: 'https://api.example.com',
     timeout: 5000,
@@ -21,15 +21,15 @@ const api = zac(UserController, {
 })
 
 // Method 2: Pass controller instance
-const api2 = zac(new UserController())
+const api2 = _http(new UserController())
 ```
 
 ### Configuration Options
 
-#### ZacOptions Interface
+#### ZacHttpOptions Interface
 
 ```typescript
-interface ZacOptions {
+interface ZacHttpOptions {
   ofetchOptions?: FetchOptions<any>
 }
 ```
@@ -79,7 +79,7 @@ const result = await api
 Configuration options are merged in the following order (later options override earlier ones):
 
 1. **Global configuration** - Options set via `setGlobalZacOfetchOptions()` (base layer)
-2. **Instance configuration** - Options passed to `zac()` function (overrides global)
+2. **Instance configuration** - Options passed to `_http()` function (overrides global)
 3. **Runtime configuration** - Options passed to `setOptions()` (highest priority)
 
 The merging follows JavaScript object spread syntax: `{ ...globalOptions, ...instanceOptions, ...runtimeOptions }`

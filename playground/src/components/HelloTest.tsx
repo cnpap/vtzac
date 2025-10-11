@@ -2,14 +2,14 @@ import React from 'react';
 import { Button, Space, Typography, Alert } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import { message } from 'antd';
-import { zac } from 'vtzac/hook';
+import { _http } from 'vtzac/hook';
 import { AppController } from '../backend/app.controller';
 import type { TestComponentProps, TestResult } from '../types';
 
 const { Title, Text, Paragraph } = Typography;
 
 // 创建控制器实例
-const defaultController = zac(AppController, {
+const defaultController = _http(AppController, {
   ofetchOptions: {
     baseURL: 'http://localhost:3001',
     timeout: 5000,
@@ -25,13 +25,7 @@ export const HelloTest: React.FC<TestComponentProps> = ({
   const handleHello = async () => {
     setLoading(prev => ({ ...prev, hello: true }));
     try {
-      const res = await defaultController
-        .setOptions({
-          ofetchOptions: {
-            timeout: 10000,
-          },
-        })
-        .call('getHello');
+      const res = await defaultController.getHello();
       setResults(prev => ({ ...prev, hello: res._data }));
       message.success('Hello 请求成功！');
     } catch (error) {

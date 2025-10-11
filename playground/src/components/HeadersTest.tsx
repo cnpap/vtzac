@@ -2,14 +2,18 @@ import React from 'react';
 import { Button, Space, Typography, Alert } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 import { message } from 'antd';
-import { zac } from 'vtzac/hook';
+import { _http } from 'vtzac/hook';
 import { TestInputController } from '../backend/test-input.controller';
 import type { TestComponentProps, TestResult, HeadersObject } from '../types';
 
 const { Title, Text, Paragraph } = Typography;
 
 // 创建控制器实例
-const testController = zac(TestInputController);
+const testController = _http(TestInputController, {
+  ofetchOptions: {
+    baseURL: 'http://localhost:3001',
+  },
+});
 
 export const HeadersTest: React.FC<TestComponentProps> = ({
   loading,
@@ -27,8 +31,7 @@ export const HeadersTest: React.FC<TestComponentProps> = ({
         'user-agent': 'Test Client',
         'x-custom-header': 'custom-value',
       };
-      const res = await testController.call(
-        'testHeaders',
+      const res = await testController.testHeaders(
         'Bearer token123',
         headersObj
       );

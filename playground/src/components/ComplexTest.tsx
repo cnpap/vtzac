@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Button, Alert, Typography, message } from 'antd';
-import { zac } from 'vtzac/hook';
+import { _http } from 'vtzac/hook';
 import { TestInputController } from '../backend/test-input.controller';
 import type {
   TestComponentProps,
@@ -17,13 +17,12 @@ const ComplexTest: React.FC<TestComponentProps> = ({
   results,
   setResults,
 }) => {
-  const testController = zac(TestInputController);
+  const testController = _http(TestInputController);
 
   const handleComplexTest = async () => {
     setLoading((prev: LoadingState) => ({ ...prev, complex: true }));
     try {
-      const res = await testController.call(
-        'testComplex',
+      const res = await testController.testComplex(
         '123',
         { name: '更新的名称', status: 'active' },
         'v1.0',

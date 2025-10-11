@@ -2,14 +2,18 @@ import React from 'react';
 import { Button, Space, Typography, Alert, Card, Upload, Row, Col } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { message } from 'antd';
-import { zac } from 'vtzac/hook';
+import { _http } from 'vtzac/hook';
 import { TestInputController } from '../backend/test-input.controller';
 import type { TestComponentProps } from '../types';
 
 const { Title, Text, Paragraph } = Typography;
 
 // 创建控制器实例
-const testController = zac(TestInputController);
+const testController = _http(TestInputController, {
+  ofetchOptions: {
+    baseURL: 'http://localhost:3001',
+  },
+});
 
 export const UploadTest: React.FC<TestComponentProps> = ({
   loading,
@@ -22,8 +26,7 @@ export const UploadTest: React.FC<TestComponentProps> = ({
     const key = 'upload-single';
     setLoading(prev => ({ ...prev, [key]: true }));
     try {
-      const res = await testController.call(
-        'testSingleFileUpload',
+      const res = await testController.testSingleFileUpload(
         file as unknown as Express.Multer.File,
         { metadata: 'test' }
       );
@@ -42,8 +45,7 @@ export const UploadTest: React.FC<TestComponentProps> = ({
     const key = 'upload-multiple';
     setLoading(prev => ({ ...prev, [key]: true }));
     try {
-      const res = await testController.call(
-        'testMultipleFileUpload',
+      const res = await testController.testMultipleFileUpload(
         files as unknown as Express.Multer.File[],
         { metadata: 'test' }
       );
@@ -62,8 +64,7 @@ export const UploadTest: React.FC<TestComponentProps> = ({
     const key = 'upload-named';
     setLoading(prev => ({ ...prev, [key]: true }));
     try {
-      const res = await testController.call(
-        'testNamedMultipleFileUpload',
+      const res = await testController.testNamedMultipleFileUpload(
         {
           documents: documents as unknown as Express.Multer.File[],
           images: images as unknown as Express.Multer.File[],

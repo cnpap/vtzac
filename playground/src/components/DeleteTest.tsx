@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Button, Alert, message } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
-import { zac } from 'vtzac/hook';
+import { _http } from 'vtzac/hook';
 import { TestInputController } from '../backend/test-input.controller';
 import type { TestComponentProps } from '../types';
 
@@ -11,12 +11,12 @@ export const DeleteTest: React.FC<TestComponentProps> = ({
   results,
   setResults,
 }) => {
-  const testController = zac(TestInputController);
+  const testController = _http(TestInputController);
 
   const handleDeleteTest = async () => {
     setLoading(prev => ({ ...prev, delete: true }));
     try {
-      const res = await testController.call('testDeleteMethod', '123');
+      const res = await testController.testDeleteMethod('123');
       setResults(prev => ({ ...prev, delete: res._data }));
       message.success('DELETE 方法测试成功！');
     } catch (error) {

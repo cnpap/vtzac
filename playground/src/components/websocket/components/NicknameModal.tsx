@@ -116,7 +116,7 @@ export const NicknameModal: React.FC<NicknameModalProps> = ({
       confirmLoading={loading}
       okText="确定"
       cancelText="取消"
-      destroyOnClose
+      destroyOnHidden
       width={450}
     >
       <Form

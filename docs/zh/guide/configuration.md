@@ -9,11 +9,11 @@
 `zac` 函数接受两个参数：控制器类或实例，以及可选的配置选项。
 
 ```typescript
-import { setGlobalZacOfetchOptions, zac } from 'vtzac/hook'
+import { _http, setGlobalZacOfetchOptions } from 'vtzac/hook'
 import { UserController } from './controllers/user.controller'
 
 // 方法 1：传递控制器类和配置选项
-const api = zac(UserController, {
+const api = _http(UserController, {
   ofetchOptions: {
     baseURL: 'https://api.example.com',
     timeout: 5000,
@@ -21,15 +21,15 @@ const api = zac(UserController, {
 })
 
 // 方法 2：传递控制器实例
-const api2 = zac(new UserController())
+const api2 = _http(new UserController())
 ```
 
 ### 配置选项
 
-#### ZacOptions 接口
+#### ZacHttpOptions 接口
 
 ```typescript
-interface ZacOptions {
+interface ZacHttpOptions {
   ofetchOptions?: FetchOptions<any>
 }
 ```
@@ -79,7 +79,7 @@ const result = await api
 配置选项按以下顺序合并（后面的选项会覆盖前面的选项）：
 
 1. **全局配置** - 通过 `setGlobalZacOfetchOptions()` 设置的选项（基础层）
-2. **实例配置** - 传递给 `zac()` 函数的选项（覆盖全局配置）
+2. **实例配置** - 传递给 `_http()` 函数的选项（覆盖全局配置）
 3. **运行时配置** - 传递给 `setOptions()` 的选项（最高优先级）
 
 合并遵循 JavaScript 对象展开语法：`{ ...globalOptions, ...instanceOptions, ...runtimeOptions }`
