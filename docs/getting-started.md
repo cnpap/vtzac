@@ -9,7 +9,6 @@ vtzac provides a complete solution that allows you to:
 - 🚀 **Minimal Learning Curve** - Built on familiar Vite and NestJS technology stack
 - 🔒 **Type Safety** - Automatically generates type-safe frontend API clients
 - 🎯 **Unified Development** - Develop both frontend and backend in the same project
-- ⚡ **Development Efficiency** - Automatically sync API changes without manual interface documentation maintenance
 
 ## Documentation Navigation
 

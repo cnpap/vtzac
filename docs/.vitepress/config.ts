@@ -20,7 +20,7 @@ export default defineConfig({
       label: 'English',
       lang: 'en-US',
       title: 'vtzac',
-      description: 'Vite + NestJS Full-Stack',
+      description: 'Vite + NestJS',
       themeConfig: {
         nav: [
           { text: 'Home', link: '/' },
@@ -75,8 +75,8 @@ export default defineConfig({
             text: '快速开始',
             items: [
               { text: '开始', link: '/zh/getting-started' },
-              { text: '【步骤 1】集成 NestJS', link: '/zh/nestjs-integration' },
-              { text: '【步骤 2】集成 Vite 插件', link: '/zh/vite-plugin-integration' },
+              { text: '[步骤1]集成 NestJS', link: '/zh/nestjs-integration' },
+              { text: '[步骤2]集成 Vite 插件', link: '/zh/vite-plugin-integration' },
             ],
           },
           {
@@ -88,7 +88,7 @@ export default defineConfig({
           {
             text: '使用指南',
             items: [
-              { text: '【必读】注意事项', link: '/zh/guide/notes' },
+              { text: '[必读]注意事项', link: '/zh/guide/notes' },
               { text: '配置说明', link: '/zh/guide/configuration' },
               { text: '故障排除', link: '/zh/troubleshooting' },
             ],

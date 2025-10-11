@@ -257,12 +257,12 @@
  * Dark Mode Tweaks
  * -------------------------------------------------------------------------- */
 
-/* 暗色模式：更贴近亮色的蓝色主题 */
+/* 暗色模式：更贴近亮色的蓝色主题 - 调整为稍微偏向天蓝色 */
 .dark {
-  --vp-c-brand-1: #1677ff;
-  --vp-c-brand-2: #4096ff;
-  --vp-c-brand-3: #1677ff;
-  --vp-c-brand-soft: rgba(22, 119, 255, 0.15);
+  --vp-c-brand-1: #1890ff;
+  --vp-c-brand-2: #40a9ff;
+  --vp-c-brand-3: #1890ff;
+  --vp-c-brand-soft: rgba(24, 144, 255, 0.15);
 }
 
 .example-card__col > .language-typescript,

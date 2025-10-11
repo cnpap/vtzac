@@ -93,26 +93,33 @@ h2:hover .title-icon {
   border-bottom: none !important;
 }
 
-/* 导航栏容器样式 */
+/* 导航栏容器样式 - 使用box-shadow创建装饰线 */
 .VPNav .VPNavBar {
   background-color: var(--vp-c-bg) !important;
   backdrop-filter: none !important;
+  box-shadow: 0 4px 0 0 var(--vp-c-brand-1) !important;
+  position: relative !important;
 }
 
-/* 导航栏下方蓝色装饰线 */
-.VPNav::after {
+/* 使用::after为box-shadow添加渐变效果 */
+.VPNav .VPNavBar::after {
   content: '';
   position: absolute;
-  bottom: 0;
+  bottom: -4px;
   left: 0;
   right: 0;
   height: 4px;
   background: linear-gradient(90deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
-  z-index: 1;
+  pointer-events: none;
 }
 
 .VPNavBar .menu {
   z-index: 2;
+}
+
+/* 确保语言切换菜单正常显示 */
+.VPFlyout.VPNavBarTranslations .menu {
+  z-index: 50 !important;
 }
 
 /* 暗色模式下的导航栏样式 */
@@ -143,7 +150,7 @@ h2:hover .title-icon {
 .VPNavBarTitle .title {
   /* 要减少 2 px */
   /* height: var(--vp-nav-height) !important; */
-  height: calc(var(--vp-nav-height) - 4px) !important;
+  border-bottom: none;
 }
 
 /**
@@ -159,6 +166,10 @@ h2:hover .title-icon {
 /* 增大导航栏菜单项字体 */
 .VPNavBarMenuLink {
   font-size: 1.1rem !important;
+}
+
+.VPSidebar {
+  padding-top: calc(var(--vp-nav-height) + 4px) !important;
 }
 
 /* 增大侧边栏标题字体 */

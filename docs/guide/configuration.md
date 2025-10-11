@@ -59,14 +59,6 @@ setGlobalZacOfetchOptions({
 })
 ```
 
-### Runtime Configuration
-
-You can override configuration at runtime using the `setOptions` method:
-
-```typescript
-const result = await api.getUser(userId)
-```
-
 ## Configuration Priority
 
 Configuration options are merged in the following order (later options override earlier ones):
