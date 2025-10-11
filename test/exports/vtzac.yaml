@@ -2,8 +2,8 @@
   default: function
   vtzac: function
 ./hook:
+  _http: function
   setGlobalZacOfetchOptions: function
-  zac: function
 ./fetch:
   default: function
   setGlobalZacOfetchOptions: function

@@ -49,12 +49,38 @@ export interface HttpMethodInfo {
 }
 
 /**
+ * Socket.IO 事件方法信息
+ */
+export interface SocketEventInfo {
+  name: string
+  eventName: string
+  parameters: MethodParameter[]
+  decorators: {
+    name: string
+    arguments: DecoratorArgument[]
+  }[]
+}
+
+/**
  * 控制器信息
  */
 export interface ControllerInfo {
   name: string
   prefix?: string
   methods: HttpMethodInfo[]
+  decorators: {
+    name: string
+    arguments: DecoratorArgument[]
+  }[]
+}
+
+/**
+ * Gateway 信息
+ */
+export interface GatewayInfo {
+  name: string
+  namespace?: string
+  events: SocketEventInfo[]
   decorators: {
     name: string
     arguments: DecoratorArgument[]
@@ -87,6 +113,7 @@ export interface FileParameterInfo {
  */
 export interface AnalysisResult {
   controllers: ControllerInfo[]
+  gateways: GatewayInfo[]
 }
 
 /**
@@ -305,6 +332,66 @@ function analyzeController(classNode: ts.ClassDeclaration): ControllerInfo | nul
 }
 
 /**
+ * 分析 Gateway 类
+ */
+function analyzeGateway(classNode: ts.ClassDeclaration): GatewayInfo | null {
+  if (!classNode.name)
+    return null
+
+  const className = classNode.name.text
+  const classDecorators = getDecorators(classNode)
+
+  // 查找 @WebSocketGateway 装饰器
+  const gatewayDecorator = classDecorators.find(d => d.name === 'WebSocketGateway')
+  if (!gatewayDecorator) {
+    return null
+  }
+
+  // 从装饰器参数中提取 namespace
+  let namespace = ''
+  if (gatewayDecorator.arguments.length > 0) {
+    const firstArg = gatewayDecorator.arguments[0]
+    if (firstArg.type === 'object' && firstArg.value && firstArg.value.namespace) {
+      namespace = firstArg.value.namespace
+    }
+    else if (firstArg.type === 'string') {
+      namespace = firstArg.value
+    }
+  }
+
+  const events: SocketEventInfo[] = []
+
+  // 分析类中的方法
+  classNode.members.forEach((member) => {
+    if (ts.isMethodDeclaration(member) && member.name && ts.isIdentifier(member.name)) {
+      const methodName = member.name.text
+      const methodDecorators = getDecorators(member)
+      const parameters = analyzeMethodParameters(member)
+
+      // 查找 @SubscribeMessage 装饰器
+      const subscribeDecorator = methodDecorators.find(d => d.name === 'SubscribeMessage')
+      if (subscribeDecorator) {
+        const eventName = subscribeDecorator.arguments[0]?.value || methodName
+
+        events.push({
+          name: methodName,
+          eventName,
+          parameters,
+          decorators: methodDecorators,
+        })
+      }
+    }
+  })
+
+  return {
+    name: className,
+    namespace,
+    events,
+    decorators: classDecorators,
+  }
+}
+
+/**
  * 分析 NestJS 控制器文件
  */
 export function analyzeNestJSController(filePath: string): AnalysisResult {
@@ -315,6 +402,7 @@ export function analyzeNestJSController(filePath: string): AnalysisResult {
   const sourceFile = virtualSourceFile(filePath, fileContent)
 
   const controllers: ControllerInfo[] = []
+  const gateways: GatewayInfo[] = []
 
   // 遍历 AST 节点
   function visit(node: ts.Node): void {
@@ -323,6 +411,11 @@ export function analyzeNestJSController(filePath: string): AnalysisResult {
       if (controllerInfo) {
         controllers.push(controllerInfo)
       }
+
+      const gatewayInfo = analyzeGateway(node)
+      if (gatewayInfo) {
+        gateways.push(gatewayInfo)
+      }
     }
 
     ts.forEachChild(node, visit)
@@ -330,7 +423,7 @@ export function analyzeNestJSController(filePath: string): AnalysisResult {
 
   visit(sourceFile)
 
-  return { controllers }
+  return { controllers, gateways }
 }
 
 /**
@@ -344,6 +437,7 @@ export function analyzeNestJSControllerFromCode(code: string, fileName: string =
   const sourceFile = virtualSourceFile(fileName, code)
 
   const controllers: ControllerInfo[] = []
+  const gateways: GatewayInfo[] = []
 
   // 遍历 AST 节点
   function visit(node: ts.Node): void {
@@ -352,6 +446,11 @@ export function analyzeNestJSControllerFromCode(code: string, fileName: string =
       if (controllerInfo) {
         controllers.push(controllerInfo)
       }
+
+      const gatewayInfo = analyzeGateway(node)
+      if (gatewayInfo) {
+        gateways.push(gatewayInfo)
+      }
     }
 
     ts.forEachChild(node, visit)
@@ -359,7 +458,7 @@ export function analyzeNestJSControllerFromCode(code: string, fileName: string =
 
   visit(sourceFile)
 
-  return { controllers }
+  return { controllers, gateways }
 }
 
 /**

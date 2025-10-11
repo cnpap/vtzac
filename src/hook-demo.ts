@@ -16,7 +16,6 @@ const api = _http(TestInputController, {
 })
 
 async function demo(): Promise<boolean> {
-  // 两种 API 都有完整的类型支持，不管是输入函数名称还是函数参数，都有完整的类型提示。
   // 返回值也有完整的类型提示。
   const result = await api.testComplex('123', { name: 'test' }, 'v1.0', 'Bearer token')
   const data = result._data!
