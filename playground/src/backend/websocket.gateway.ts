@@ -234,12 +234,14 @@ export class WebSocketTestGateway
 
   // 获取在线用户数
   @SubscribeMessage('getOnlineCount')
-  handleGetOnlineCount(@ConnectedSocket() client?: Socket): void {
+  handleGetOnlineCount(@ConnectedSocket() client?: Socket): { count: number } {
     const onlineCount = this.onlineUsers.size;
     emitWith(
       this.eventEmitter.onlineCount,
       this.eventEmitter
     )(onlineCount).toClient(client!);
+
+    return { count: onlineCount };
   }
 
   // 用户开始输入（私聊）

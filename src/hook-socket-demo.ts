@@ -25,8 +25,9 @@ async function demo(): Promise<void> {
   _emit1.handlePublicMessage({ text: 'Hello everyone!' })
   _emit1.handlePrivateMessage({ text: '123', toUserId: 'user123' })
   _emit1.handlePing()
-  _emit1.handleGetOnlineCount()
-  _emit1.handleGetOnlineUsers()
+  // 有返回值的会默认从 emit 调用改为 emitWithAsk 调用，等待服务器响应
+  const counter = await _emit1.handleGetOnlineCount()
+  console.warn('当前在线人数:', counter)
   _emit1.handleStartTyping({ toUserId: 'user123' })
   _emit1.handleStopTyping({ toUserId: 'user123' })
 

@@ -36,10 +36,16 @@ export type OfetchWrappedInstance<T> = {
 }
 
 // 类型工具：对实例进行轻量包装，使所有方法直接发送 Socket 消息（返回 void）
+// 类型工具：将返回类型包装为 Promise<...>，自动解包原本的 Promise
+export type SocketWrappedReturn<R> = R extends Promise<infer U>
+  ? Promise<U>
+  : Promise<R>
+
+// 类型工具：对实例进行轻量包装，使所有方法返回 Promise<原类型>
 export type SocketWrappedInstance<T> = {
   [K in keyof ExcludeLifecycleMethods<T>]: ExcludeLifecycleMethods<T>[K] extends (
     ...args: infer A
-  ) => any
-    ? (...args: A) => void
+  ) => infer R
+    ? (...args: A) => SocketWrappedReturn<R>
     : ExcludeLifecycleMethods<T>[K]
 }
