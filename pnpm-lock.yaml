@@ -133,6 +133,9 @@ catalogs:
     socket.io:
       specifier: ^4.8.1
       version: 4.8.1
+    socket.io-client:
+      specifier: ^4.8.1
+      version: 4.8.1
     tailwindcss:
       specifier: ^4.1.14
       version: 4.1.14
@@ -245,6 +248,9 @@ importers:
         specifier: catalog:cli
         version: 2.13.1
       socket.io:
+        specifier: 'catalog:'
+        version: 4.8.1
+      socket.io-client:
         specifier: 'catalog:'
         version: 4.8.1
       tinyexec:

@@ -36,7 +36,8 @@ catalog:
   react-dom: ^19.1.1
   reflect-metadata: 0.2.2
   rxjs: 7.8.2
-  socket.io: ^0.0.0
+  socket.io: ^4.8.1
+  socket.io-client: ^4.8.1
   tailwindcss: ^4.1.14
   typescript-eslint: ^8.45.0
   vitepress: 2.0.0-alpha.12

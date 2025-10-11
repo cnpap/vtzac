@@ -54,7 +54,8 @@
     "ofetch": ">=1.4.1",
     "reflect-metadata": ">=0.1.0",
     "rxjs": ">=7.0.0",
-    "socket.io": ">=4.0.0"
+    "socket.io": ">=4.0.0",
+    "socket.io-client": ">=4.0.0"
   },
   "dependencies": {
     "@nestjs/swagger": "catalog:",
@@ -84,6 +85,7 @@
     "rxjs": "catalog:",
     "simple-git-hooks": "catalog:cli",
     "socket.io": "catalog:",
+    "socket.io-client": "catalog:",
     "tinyexec": "catalog:testing",
     "tsdown": "catalog:cli",
     "tsx": "catalog:cli",
