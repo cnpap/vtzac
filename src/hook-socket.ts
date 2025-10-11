@@ -1,5 +1,5 @@
 import type { ManagerOptions, SocketOptions } from 'socket.io-client'
-import type { Constructor, ExtractInstance, SocketWrappedInstance } from './types'
+import type { Constructor, ExcludeLifecycleMethods, SocketWrappedInstance } from './types'
 import { io, Socket } from 'socket.io-client'
 
 // ZAC Socket 配置选项类型
@@ -10,9 +10,19 @@ export interface ZacSocketOptions {
 // Socket 发送器接口（方法直调）：返回与控制器方法同名的调用器
 export type ZacSocketEmitter<T> = SocketWrappedInstance<T>
 
+// Socket 监听器接口：将事件发送器的方法转换为监听器
+export type ZacSocketListener<T> = {
+  [K in keyof ExcludeLifecycleMethods<T>]: ExcludeLifecycleMethods<T>[K] extends (
+    ...args: any[]
+  ) => infer R
+    ? (callback: (data: R) => void) => void
+    : never
+}
+
 // Socket 初始化返回接口
 export interface ZacSocketInstance {
-  createEmitter: <T>(controller: Constructor<T> | T) => ZacSocketEmitter<ExtractInstance<T>>
+  createEmitter: <T>(controller: Constructor<T>) => ZacSocketEmitter<T>
+  createListener: <T>(eventEmitter: Constructor<T>) => ZacSocketListener<T>
   socket: Socket
   disconnect: () => void
 }
@@ -36,18 +46,9 @@ export function _socket(uri: string, options?: ZacSocketOptions): ZacSocketInsta
       socket?.disconnect()
       socketInstances.delete(cacheKey)
     },
-    createEmitter: <T>(controller: Constructor<T> | T): ZacSocketEmitter<ExtractInstance<T>> => {
-      let instance: ExtractInstance<T> = undefined as ExtractInstance<T>
-      // 判断传入的是构造函数还是实例
-      if (typeof controller === 'function') {
-        instance = new (controller as Constructor<T>)(socket) as ExtractInstance<T>
-      }
-      else {
-        (controller as any).__socket__(socket)
-        instance = controller as ExtractInstance<T>
-      }
-      // Socket 方法不需要 options 参数，直接返回原始实例
-      return instance as ZacSocketEmitter<ExtractInstance<T>>
-    },
+    createEmitter: <T>(controller: Constructor<T>): ZacSocketEmitter<T> =>
+      new (controller as Constructor<T>)(socket) as ZacSocketEmitter<T>,
+    createListener: <T>(eventEmitter: Constructor<T>): ZacSocketListener<T> =>
+      new (eventEmitter as Constructor<T>)(socket) as ZacSocketListener<T>,
   }
 }

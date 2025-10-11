@@ -57,42 +57,6 @@ export interface Message {
 // 聊天目标类型
 export type ChatTarget = 'public' | User;
 
-// WebSocket事件数据类型
-export interface WebSocketEventData {
-  connected?: {
-    message: string;
-    timestamp: string;
-    clientId: string;
-  };
-  joinedChat?: {
-    user: User;
-    timestamp: string;
-  };
-  onlineUsers?: {
-    users: User[];
-    count: number;
-  };
-  userJoined?: {
-    user: User;
-    timestamp: string;
-  };
-  userLeft?: {
-    user: User;
-    timestamp: string;
-  };
-  pong?: {
-    message: string;
-    timestamp: string;
-  };
-  onlineCount?: {
-    count: number;
-    timestamp: string;
-  };
-  error?: {
-    message: string;
-  };
-}
-
 // 消息标签配置
 export interface MessageTagConfig {
   color: string;

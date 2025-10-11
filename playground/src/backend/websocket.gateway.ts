@@ -46,7 +46,7 @@ export class WebSocketTestGateway
     client.join('public');
 
     emitWith(
-      this.eventEmitter.connected,
+      this.eventEmitter.onConnected,
       this.eventEmitter
     )(client.id).toClient(client);
   }

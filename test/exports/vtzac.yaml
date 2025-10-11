@@ -3,6 +3,7 @@
   vtzac: function
 ./hook:
   _http: function
+  _socket: function
   setGlobalZacOfetchOptions: function
 ./fetch:
   default: function

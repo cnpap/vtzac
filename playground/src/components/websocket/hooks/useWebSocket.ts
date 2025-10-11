@@ -1,13 +1,11 @@
 import { useState, useRef, useCallback } from 'react';
 import { notification } from 'antd';
-import { io, Socket } from 'socket.io-client';
-import type {
-  User,
-  Message,
-  ChatMessageType,
-  WebSocketEventData,
-} from '../types';
+import { Socket } from 'socket.io-client';
+import type { User, Message } from '../types';
 import type { LoadingState } from '../../../types';
+import { _socket } from '../../../../../dist/hook';
+import { WebSocketTestGateway } from '../../../backend/websocket.gateway';
+import { WebSocketEventEmitter } from '../../../backend/websocket.emitter';
 
 interface UseWebSocketProps {
   loading: LoadingState;
@@ -32,6 +30,10 @@ export const useWebSocket = ({
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const emitterRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const listenerRef = useRef<any>(null);
 
   // 连接 WebSocket
   const connectWebSocket = useCallback(() => {
@@ -42,9 +44,21 @@ export const useWebSocket = ({
     setLoading((prev: LoadingState) => ({ ...prev, connect: true }));
 
     try {
-      const newSocket = io('http://localhost:3001', {
-        transports: ['websocket'],
-      });
+      const { createEmitter, createListener, socket } = _socket(
+        'http://localhost:3001',
+        {
+          socketIoOptions: {
+            transports: ['websocket'],
+          },
+        }
+      );
+
+      const newSocket = socket;
+      const emitter = createEmitter(WebSocketTestGateway);
+      const listener = createListener(WebSocketEventEmitter);
+
+      emitterRef.current = emitter;
+      listenerRef.current = listener;
 
       // 连接成功
       newSocket.on('connect', () => {
@@ -61,7 +75,7 @@ export const useWebSocket = ({
       });
 
       // 服务器确认连接
-      newSocket.on('connected', (data: WebSocketEventData['connected']) => {
+      listener.onConnected(data => {
         onMessage({
           id: Date.now().toString(),
           type: 'connected',
@@ -70,7 +84,7 @@ export const useWebSocket = ({
       });
 
       // 加入聊天成功
-      newSocket.on('joinedChat', (data: WebSocketEventData['joinedChat']) => {
+      listener.joinedChat(data => {
         if (data) {
           onJoinedChat(data.user);
           onMessage({
@@ -83,7 +97,7 @@ export const useWebSocket = ({
       });
 
       // 公共频道消息
-      newSocket.on('publicMessage', (data: ChatMessageType) => {
+      listener.publicMessage(data => {
         onMessage({
           id: data.id,
           type: 'public',
@@ -96,7 +110,7 @@ export const useWebSocket = ({
       });
 
       // 私聊消息（接收）
-      newSocket.on('privateMessage', (data: ChatMessageType) => {
+      listener.privateMessage(data => {
         onPrivateMessage(data.fromUserId, {
           id: data.id,
           type: 'private',
@@ -117,7 +131,7 @@ export const useWebSocket = ({
       });
 
       // 私聊消息（发送确认）
-      newSocket.on('privateMessageSent', (data: ChatMessageType) => {
+      listener.privateMessageSent(data => {
         onPrivateMessage(data.toUserId!, {
           id: data.id,
           type: 'private',
@@ -132,14 +146,14 @@ export const useWebSocket = ({
       });
 
       // 在线用户列表更新
-      newSocket.on('onlineUsers', (data: WebSocketEventData['onlineUsers']) => {
+      listener.onlineUsers(data => {
         if (data) {
           onUserUpdate(data);
         }
       });
 
       // 用户加入
-      newSocket.on('userJoined', (data: WebSocketEventData['userJoined']) => {
+      listener.userJoined(data => {
         if (data) {
           onUserJoined(data);
           onMessage({
@@ -153,7 +167,7 @@ export const useWebSocket = ({
       });
 
       // 用户离开
-      newSocket.on('userLeft', (data: WebSocketEventData['userLeft']) => {
+      listener.userLeft(data => {
         if (data) {
           onUserLeft(data);
           onMessage({
@@ -167,7 +181,7 @@ export const useWebSocket = ({
       });
 
       // 心跳响应
-      newSocket.on('pong', (data: WebSocketEventData['pong']) => {
+      listener.pong(data => {
         onMessage({
           id: Date.now().toString(),
           type: 'pong',
@@ -176,7 +190,7 @@ export const useWebSocket = ({
       });
 
       // 在线人数
-      newSocket.on('onlineCount', (data: WebSocketEventData['onlineCount']) => {
+      listener.onlineCount(data => {
         onMessage({
           id: Date.now().toString(),
           type: 'onlineCount',
@@ -185,7 +199,7 @@ export const useWebSocket = ({
       });
 
       // 错误处理
-      newSocket.on('error', (data: WebSocketEventData['error']) => {
+      listener.error(data => {
         onMessage({
           id: Date.now().toString(),
           type: 'error',
@@ -248,34 +262,34 @@ export const useWebSocket = ({
 
   // 发送心跳
   const sendPing = useCallback(() => {
-    if (!socket) {
+    if (!socket || !emitterRef.current) {
       return;
     }
 
     setLoading((prev: LoadingState) => ({ ...prev, ping: true }));
-    socket.emit('ping');
+    emitterRef.current.handlePing();
     setLoading((prev: LoadingState) => ({ ...prev, ping: false }));
   }, [socket, setLoading]);
 
   // 获取在线人数
   const getOnlineCount = useCallback(() => {
-    if (!socket) {
+    if (!socket || !emitterRef.current) {
       return;
     }
 
     setLoading((prev: LoadingState) => ({ ...prev, count: true }));
-    socket.emit('getOnlineCount');
+    emitterRef.current.handleGetOnlineCount();
     setLoading((prev: LoadingState) => ({ ...prev, count: false }));
   }, [socket, setLoading]);
 
   // 加入聊天
   const joinChat = useCallback(
     (nickname: string) => {
-      if (!socket || !nickname.trim()) {
+      if (!socket || !nickname.trim() || !emitterRef.current) {
         return;
       }
 
-      socket.emit('joinChat', { nickname: nickname.trim() });
+      emitterRef.current.handleJoinChat({ nickname: nickname.trim() });
     },
     [socket]
   );
@@ -283,12 +297,12 @@ export const useWebSocket = ({
   // 发送公共消息
   const sendPublicMessage = useCallback(
     (text: string) => {
-      if (!socket || !text.trim()) {
+      if (!socket || !text.trim() || !emitterRef.current) {
         return;
       }
 
       setLoading((prev: LoadingState) => ({ ...prev, send: true }));
-      socket.emit('publicMessage', { text });
+      emitterRef.current.handlePublicMessage({ text });
       setLoading((prev: LoadingState) => ({ ...prev, send: false }));
     },
     [socket, setLoading]
@@ -297,12 +311,12 @@ export const useWebSocket = ({
   // 发送私聊消息
   const sendPrivateMessage = useCallback(
     (text: string, toUserId: string) => {
-      if (!socket || !text.trim() || !toUserId) {
+      if (!socket || !text.trim() || !toUserId || !emitterRef.current) {
         return;
       }
 
       setLoading((prev: LoadingState) => ({ ...prev, send: true }));
-      socket.emit('privateMessage', { text, toUserId });
+      emitterRef.current.handlePrivateMessage({ text, toUserId });
       setLoading((prev: LoadingState) => ({ ...prev, send: false }));
     },
     [socket, setLoading]

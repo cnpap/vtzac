@@ -55,6 +55,7 @@ export interface SocketEventInfo {
   name: string
   eventName: string
   parameters: MethodParameter[]
+  returnType: string
   decorators: {
     name: string
     arguments: DecoratorArgument[]
@@ -109,11 +110,24 @@ export interface FileParameterInfo {
 }
 
 /**
+ * 事件发射器信息
+ */
+export interface EventEmitterInfo {
+  name: string
+  events: SocketEventInfo[]
+  decorators: {
+    name: string
+    arguments: DecoratorArgument[]
+  }[]
+}
+
+/**
  * 分析结果
  */
 export interface AnalysisResult {
   controllers: ControllerInfo[]
   gateways: GatewayInfo[]
+  eventEmitters: EventEmitterInfo[]
 }
 
 /**
@@ -373,10 +387,17 @@ function analyzeGateway(classNode: ts.ClassDeclaration): GatewayInfo | null {
       if (subscribeDecorator) {
         const eventName = subscribeDecorator.arguments[0]?.value || methodName
 
+        // 提取返回值类型
+        let returnType = 'void'
+        if (member.type) {
+          returnType = member.type.getText()
+        }
+
         events.push({
           name: methodName,
           eventName,
           parameters,
+          returnType,
           decorators: methodDecorators,
         })
       }
@@ -386,6 +407,59 @@ function analyzeGateway(classNode: ts.ClassDeclaration): GatewayInfo | null {
   return {
     name: className,
     namespace,
+    events,
+    decorators: classDecorators,
+  }
+}
+
+/**
+ * 分析事件发射器类
+ */
+function analyzeEventEmitter(classNode: ts.ClassDeclaration): EventEmitterInfo | null {
+  if (!classNode.name)
+    return null
+
+  const className = classNode.name.text
+  const classDecorators = getDecorators(classNode)
+
+  const events: SocketEventInfo[] = []
+
+  // 分析类中的方法
+  classNode.members.forEach((member) => {
+    if (ts.isMethodDeclaration(member) && member.name && ts.isIdentifier(member.name)) {
+      const methodName = member.name.text
+      const methodDecorators = getDecorators(member)
+      const parameters = analyzeMethodParameters(member)
+
+      // 查找 @Emit 装饰器
+      const emitDecorator = methodDecorators.find(d => d.name === 'Emit')
+      if (emitDecorator) {
+        const eventName = emitDecorator.arguments[0]?.value || methodName
+
+        // 提取返回值类型
+        let returnType = 'void'
+        if (member.type) {
+          returnType = member.type.getText()
+        }
+
+        events.push({
+          name: methodName,
+          eventName,
+          parameters,
+          returnType,
+          decorators: methodDecorators,
+        })
+      }
+    }
+  })
+
+  // 只有包含 @Emit 装饰器的方法时才返回事件发射器信息
+  if (events.length === 0) {
+    return null
+  }
+
+  return {
+    name: className,
     events,
     decorators: classDecorators,
   }
@@ -403,6 +477,7 @@ export function analyzeNestJSController(filePath: string): AnalysisResult {
 
   const controllers: ControllerInfo[] = []
   const gateways: GatewayInfo[] = []
+  const eventEmitters: EventEmitterInfo[] = []
 
   // 遍历 AST 节点
   function visit(node: ts.Node): void {
@@ -416,6 +491,11 @@ export function analyzeNestJSController(filePath: string): AnalysisResult {
       if (gatewayInfo) {
         gateways.push(gatewayInfo)
       }
+
+      const eventEmitterInfo = analyzeEventEmitter(node)
+      if (eventEmitterInfo) {
+        eventEmitters.push(eventEmitterInfo)
+      }
     }
 
     ts.forEachChild(node, visit)
@@ -423,7 +503,7 @@ export function analyzeNestJSController(filePath: string): AnalysisResult {
 
   visit(sourceFile)
 
-  return { controllers, gateways }
+  return { controllers, gateways, eventEmitters }
 }
 
 /**
@@ -438,6 +518,7 @@ export function analyzeNestJSControllerFromCode(code: string, fileName: string =
 
   const controllers: ControllerInfo[] = []
   const gateways: GatewayInfo[] = []
+  const eventEmitters: EventEmitterInfo[] = []
 
   // 遍历 AST 节点
   function visit(node: ts.Node): void {
@@ -451,6 +532,11 @@ export function analyzeNestJSControllerFromCode(code: string, fileName: string =
       if (gatewayInfo) {
         gateways.push(gatewayInfo)
       }
+
+      const eventEmitterInfo = analyzeEventEmitter(node)
+      if (eventEmitterInfo) {
+        eventEmitters.push(eventEmitterInfo)
+      }
     }
 
     ts.forEachChild(node, visit)
@@ -458,7 +544,7 @@ export function analyzeNestJSControllerFromCode(code: string, fileName: string =
 
   visit(sourceFile)
 
-  return { controllers, gateways }
+  return { controllers, gateways, eventEmitters }
 }
 
 /**

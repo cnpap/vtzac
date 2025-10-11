@@ -6,8 +6,7 @@ setGlobalZacOfetchOptions({
   timeout: 5000,
 })
 
-// 两种方式都支持
-// const api = _http(new TestInputController(), {
+// 只支持传递类构造函数
 const api = _http(TestInputController, {
   ofetchOptions: {
     baseURL: 'https://api.example.com',

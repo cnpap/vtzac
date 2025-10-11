@@ -1,14 +1,14 @@
 import type { FetchOptions } from 'ofetch'
-import type { Constructor, ExtractInstance, OfetchWrappedInstance } from './types'
+import type { Constructor, OfetchWrappedInstance } from './types'
 
 // ZAC 配置选项类型，与 ofetch.create 参数保持一致
 export interface ZacHttpOptions {
   ofetchOptions?: FetchOptions<any>
 }
 
-// 主函数：统一处理构造函数和实例，返回原始实例（直接方法调用）
-export function _http<T>(input: Constructor<T> | T, _options?: ZacHttpOptions): OfetchWrappedInstance<ExtractInstance<T>> {
-  const instance = (typeof input === 'function' ? new (input as Constructor<T>)() : input) as ExtractInstance<T>
+// 主函数：只接受构造函数，返回包装后的实例（直接方法调用）
+export function _http<T>(input: Constructor<T>, _options?: ZacHttpOptions): OfetchWrappedInstance<T> {
+  const instance = new (input as Constructor<T>)() as T
   const options = _options ?? {}
 
   // 使用 Proxy 进行按需注入：不改写实例，只在调用时把 options 作为首参插入

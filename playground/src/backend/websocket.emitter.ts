@@ -25,7 +25,7 @@ export interface ChatMessage {
 // 事件发射器类，使用 @Emit 装饰器定义所有事件
 export class WebSocketEventEmitter {
   @Emit('connected')
-  connected(clientId: string): {
+  onConnected(clientId: string): {
     message: string;
     clientId: string;
     timestamp: string;

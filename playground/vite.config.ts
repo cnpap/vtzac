@@ -6,12 +6,5 @@ import Inspect from 'vite-plugin-inspect';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vtzac({
-      glob: ['src/backend/**/*.controller.ts'],
-    }),
-    Inspect(),
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [vtzac(), Inspect(), react(), tailwindcss()],
 });

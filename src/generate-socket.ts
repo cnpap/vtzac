@@ -1,4 +1,4 @@
-import type { AnalysisResult, GatewayInfo, MethodParameter, SocketEventInfo } from './ast'
+import type { AnalysisResult, EventEmitterInfo, GatewayInfo, SocketEventInfo } from './ast'
 
 /**
  * 生成 Socket.IO JavaScript 类代码
@@ -10,13 +10,10 @@ export function generateSocketJavaScriptClass(analysisResult: AnalysisResult): s
     return ''
   }
 
-  // 生成导入语句
-  const importStatement = 'import _socket from \'vtzac/socket\';'
-
   // 生成所有 Gateway 的代码
   const classesCode = gateways.map(gateway => generateGatewayClass(gateway)).join('\n\n')
 
-  return `${importStatement}\n\n${classesCode}`
+  return classesCode
 }
 
 /**
@@ -27,6 +24,10 @@ function generateGatewayClass(gateway: GatewayInfo): string {
   const methods = gateway.events.map(event => generateEventMethod(event, gateway)).join('\n\n')
 
   return `export class ${className} {
+  constructor(socket) {
+    this.socket = socket;
+  }
+
 ${methods}
 }`
 }
@@ -34,65 +35,59 @@ ${methods}
 /**
  * 生成事件方法代码
  */
-function generateEventMethod(event: SocketEventInfo, gateway: GatewayInfo): string {
+function generateEventMethod(event: SocketEventInfo, _gateway: GatewayInfo): string {
   const methodName = event.name // 使用原始方法名作为函数名
-  const socketCall = generateSocketCall(event, gateway)
+  const eventName = event.eventName
 
-  return `  ${methodName}(options, ...args) {
-    const input = ${socketCall};
-    input.socketIoOptions = options.socketIoOptions
-    return _socket(input, args);
+  // 判断是否有返回值，如果返回值不是 void，则使用 emitWithAck
+  const hasReturnValue = event.returnType && event.returnType !== 'void'
+  const emitMethod = hasReturnValue ? 'emitWithAck' : 'emit'
+
+  return `  ${methodName}(...args) {
+    return this.socket.${emitMethod}('${eventName}', ...args);
   }`
 }
 
 /**
- * 生成 Socket.IO 函数调用参数
+ * 生成 Socket.IO Listener JavaScript 类代码
  */
-function generateSocketCall(event: SocketEventInfo, gateway: GatewayInfo): string {
-  const eventName = event.eventName
-  const namespace = gateway.namespace || ''
+export function generateListenerJavaScriptClass(analysisResult: AnalysisResult): string {
+  const eventEmitters = analysisResult.eventEmitters
 
-  const parameterMappings = event.parameters.map(param => generateParameterMapping(param)).filter(Boolean)
-
-  const config: any = {
-    eventName,
-    namespace,
-    parameters: parameterMappings,
+  if (eventEmitters.length === 0) {
+    return ''
   }
 
-  return JSON.stringify(config, null, 2).replace(/"/g, '\'')
+  // 生成所有 EventEmitter 的代码
+  const classesCode = eventEmitters.map(emitter => generateListenerClass(emitter)).join('\n\n')
+
+  return classesCode
 }
 
 /**
- * 生成参数映射信息
+ * 生成单个 Listener 类的代码
  */
-function generateParameterMapping(parameter: MethodParameter): any {
-  const paramName = parameter.name
-  const decorators = parameter.decorators
+function generateListenerClass(emitter: EventEmitterInfo): string {
+  const className = emitter.name
+  const methods = emitter.events.map(event => generateListenerMethod(event, emitter)).join('\n\n')
 
-  if (decorators.length === 0) {
-    return {
-      name: paramName,
-      decorator: 'MessageBody',
-    }
+  return `export class ${className} {
+  constructor(socket) {
+    this.socket = socket;
   }
 
-  const decorator = decorators[0] // 取第一个装饰器
-  const decoratorName = decorator.name
-  const decoratorArgs = decorator.arguments
+${methods}
+}`
+}
 
-  const mapping: any = {
-    name: paramName,
-    decorator: decoratorName,
-  }
+/**
+ * 生成监听器方法代码
+ */
+function generateListenerMethod(event: SocketEventInfo, _emitter: EventEmitterInfo): string {
+  const methodName = event.name // 使用原始方法名作为函数名
+  const eventName = event.eventName
 
-  // 处理装饰器参数
-  if (decoratorArgs.length > 0) {
-    const firstArg = decoratorArgs[0]
-    if (firstArg.type === 'string') {
-      mapping.key = firstArg.value
-    }
-  }
-
-  return mapping
+  return `  ${methodName}(callback) {
+    this.socket.on('${eventName}', callback);
+  }`
 }

@@ -1,8 +1,9 @@
+import { WebSocketEventEmitter } from '../playground/src/backend/websocket.emitter'
 import { WebSocketTestGateway } from '../playground/src/backend/websocket.gateway'
 import { _socket } from './hook-socket'
 
 // 初始化 socket 连接，类似于原始的 io('http://localhost:3001', { transports: ['websocket'] })
-const { createEmitter, socket, disconnect } = _socket('http://localhost:3001', {
+const { createEmitter, createListener, socket, disconnect } = _socket('http://localhost:3001', {
   socketIoOptions: {
     transports: ['websocket'],
   },
@@ -25,52 +26,57 @@ async function demo(): Promise<void> {
   _emit1.handlePublicMessage({ text: 'Hello everyone!' })
   _emit1.handlePrivateMessage({ text: '123', toUserId: 'user123' })
   _emit1.handlePing()
-  // 有返回值的会默认从 emit 调用改为 emitWithAsk 调用，等待服务器响应
+  // 有返回值的会默认从 emit 调用改为 emitWithAck 调用，等待服务器响应
   const counter = await _emit1.handleGetOnlineCount()
   console.warn('当前在线人数:', counter)
   _emit1.handleStartTyping({ toUserId: 'user123' })
   _emit1.handleStopTyping({ toUserId: 'user123' })
 
-  // 删除方式2（_emit.emit('handleMethodName', ...args)）
+  /**
+   * createListener 方法：设计方案实现
+   *
+   * 监听服务端的发送类，使用 createListener 创建类型安全的监听器
+   */
+  const _listener = createListener(WebSocketEventEmitter)
 
-  // 监听服务器响应（这部分暂时使用原始 socket.on）
-  socket.on('connected', (data) => {
+  // 使用类型安全的监听器，这个获得的 data 就是对应方法的返回值类型
+  _listener.onConnected((data) => {
     console.warn('服务器确认连接:', data)
   })
 
-  socket.on('joinedChat', (data) => {
+  _listener.joinedChat((data) => {
     console.warn('加入聊天成功:', data)
   })
 
-  socket.on('publicMessage', (data) => {
+  _listener.publicMessage((data) => {
     console.warn('收到公共消息:', data)
   })
 
-  socket.on('privateMessage', (data) => {
+  _listener.privateMessage((data) => {
     console.warn('收到私聊消息:', data)
   })
 
-  socket.on('onlineUsers', (data) => {
+  _listener.onlineUsers((data) => {
     console.warn('在线用户列表:', data)
   })
 
-  socket.on('userJoined', (data) => {
+  _listener.userJoined((data) => {
     console.warn('用户加入:', data)
   })
 
-  socket.on('userLeft', (data) => {
+  _listener.userLeft((data) => {
     console.warn('用户离开:', data)
   })
 
-  socket.on('pong', (data) => {
+  _listener.pong((data) => {
     console.warn('心跳响应:', data)
   })
 
-  socket.on('onlineCount', (data) => {
+  _listener.onlineCount((data) => {
     console.warn('在线人数:', data)
   })
 
-  socket.on('error', (data) => {
+  _listener.error((data) => {
     console.error('Socket 错误:', data)
   })
 
@@ -85,10 +91,11 @@ async function demo(): Promise<void> {
 demo().catch(console.error)
 
 // 使用说明：
-// 1. 初始化：const { createEmitter, socket, disconnect } = _socket(url, options)
+// 1. 初始化：const { createEmitter, createListener, socket, disconnect } = _socket(url, options)
 // 2. 创建发送器：const _emit = createEmitter(ControllerClass)
-// 3. 发送消息：直接方法名 _emit.handleMethodName(params)
-// 4. 监听响应：socket.on('eventName', callback)
-// 5. 断开连接：disconnect()
+// 3. 创建监听器：const _listener = createListener(EventEmitterClass)
+// 4. 发送消息：直接方法名 _emit.handleMethodName(params)
+// 5. 监听响应：_listener.eventMethodName(callback) - 类型安全的事件监听
+// 6. 断开连接：disconnect()
 
 export { demo }
