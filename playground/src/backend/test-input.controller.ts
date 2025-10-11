@@ -61,7 +61,7 @@ export class TestInputController {
   testNamedQuery(
     @Query('page') _page?: string,
     @Query('limit') _limit?: string
-  ): any {
+  ): { success: boolean; type: string } {
     return { success: true, type: 'named-query' };
   }
 
@@ -73,7 +73,7 @@ export class TestInputController {
     description: '成功返回',
     schema: { example: { success: true, type: 'query-object' } },
   })
-  testQueryObject(@Query() _query: any): any {
+  testQueryObject(@Query() _query: any): { success: boolean; type: string } {
     return { success: true, type: 'query-object' };
   }
 
@@ -95,7 +95,7 @@ export class TestInputController {
   testNamedParam(
     @Param('userId') _userId: string,
     @Param('postId') _postId: string
-  ): any {
+  ): { success: boolean; type: string } {
     return { success: true, type: 'named-param' };
   }
 
@@ -110,7 +110,7 @@ export class TestInputController {
     description: '成功返回',
     schema: { example: { success: true, type: 'param-object' } },
   })
-  testParamObject(@Param() _params: any): any {
+  testParamObject(@Param() _params: any): { success: boolean; type: string } {
     return { success: true, type: 'param-object' };
   }
 
@@ -130,7 +130,7 @@ export class TestInputController {
   testMixedParam(
     @Param('userId') _userId: string,
     @Param() _allParams: any
-  ): any {
+  ): { success: boolean; type: string } {
     return { success: true, type: 'mixed-param' };
   }
 
@@ -153,7 +153,7 @@ export class TestInputController {
   testHeaders(
     @Headers('authorization') _auth?: string,
     @Headers() _headers?: any
-  ): any {
+  ): { success: boolean; type: string } {
     return { success: true, type: 'headers' };
   }
 
@@ -234,7 +234,7 @@ export class TestInputController {
   testMultipleFileUpload(
     @UploadedFiles() _files: Express.Multer.File[],
     @Body() _metadata?: any
-  ): any {
+  ): { success: true; type: 'multiple-file-upload' } {
     return { success: true, type: 'multiple-file-upload' };
   }
 
@@ -292,7 +292,7 @@ export class TestInputController {
       images?: Express.Multer.File[];
     },
     @Body() _metadata?: any
-  ): any {
+  ): { success: true; type: 'named-multiple-file-upload' } {
     return { success: true, type: 'named-multiple-file-upload' };
   }
 

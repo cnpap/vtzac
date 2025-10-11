@@ -28,7 +28,7 @@ const testController = _http(TestController, {
 
 async function handleHello() {
   const res = await testController
-    .call('getHello')
+    .getHello()
     .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // { message: 'Hello World!' }

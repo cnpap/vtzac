@@ -64,14 +64,7 @@ setGlobalZacOfetchOptions({
 You can override configuration at runtime using the `setOptions` method:
 
 ```typescript
-const result = await api
-  .setOptions({
-    ofetchOptions: {
-      baseURL: 'https://api-staging.example.com',
-      timeout: 10000,
-    },
-  })
-  .call('getUser', userId)
+const result = await api.getUser(userId)
 ```
 
 ## Configuration Priority
@@ -80,9 +73,8 @@ Configuration options are merged in the following order (later options override 
 
 1. **Global configuration** - Options set via `setGlobalZacOfetchOptions()` (base layer)
 2. **Instance configuration** - Options passed to `_http()` function (overrides global)
-3. **Runtime configuration** - Options passed to `setOptions()` (highest priority)
 
-The merging follows JavaScript object spread syntax: `{ ...globalOptions, ...instanceOptions, ...runtimeOptions }`
+The merging follows JavaScript object spread syntax: `{ ...globalOptions, ...instanceOptions }`
 
 ## Interceptors
 

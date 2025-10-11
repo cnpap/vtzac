@@ -105,7 +105,7 @@ const testController = _http(TestController, {
 async function handleGetUser() {
   // Only pass required parameters, Headers handled by middleware
   const res = await testController
-    .call('getUser', '123', 'profile')
+    .getUser('123', 'profile')
     .catch(error => console.error('Request failed:', error))
 
   console.log(res._data)
@@ -114,7 +114,7 @@ async function handleGetUser() {
 async function handleCreateItem() {
   // Response object doesn't need to be passed from frontend
   const res = await testController
-    .call('createItem', { name: 'New project' })
+    .createItem({ name: 'New project' })
     .catch(error => console.error('Request failed:', error))
 
   console.log(res._data) // Type-safe return data

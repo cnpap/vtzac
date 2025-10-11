@@ -78,8 +78,7 @@ function UploadComponent() {
 
     // Type-safe call
     // Actual request: POST /api/user/123/upload?version=v2
-    const result = await api.call(
-      'uploadAvatar',
+    const result = await api.uploadAvatar(
       '123', // @Param('id')
       'v2', // @Query('version')
       file as unknown as Express.Multer.File, // @UploadedFile()

@@ -39,8 +39,7 @@ const uploadController = _http(UploadController, {
 
 async function handleSingleUpload(file: File) {
   const res = await uploadController
-    .call(
-      'uploadSingle',
+    .uploadSingle(
       file as unknown as Express.Multer.File, // 文件对象
       { description: '测试文件' } // 元数据
     )
@@ -84,8 +83,7 @@ export class UploadController {
 ```tsx
 async function handleMultipleUpload(files: File[]) {
   const res = await uploadController
-    .call(
-      'uploadMultiple',
+    .uploadMultiple(
       files as unknown as Express.Multer.File[], // 文件数组
       { description: '批量上传' } // 元数据
     )
@@ -143,8 +141,7 @@ export class UploadController {
 ```tsx
 async function handleNamedUpload(documents: File[], images: File[]) {
   const res = await uploadController
-    .call(
-      'uploadNamedMultiple',
+    .uploadNamedMultiple(
       {
         documents: documents as unknown as Express.Multer.File[],
         images: images as unknown as Express.Multer.File[],

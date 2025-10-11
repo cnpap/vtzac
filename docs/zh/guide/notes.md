@@ -105,7 +105,7 @@ const testController = _http(TestController, {
 async function handleGetUser() {
   // 只传递必需参数，Headers 通过中间件处理
   const res = await testController
-    .call('getUser', '123', 'profile')
+    .getUser('123', 'profile')
     .catch(error => console.error('请求失败:', error))
 
   console.log(res._data)
@@ -114,7 +114,7 @@ async function handleGetUser() {
 async function handleCreateItem() {
   // Response 对象不需要在前端传递
   const res = await testController
-    .call('createItem', { name: '新项目' })
+    .createItem({ name: '新项目' })
     .catch(error => console.error('请求失败:', error))
 
   console.log(res._data) // 类型安全的返回数据

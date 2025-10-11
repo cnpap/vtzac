@@ -59,30 +59,14 @@ setGlobalZacOfetchOptions({
 })
 ```
 
-### 运行时配置
-
-您可以使用 `setOptions` 方法在运行时覆盖配置：
-
-```typescript
-const result = await api
-  .setOptions({
-    ofetchOptions: {
-      baseURL: 'https://api-staging.example.com',
-      timeout: 10000,
-    },
-  })
-  .call('getUser', userId)
-```
-
 ## 配置优先级
 
 配置选项按以下顺序合并（后面的选项会覆盖前面的选项）：
 
 1. **全局配置** - 通过 `setGlobalZacOfetchOptions()` 设置的选项（基础层）
 2. **实例配置** - 传递给 `_http()` 函数的选项（覆盖全局配置）
-3. **运行时配置** - 传递给 `setOptions()` 的选项（最高优先级）
 
-合并遵循 JavaScript 对象展开语法：`{ ...globalOptions, ...instanceOptions, ...runtimeOptions }`
+合并遵循 JavaScript 对象展开语法：`{ ...globalOptions, ...instanceOptions }`
 
 ## 拦截器
 
