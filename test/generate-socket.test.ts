@@ -6,7 +6,7 @@ import { generateSocketJavaScriptClass } from '../src/generate-socket'
 
 describe('socket.IO Code Generation', () => {
   it('should generate JavaScript class from WebSocket Gateway', () => {
-    const testGatewayPath = path.resolve(__dirname, '../playground/src/backend/websocket.gateway.ts')
+    const testGatewayPath = path.resolve(__dirname, '../examples/nestjs-example/src/websocket.gateway.ts')
 
     // 分析 Gateway
     const analysisResult = analyzeNestJSController(testGatewayPath)

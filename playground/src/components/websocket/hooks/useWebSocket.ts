@@ -4,8 +4,8 @@ import { Socket } from 'socket.io-client';
 import type { User, Message } from '../types';
 import type { LoadingState } from '../../../types';
 import { _socket } from 'vtzac/hook';
-import { WebSocketTestGateway } from '../../../backend/websocket.gateway';
-import { WebSocketEventEmitter } from '../../../backend/websocket.emitter';
+import { WebSocketTestGateway } from 'nestjs-example/src/websocket.gateway';
+import { WebSocketEventEmitter } from 'nestjs-example/src/websocket.emitter';
 
 interface UseWebSocketProps {
   loading: LoadingState;

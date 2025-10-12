@@ -3,7 +3,7 @@ import { Button, Space, Typography, Alert, Card, Upload, Row, Col } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import { _http } from 'vtzac/hook';
-import { TestInputController } from '../backend/test-input.controller';
+import { TestInputController } from 'nestjs-example/src/test-input.controller';
 import type { TestComponentProps } from '../types';
 
 const { Title, Text, Paragraph } = Typography;

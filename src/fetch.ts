@@ -9,7 +9,7 @@ export interface HttpConfig {
   path: string
   parameters: ParameterMapping[]
   fileUpload?: FileUploadConfig
-  ofetchOptions?: FetchOptions<any>
+  ofetchOptions?: FetchOptions<'json'>
 }
 
 /**
@@ -40,9 +40,9 @@ export interface FileUploadConfig {
 }
 
 // 默认基础 URL，可以通过环境变量或配置覆盖
-let globalZacOfetchOptions: FetchOptions<any> = {}
+let globalZacOfetchOptions: FetchOptions<'json'> = {}
 
-export function setGlobalZacOfetchOptions(options: FetchOptions<any>): void {
+export function setGlobalZacOfetchOptions(options: FetchOptions<'json'>): void {
   globalZacOfetchOptions = options
 }
 
@@ -51,9 +51,9 @@ export function setGlobalZacOfetchOptions(options: FetchOptions<any>): void {
  *
  * @param config HTTP 配置对象
  * @param args 传入的参数数组
- * @returns Promise<any> ofetch 的原生返回
+ * @returns Promise<FetchResponse<T>> ofetch 的原生返回
  */
-export default async function _api<T>(config: HttpConfig, args: any[]): Promise<FetchResponse<T>> {
+export default async function _api<T>(config: HttpConfig, args: unknown[]): Promise<FetchResponse<T>> {
   const { method, path, parameters, fileUpload } = config
 
   // 构建请求 URL
@@ -63,7 +63,7 @@ export default async function _api<T>(config: HttpConfig, args: any[]): Promise<
   const { queryParams, headers, body, formData } = processParameters(parameters, args, fileUpload)
 
   // 构建查询参数对象
-  const query: Record<string, any> = {}
+  const query: Record<string, unknown> = {}
   queryParams.forEach((value, key) => {
     query[key] = value
   })
@@ -83,13 +83,13 @@ export default async function _api<T>(config: HttpConfig, args: any[]): Promise<
 
   // 不直接返回 ofetch 的结果，而是使用 raw，这样返回值就不是直接的值了，而是 raw<T = any, R extends ResponseType = "json">(request: FetchRequest, options?: FetchOptions<R>): Promise<FetchResponse<MappedResponseType<R, T>>>;
   // return await ofetch(url, options)
-  return ofetch.raw(url, ofetchOptions)
+  return ofetch.raw<T>(url, ofetchOptions)
 }
 
 /**
  * 构建 URL，处理路径参数
  */
-function buildUrl(path: string, parameters: ParameterMapping[], args: any[]): string {
+function buildUrl(path: string, parameters: ParameterMapping[], args: unknown[]): string {
   let url = path
 
   // 处理路径参数
@@ -100,7 +100,7 @@ function buildUrl(path: string, parameters: ParameterMapping[], args: any[]): st
     }
     else if (param.decorator === 'Param' && !param.key && args[index] !== undefined) {
       // 处理参数对象的情况
-      const paramObj = args[index]
+      const paramObj = args[index] as Record<string, unknown>
       if (typeof paramObj === 'object' && paramObj !== null) {
         Object.entries(paramObj).forEach(([key, value]) => {
           const placeholder = `:${key}`
@@ -120,12 +120,12 @@ function buildUrl(path: string, parameters: ParameterMapping[], args: any[]): st
  */
 function processParameters(
   parameters: ParameterMapping[],
-  args: any[],
+  args: unknown[],
   fileUpload?: FileUploadConfig,
-): { queryParams: Map<string, any>, headers: Record<string, string>, body: any, formData?: FormData } {
-  const queryParams = new Map<string, any>()
+): { queryParams: Map<string, unknown>, headers: Record<string, string>, body: unknown, formData?: FormData } {
+  const queryParams = new Map<string, unknown>()
   const headers: Record<string, string> = {}
-  let body: any
+  let body: unknown
   let formData: FormData | undefined
 
   // 如果有文件上传，创建 FormData
@@ -156,12 +156,12 @@ function processParameters(
         if (formData) {
           // 文件上传时，Body 参数作为表单字段
           if (typeof value === 'object' && value !== null) {
-            Object.entries(value).forEach(([key, val]) => {
-              formData!.append(key, String(val))
+            Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
+              formData.append(key, String(val))
             })
           }
           else if (value !== undefined) {
-            formData!.append('data', String(value))
+            formData.append('data', String(value))
           }
         }
         else {
@@ -187,7 +187,7 @@ function processParameters(
 /**
  * 处理查询参数
  */
-function handleQueryParameter(param: ParameterMapping, value: any, queryParams: Map<string, any>): void {
+function handleQueryParameter(param: ParameterMapping, value: unknown, queryParams: Map<string, unknown>): void {
   if (param.key) {
     // 具名查询参数
     queryParams.set(param.key, value)
@@ -195,7 +195,7 @@ function handleQueryParameter(param: ParameterMapping, value: any, queryParams: 
   else {
     // 查询对象
     if (typeof value === 'object' && value !== null) {
-      Object.entries(value).forEach(([key, val]) => {
+      Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
         queryParams.set(key, val)
       })
     }
@@ -205,7 +205,7 @@ function handleQueryParameter(param: ParameterMapping, value: any, queryParams: 
 /**
  * 处理请求头参数
  */
-function handleHeaderParameter(param: ParameterMapping, value: any, headers: Record<string, string>): void {
+function handleHeaderParameter(param: ParameterMapping, value: unknown, headers: Record<string, string>): void {
   if (param.key) {
     // 具名请求头
     headers[param.key] = String(value)
@@ -213,7 +213,7 @@ function handleHeaderParameter(param: ParameterMapping, value: any, headers: Rec
   else {
     // 请求头对象
     if (typeof value === 'object' && value !== null) {
-      Object.entries(value).forEach(([key, val]) => {
+      Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
         headers[key] = String(val)
       })
     }
@@ -225,7 +225,7 @@ function handleHeaderParameter(param: ParameterMapping, value: any, headers: Rec
  */
 function handleFileParameter(
   param: ParameterMapping,
-  value: any,
+  value: unknown,
   formData: FormData | undefined,
   fileUpload?: FileUploadConfig,
 ): void {
@@ -239,17 +239,18 @@ function handleFileParameter(
       if (field.isArray) {
         // 处理数组文件
         if (Array.isArray(value)) {
-          value.forEach((file: File) => {
+          value.forEach((file: unknown) => {
             if (file instanceof File) {
               formData.append(field.fieldName, file)
             }
           })
         }
-        else if (typeof value === 'object' && value !== null && value[field.fieldName]) {
+        else if (typeof value === 'object' && value !== null) {
           // 处理具名多文件上传
-          const files = value[field.fieldName]
+          const valueObj = value as Record<string, unknown>
+          const files = valueObj[field.fieldName]
           if (Array.isArray(files)) {
-            files.forEach((file: File) => {
+            files.forEach((file: unknown) => {
               if (file instanceof File) {
                 formData.append(field.fieldName, file)
               }
@@ -278,7 +279,7 @@ function handleFileParameter(
       case 'multiple':
         // 多文件上传
         if (Array.isArray(value)) {
-          value.forEach((file: File) => {
+          value.forEach((file: unknown) => {
             if (file instanceof File) {
               formData.append(fileUpload.fieldNames[0], file)
             }
@@ -289,9 +290,9 @@ function handleFileParameter(
       case 'named-multiple':
         // 具名多文件上传
         if (typeof value === 'object' && value !== null) {
-          Object.entries(value).forEach(([fieldName, files]) => {
+          Object.entries(value as Record<string, unknown>).forEach(([fieldName, files]) => {
             if (Array.isArray(files)) {
-              files.forEach((file: File) => {
+              files.forEach((file: unknown) => {
                 if (file instanceof File) {
                   formData.append(fieldName, file)
                 }

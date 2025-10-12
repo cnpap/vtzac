@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\"",
     "dev:frontend": "vite",
-    "dev:backend": "../node_modules/.bin/tsx watch --tsconfig ./tsconfig.server.json src/backend/main.ts",
-    "dev:server": "../node_modules/.bin/tsx watch --tsconfig ./tsconfig.server.json src/backend/main.ts",
+    "dev:backend": "pnpm --filter nestjs-example start",
     "build": "pnpm build:frontend && pnpm build:backend",
     "build:frontend": "tsc -b && vite build",
     "build:backend": "nest build",
@@ -28,6 +27,7 @@
     "@tailwindcss/vite": "catalog:",
     "@types/multer": "catalog:",
     "antd": "catalog:",
+    "nestjs-example": "workspace:*",
     "multer": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

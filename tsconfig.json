@@ -12,5 +12,17 @@
     "verbatimModuleSyntax": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true
-  }
+  },
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "types/**/*",
+    "vitest.config.ts"
+  ],
+  "exclude": [
+    "playground/**/*",
+    "examples/**/*",
+    "docs/**/*",
+    "node_modules"
+  ]
 }

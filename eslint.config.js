@@ -1,25 +1,25 @@
 // @ts-check
 import antfu from '@antfu/eslint-config'
-import globals from 'globals'
 
 export default antfu(
   {
     type: 'lib',
     pnpm: true,
+    // 明确排除子项目目录，避免 tsconfigRootDir 冲突
+    ignores: [
+      'playground/**/*',
+      'examples/**/*',
+      'docs/**/*',
+    ],
+    typescript: {
+      tsconfigPath: './tsconfig.json',
+    },
+    rules: {
+      'ts/strict-boolean-expressions': 'off',
+    },
   },
   {
-    files: ['src/backend/**/*.ts', 'docs/**/*.ts', '!playground/**/*'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.node,
-    },
-    ignores: ['playground/**/*'],
-    rules: {
-      '@typescript-eslint/interface-name-prefix': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/consistent-type-imports': 'off',
-    },
+    // 明确指定只处理根目录的源文件
+    files: ['src/**/*.ts', 'test/**/*.ts', 'types/**/*.ts', 'vitest.config.ts'],
   },
 )

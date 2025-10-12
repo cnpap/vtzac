@@ -41,6 +41,7 @@ export const useChat = () => {
   const handleUserJoined = useCallback(
     (_data: { user: User; timestamp: string }) => {
       // 在线用户列表会通过 onlineUsers 事件更新，这里只需要处理其他逻辑
+      console.log(_data);
     },
     []
   );
@@ -49,6 +50,7 @@ export const useChat = () => {
   const handleUserLeft = useCallback(
     (_data: { user: User; timestamp: string }) => {
       // 在线用户列表会通过 onlineUsers 事件更新，这里只需要处理其他逻辑
+      console.log(_data);
     },
     []
   );

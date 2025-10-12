@@ -6,7 +6,7 @@ import { generateHttpJavaScriptClass } from '../src/generate-http'
 
 describe('plugin Code Generation', () => {
   it('should generate JavaScript class from NestJS controller', () => {
-    const testControllerPath = path.resolve(__dirname, '../playground/src/backend/test-input.controller.ts')
+    const testControllerPath = path.resolve(__dirname, '../examples/nestjs-example/src/test-input.controller.ts')
 
     // 分析控制器
     const analysisResult = analyzeNestJSController(testControllerPath)

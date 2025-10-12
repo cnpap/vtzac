@@ -36,11 +36,11 @@ async function bootstrap(): Promise<void> {
   await app.listen(port);
   Logger.log(
     `🚀 Application is running on: http://localhost:${port}`,
-    'Bootstrap'
+    'Bootstrap',
   );
   Logger.log(
     `📚 Swagger UI is available at: http://localhost:${port}/api-docs`,
-    'Bootstrap'
+    'Bootstrap',
   );
 }
 

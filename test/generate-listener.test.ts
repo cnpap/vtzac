@@ -6,7 +6,7 @@ import { generateListenerJavaScriptClass } from '../src/generate-socket'
 
 describe('socket.IO Listener Code Generation', () => {
   it('should generate JavaScript listener class from WebSocket EventEmitter', () => {
-    const testEmitterPath = path.resolve(__dirname, '../playground/src/backend/websocket.emitter.ts')
+    const testEmitterPath = path.resolve(__dirname, '../examples/nestjs-example/src/websocket.emitter.ts')
 
     // 分析 EventEmitter
     const analysisResult = analyzeNestJSController(testEmitterPath)

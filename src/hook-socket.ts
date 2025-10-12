@@ -1,6 +1,12 @@
-import type { ManagerOptions, SocketOptions } from 'socket.io-client'
+import type { ManagerOptions, Socket, SocketOptions } from 'socket.io-client'
 import type { Constructor, ExcludeLifecycleMethods, SocketWrappedInstance } from './types'
-import { io, Socket } from 'socket.io-client'
+import { io } from 'socket.io-client'
+
+// Gateway 实例接口，定义生成的 Gateway 类必须实现的方法
+export interface GatewayInstance {
+  getNamespace: () => string
+  __setSocket: (socket: Socket) => void
+}
 
 // ZAC Socket 配置选项类型
 export interface ZacSocketOptions {
@@ -21,7 +27,7 @@ export type ZacSocketListener<T> = {
 
 // Socket 初始化返回接口
 export interface ZacSocketInstance<E> {
-  emitter: E
+  emitter: ZacSocketEmitter<E>
   createListener: <T>(eventEmitter: Constructor<T>) => ZacSocketListener<T>
   socket: Socket
   disconnect: () => void
@@ -39,9 +45,10 @@ function joinUrl(baseurl: string, namespace?: string): string {
 }
 
 // 主函数：初始化 socket 连接
-export function _socket<T>(baseurl: string, gateway: Constructor<T>, options?: ZacSocketOptions): ZacSocketInstance<T> {
-  const instance = new (gateway as Constructor<T>)()
-  const namespace = (instance as any).getNamespace()
+export function _socket<T>(baseurl: string, Gateway: Constructor<T>, options?: ZacSocketOptions): ZacSocketInstance<T> {
+  const instance = new Gateway()
+  const gatewayInstance = instance as unknown as GatewayInstance
+  const namespace = gatewayInstance.getNamespace()
   const uri = joinUrl(baseurl, namespace)
   const cacheKey = `${uri}_${JSON.stringify(options?.socketIoOptions || {})}`
   // 检查是否已有相同配置的连接
@@ -51,15 +58,15 @@ export function _socket<T>(baseurl: string, gateway: Constructor<T>, options?: Z
     socket = io(uri, options?.socketIoOptions)
     socketInstances.set(cacheKey, socket)
   }
-  (instance as any).__setSocket(socket)
+  gatewayInstance.__setSocket(socket)
   return {
     socket,
-    emitter: instance,
+    emitter: instance as ZacSocketEmitter<T>,
     disconnect: () => {
       socket?.disconnect()
       socketInstances.delete(cacheKey)
     },
-    createListener: <T>(eventEmitter: Constructor<T>): ZacSocketListener<T> =>
-      new (eventEmitter as Constructor<T>)(socket) as ZacSocketListener<T>,
+    createListener: <U>(EventEmitter: Constructor<U>): ZacSocketListener<U> =>
+      new EventEmitter(socket) as ZacSocketListener<U>,
   }
 }

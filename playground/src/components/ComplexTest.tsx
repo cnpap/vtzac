@@ -1,13 +1,13 @@
 import React from 'react';
 import { Card, Button, Alert, Typography, message } from 'antd';
 import { _http } from 'vtzac/hook';
-import { TestInputController } from '../backend/test-input.controller';
 import type {
   TestComponentProps,
   TestResult,
   LoadingState,
   ResultsState,
 } from '../types';
+import { TestInputController } from 'nestjs-example/src/test-input.controller';
 
 const { Text, Paragraph } = Typography;
 

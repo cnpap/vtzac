@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { analyzeNestJSController, getFileParameterInfo } from '../src/ast'
 
 describe('aST Analysis', () => {
-  const testControllerPath = path.resolve(__dirname, '../playground/src/backend/test-input.controller.ts')
+  const testControllerPath = path.resolve(__dirname, '../examples/nestjs-example/src/test-input.controller.ts')
 
   it('should analyze basic controller information', () => {
     const result = analyzeNestJSController(testControllerPath)

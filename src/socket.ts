@@ -1,5 +1,18 @@
-import type { ManagerOptions, SocketOptions } from 'socket.io-client'
-import { io, Socket } from 'socket.io-client'
+import type { ManagerOptions, Socket, SocketOptions } from 'socket.io-client'
+import { io } from 'socket.io-client'
+
+/**
+ * Socket.IO 事件响应接口
+ */
+export interface SocketResponse<T = unknown> {
+  error?: string
+  data?: T
+}
+
+/**
+ * Socket.IO 事件数据类型
+ */
+export type SocketEventData = Record<string, unknown> | unknown[] | unknown
 
 /**
  * Socket.IO 配置接口
@@ -35,9 +48,9 @@ const socketInstances = new Map<string, Socket>()
  *
  * @param config Socket 配置对象
  * @param args 传入的参数数组
- * @returns Promise<any> Socket.IO 的事件发送结果
+ * @returns Promise<T> Socket.IO 的事件发送结果
  */
-export default function _socket(config: SocketConfig, args: any[]): Promise<any> {
+export default async function _socket<T = unknown>(config: SocketConfig, args: unknown[]): Promise<T> {
   const { eventName, namespace, parameters } = config
 
   // 构建 Socket.IO 连接
@@ -47,20 +60,27 @@ export default function _socket(config: SocketConfig, args: any[]): Promise<any>
   const eventData = processParameters(parameters, args)
 
   // 发送事件并返回 Promise
-  return new Promise((resolve, reject) => {
+  return new Promise<T>((resolve, reject) => {
     // 设置超时
     const timeout = setTimeout(() => {
       reject(new Error(`Socket event '${eventName}' timeout`))
     }, 30000) // 30秒超时
 
     // 发送事件
-    socket.emit(eventName, eventData, (response: any) => {
+    socket.emit(eventName, eventData, (response: SocketResponse<T> | T) => {
       clearTimeout(timeout)
-      if (response && response.error) {
+
+      // 检查是否是标准的错误响应格式
+      if (response && typeof response === 'object' && 'error' in response && response.error) {
         reject(new Error(response.error))
       }
+      else if (response && typeof response === 'object' && 'data' in response) {
+        // 如果响应包含 data 字段，返回 data
+        resolve(response.data as T)
+      }
       else {
-        resolve(response)
+        // 直接返回响应
+        resolve(response as T)
       }
     })
   })
@@ -86,12 +106,12 @@ function getOrCreateSocket(namespace?: string, options?: Partial<ManagerOptions 
 /**
  * 处理所有参数，构建事件数据
  */
-function processParameters(parameters: ParameterMapping[], args: any[]): any {
+function processParameters(parameters: ParameterMapping[], args: unknown[]): SocketEventData {
   if (parameters.length === 0) {
     return args.length === 1 ? args[0] : args
   }
 
-  const eventData: any = {}
+  const eventData: Record<string, unknown> = {}
   let hasData = false
 
   parameters.forEach((param, index) => {

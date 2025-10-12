@@ -3,8 +3,8 @@ import { Button, Space, Typography, Alert, Card } from 'antd';
 import { LinkOutlined, SettingOutlined, SendOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import { _http } from 'vtzac/hook';
-import { TestInputController } from '../backend/test-input.controller';
 import type { TestComponentProps, TestResult, ParamTestType } from '../types';
+import { TestInputController } from 'nestjs-example/src/test-input.controller';
 
 const { Title, Text, Paragraph } = Typography;
 
