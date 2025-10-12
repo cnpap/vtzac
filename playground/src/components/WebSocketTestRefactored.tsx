@@ -48,7 +48,7 @@ const WebSocketTestRefactored: React.FC = () => {
   const {
     connected,
     connectWebSocket,
-    disconnectWebSocket,
+    disconnect,
     sendPing,
     getOnlineCount,
     joinChat,
@@ -87,7 +87,7 @@ const WebSocketTestRefactored: React.FC = () => {
 
   // 断开连接
   const handleDisconnect = () => {
-    disconnectWebSocket();
+    disconnect();
     resetChatState();
   };
 

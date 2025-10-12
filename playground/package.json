@@ -27,8 +27,8 @@
     "@tailwindcss/vite": "catalog:",
     "@types/multer": "catalog:",
     "antd": "catalog:",
-    "nestjs-example": "workspace:*",
     "multer": "catalog:",
+    "nestjs-example": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-use": "^17.6.0",
@@ -61,6 +61,7 @@
     "typescript-eslint": "catalog:",
     "vite": "catalog:cli",
     "vite-plugin-inspect": "^11.3.3",
+    "vtjump": "^4.0.1",
     "vtzac": "link:../"
   }
 }
