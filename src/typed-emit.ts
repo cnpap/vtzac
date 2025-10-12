@@ -16,11 +16,11 @@ interface EventFunction {
  * 事件名会被挂载到方法本身上，后续由 emitWith 读取。
  */
 export function Emit(eventName: string) {
-  return <T extends object, K extends string | symbol>(
+  return <T extends object, K extends string | symbol, F extends (...args: unknown[]) => unknown>(
     _target: T,
     _key: K,
-    descriptor: TypedPropertyDescriptor<(...args: unknown[]) => unknown>,
-  ): TypedPropertyDescriptor<(...args: unknown[]) => unknown> => {
+    descriptor: TypedPropertyDescriptor<F>,
+  ): TypedPropertyDescriptor<F> => {
     if (descriptor.value && typeof descriptor.value === 'function') {
       (descriptor.value as EventFunction)[EVENT_SYMBOL] = eventName
     }
