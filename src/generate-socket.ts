@@ -11,9 +11,7 @@ export function generateSocketJavaScriptClass(analysisResult: AnalysisResult): s
   }
 
   // 生成所有 Gateway 的代码
-  const classesCode = gateways.map(gateway => generateGatewayClass(gateway)).join('\n\n')
-
-  return classesCode
+  return gateways.map(gateway => generateGatewayClass(gateway)).join('\n\n')
 }
 
 /**
