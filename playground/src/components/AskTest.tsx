@@ -83,7 +83,7 @@ const AskTest: React.FC = () => {
       socket.disconnect();
     }
 
-    const newSocket = io('http://localhost:3001/ask', {
+    const newSocket = io('http://localhost:3000/ask', {
       transports: ['websocket'],
     });
 

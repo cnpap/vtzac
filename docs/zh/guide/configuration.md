@@ -133,10 +133,10 @@ const api = _http(UserController, {
 
 ```typescript
 setGlobalZacOfetchOptions({
-  baseURL: 'http://localhost:3001',
+  baseURL: 'http://localhost:3000',
   timeout: 10000, // 开发环境延长超时时间
   onRequest({ request }) {
-    console.log('开发环境请求:', request); // 输出：开发环境请求: http://localhost:3001/api/user
+    console.log('开发环境请求:', request); // 输出：开发环境请求: http://localhost:3000/api/user
   },
 });
 ```

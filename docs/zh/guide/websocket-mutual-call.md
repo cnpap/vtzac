@@ -116,7 +116,7 @@ import { ChatEvents } from './chat-events';
 
 // 建立连接
 const { emitter, createListener, socket, disconnect } = _socket(
-  'http://localhost:3001',
+  'http://localhost:3000',
   ChatGateway,
   {
     socketIoOptions: { transports: ['websocket'] },
@@ -185,7 +185,7 @@ export class ChatGateway {
 **前端 ACK 调用示例：**
 
 ```ts
-const { emitter } = _socket('http://localhost:3001', ChatGateway);
+const { emitter } = _socket('http://localhost:3000', ChatGateway);
 // 如果有返回值则会自动调整为 emitWithAck 调用
 const result = await emitter.handleGetOnlineCount();
 console.log('在线人数:', result.count); // 输出：在线人数: 42
@@ -216,7 +216,7 @@ export class ChatGateway {}
 
 ```ts
 // 自动连接到 /chat 命名空间
-const { emitter } = _socket('http://localhost:3001', ChatGateway);
+const { emitter } = _socket('http://localhost:3000', ChatGateway);
 ```
 
 ## 原生 Socket 访问
@@ -228,7 +228,7 @@ const { emitter } = _socket('http://localhost:3001', ChatGateway);
 ```ts
 import { _socket } from 'vtzac/hook';
 
-const { socket } = _socket('http://localhost:3001', ChatGateway);
+const { socket } = _socket('http://localhost:3000', ChatGateway);
 
 // 使用原生 Socket API
 socket.on('connect', () => {

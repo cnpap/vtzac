@@ -19,168 +19,61 @@ vtzac 是一个面向 Vite + NestJS 的全栈开发工具，让前端以"类型�
 
 ## 🚀 快速开始
 
-### 1. 创建工作区
+### 1. 安装
 
 ```bash
-mkdir my-vtzac-demo && cd my-vtzac-demo
-pnpm init
-
-# 创建前端（以 React + TS 为例）
-pnpm create vite frontend -- --template react-ts
-
-# 创建后端（NestJS 示例）
-pnpm dlx @nestjs/cli new nestjs-example --package-manager pnpm
-```
-
-创建 `pnpm-workspace.yaml`：
-
-```yaml
-packages:
-  - frontend
-  - nestjs-example
-```
-
-### 2. 安装与配置
-
-```bash
-cd frontend
 pnpm add vtzac
 ```
 
-在 `vite.config.ts` 中添加插件：
+### 2. 配置 Vite 插件
 
 ```ts
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
 import vtzac from 'vtzac';
 
 export default defineConfig({
-  plugins: [vtzac(), react()],
+  plugins: [vtzac()],
 });
 ```
 
-将后端项目作为依赖加入前端 `package.json`：
+### 3. 开始使用
 
-```json
-{
-  "dependencies": {
-    "nestjs-example": "workspace:*"
-  }
-}
-```
+在 pnpm 工作区中，前端直接引用后端项目即可实现类型安全调用。
 
 ## 📖 功能演示
 
-### HTTP：类型安全的控制器调用
-
-**后端控制器：**
-
-```ts
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
-
-@Controller('api')
-export class AppController {
-  @Get('hello')
-  getHello(): string {
-    return 'Hello World!';
-  }
-
-  @Post('user/:id')
-  createUser(@Param('id') id: string, @Body() userData: { name: string }) {
-    return { id, name: userData.name, created: true };
-  }
-}
-```
-
-**前端调用：**
+### HTTP 调用
 
 ```ts
 import { _http } from 'vtzac/hook';
-import { AppController } from 'nestjs-example/src/app.controller';
+import { AppController } from 'backend/src/app.controller';
 
 const api = _http(AppController, {
-  ofetchOptions: { baseURL: 'http://localhost:3001', timeout: 5000 },
+  ofetchOptions: { baseURL: 'http://localhost:3000' },
 });
 
-async function demo() {
-  // GET /api/hello
-  const res1 = await api.getHello();
-  console.log(res1._data); // 输出：'Hello World!'
-
-  // POST /api/user/123
-  const res2 = await api.createUser('123', { name: 'Alice' });
-  console.log(res2._data); // 输出：{ id: '123', name: 'Alice', created: true }
-}
+// 类型安全的方法调用
+const res = await api.getHello();
+console.log(res._data); // 输出：'Hello World!'
 ```
 
-### WebSocket：发送器与监听器的双向通信
-
-**前端 WebSocket 调用：**
+### WebSocket 通信
 
 ```ts
 import { _socket } from 'vtzac/hook';
-import { WebSocketTestGateway } from 'nestjs-example/src/websocket.gateway';
-import { WebSocketEventEmitter } from 'nestjs-example/src/websocket.emitter';
+import { WebSocketGateway } from 'backend/src/websocket.gateway';
 
-const { emitter, createListener, socket, disconnect } = _socket(
-  'http://localhost:3001',
-  WebSocketTestGateway,
-  { socketIoOptions: { transports: ['websocket'] } }
+const { emitter, createListener } = _socket(
+  'http://localhost:3000',
+  WebSocketGateway
 );
 
-// 发送（自动映射事件名）
-emitter.handleJoinChat({ nickname: 'Alice' });
-emitter.handlePublicMessage({ text: 'Hello everyone!' });
+// 发送消息
+emitter.handleMessage({ text: 'Hello!' });
 
-// 带返回值的调用（自动使用 ACK）
-const counter = await emitter.handleGetOnlineCount();
-console.log('在线人数:', counter.count); // 输出：在线人数: 5
-
-// 监听（类型安全）
-const listener = createListener(WebSocketEventEmitter);
-listener.publicMessage(msg => {
-  console.log('公共消息:', msg); // 输出：公共消息: { text: 'Hello everyone!' }
-});
-listener.error(data => {
-  console.error('错误:', data); // 输出：错误: { message: 'Connection failed' }
-});
-
-// 断开连接
-disconnect();
-```
-
-### 服务端：事件定义与发送
-
-**事件定义：**
-
-```ts
-import { Emit } from 'vtzac/typed-emit';
-
-export class WebSocketEventEmitter {
-  @Emit('publicMessage')
-  publicMessage(message: { text: string }) {
-    return message;
-  }
-
-  @Emit('error')
-  error(message: string) {
-    return { message };
-  }
-}
-```
-
-**服务端发送：**
-
-```ts
-import { emitWith } from 'vtzac/typed-emit';
-import { WebSocketEventEmitter } from './websocket.emitter';
-
-// 广播到房间
-emitWith(
-  new WebSocketEventEmitter().publicMessage,
-  new WebSocketEventEmitter()
-)({ text: 'Hello!' }).toRoomAll(server, 'public');
-// 输出：向房间 'public' 中的所有客户端发送 'publicMessage' 事件
+// 监听事件
+const listener = createListener(EventEmitter);
+listener.message(data => console.log(data));
 ```
 
 ## 🎯 适用场景

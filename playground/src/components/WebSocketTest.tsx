@@ -130,7 +130,7 @@ export function WebSocketTest({ loading, setLoading }: TestComponentProps) {
     setLoading((prev: LoadingState) => ({ ...prev, connect: true }));
 
     try {
-      const newSocket = io('http://localhost:3001', {
+      const newSocket = io('http://localhost:3000', {
         transports: ['websocket'],
       });
 

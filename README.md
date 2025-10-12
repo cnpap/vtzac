@@ -19,168 +19,61 @@ vtzac is a full-stack development tool for Vite + NestJS that enables frontend t
 
 ## 🚀 Quick Start
 
-### 1. Create Workspace
+### 1. Installation
 
 ```bash
-mkdir my-vtzac-demo && cd my-vtzac-demo
-pnpm init
-
-# Create frontend (React + TS example)
-pnpm create vite frontend -- --template react-ts
-
-# Create backend (NestJS example)
-pnpm dlx @nestjs/cli new nestjs-example --package-manager pnpm
-```
-
-Create `pnpm-workspace.yaml`:
-
-```yaml
-packages:
-  - frontend
-  - nestjs-example
-```
-
-### 2. Installation & Configuration
-
-```bash
-cd frontend
 pnpm add vtzac
 ```
 
-Add plugin to `vite.config.ts`:
+### 2. Configure Vite Plugin
 
 ```ts
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
 import vtzac from 'vtzac';
 
 export default defineConfig({
-  plugins: [vtzac(), react()],
+  plugins: [vtzac()],
 });
 ```
 
-Add backend project as dependency in frontend `package.json`:
+### 3. Start Using
 
-```json
-{
-  "dependencies": {
-    "nestjs-example": "workspace:*"
-  }
-}
-```
+In a pnpm workspace, frontend can directly reference backend projects for type-safe calls.
 
 ## 📖 Feature Demonstrations
 
-### HTTP: Type-Safe Controller Calls
-
-**Backend Controller:**
-
-```ts
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
-
-@Controller('api')
-export class AppController {
-  @Get('hello')
-  getHello(): string {
-    return 'Hello World!';
-  }
-
-  @Post('user/:id')
-  createUser(@Param('id') id: string, @Body() userData: { name: string }) {
-    return { id, name: userData.name, created: true };
-  }
-}
-```
-
-**Frontend Calls:**
+### HTTP Calls
 
 ```ts
 import { _http } from 'vtzac/hook';
-import { AppController } from 'nestjs-example/src/app.controller';
+import { AppController } from 'backend/src/app.controller';
 
 const api = _http(AppController, {
-  ofetchOptions: { baseURL: 'http://localhost:3001', timeout: 5000 },
+  ofetchOptions: { baseURL: 'http://localhost:3000' },
 });
 
-async function demo() {
-  // GET /api/hello
-  const res1 = await api.getHello();
-  console.log(res1._data); // Output: 'Hello World!'
-
-  // POST /api/user/123
-  const res2 = await api.createUser('123', { name: 'Alice' });
-  console.log(res2._data); // Output: { id: '123', name: 'Alice', created: true }
-}
+// Type-safe method calls
+const res = await api.getHello();
+console.log(res._data); // Output: 'Hello World!'
 ```
 
-### WebSocket: Bidirectional Communication with Emitters and Listeners
-
-**Frontend WebSocket Calls:**
+### WebSocket Communication
 
 ```ts
 import { _socket } from 'vtzac/hook';
-import { WebSocketTestGateway } from 'nestjs-example/src/websocket.gateway';
-import { WebSocketEventEmitter } from 'nestjs-example/src/websocket.emitter';
+import { WebSocketGateway } from 'backend/src/websocket.gateway';
 
-const { emitter, createListener, socket, disconnect } = _socket(
-  'http://localhost:3001',
-  WebSocketTestGateway,
-  { socketIoOptions: { transports: ['websocket'] } }
+const { emitter, createListener } = _socket(
+  'http://localhost:3000',
+  WebSocketGateway
 );
 
-// Emit (automatic event name mapping)
-emitter.handleJoinChat({ nickname: 'Alice' });
-emitter.handlePublicMessage({ text: 'Hello everyone!' });
+// Send messages
+emitter.handleMessage({ text: 'Hello!' });
 
-// Calls with return values (automatic ACK usage)
-const counter = await emitter.handleGetOnlineCount();
-console.log('Online count:', counter.count); // Output: Online count: 5
-
-// Listen (type-safe)
-const listener = createListener(WebSocketEventEmitter);
-listener.publicMessage(msg => {
-  console.log('Public message:', msg); // Output: Public message: { text: 'Hello everyone!' }
-});
-listener.error(data => {
-  console.error('Error:', data); // Output: Error: { message: 'Connection failed' }
-});
-
-// Disconnect
-disconnect();
-```
-
-### Server-side: Event Definition and Emission
-
-**Event Definition:**
-
-```ts
-import { Emit } from 'vtzac/typed-emit';
-
-export class WebSocketEventEmitter {
-  @Emit('publicMessage')
-  publicMessage(message: { text: string }) {
-    return message;
-  }
-
-  @Emit('error')
-  error(message: string) {
-    return { message };
-  }
-}
-```
-
-**Server-side Emission:**
-
-```ts
-import { emitWith } from 'vtzac/typed-emit';
-import { WebSocketEventEmitter } from './websocket.emitter';
-
-// Broadcast to room
-emitWith(
-  new WebSocketEventEmitter().publicMessage,
-  new WebSocketEventEmitter()
-)({ text: 'Hello!' }).toRoomAll(server, 'public');
-// Output: Send 'publicMessage' event to all clients in room 'public'
+// Listen to events
+const listener = createListener(EventEmitter);
+listener.message(data => console.log(data));
 ```
 
 ## 🎯 Use Cases

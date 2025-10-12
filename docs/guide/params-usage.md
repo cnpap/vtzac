@@ -25,7 +25,7 @@ import { TestController } from './backend/test.controller';
 // Create controller instance (specify backend URL)
 const testController = _http(TestController, {
   ofetchOptions: {
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://localhost:3000',
   },
 });
 

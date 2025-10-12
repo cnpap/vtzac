@@ -31,7 +31,7 @@ import { _http } from 'vtzac/hook';
 import { TestController } from './backend/test.controller';
 
 const api = _http(TestController, {
-  ofetchOptions: { baseURL: 'http://localhost:3001' },
+  ofetchOptions: { baseURL: 'http://localhost:3000' },
 });
 
 // 只传递必需参数，Headers 通过拦截器处理

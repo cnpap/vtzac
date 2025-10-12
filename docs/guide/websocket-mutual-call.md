@@ -116,7 +116,7 @@ import { ChatEvents } from './chat-events';
 
 // Establish connection
 const { emitter, createListener, socket, disconnect } = _socket(
-  'http://localhost:3001',
+  'http://localhost:3000',
   ChatGateway,
   {
     socketIoOptions: { transports: ['websocket'] },
@@ -185,7 +185,7 @@ export class ChatGateway {
 **Frontend ACK Call Example:**
 
 ```ts
-const { emitter } = _socket('http://localhost:3001', ChatGateway);
+const { emitter } = _socket('http://localhost:3000', ChatGateway);
 // If there's a return value, it will automatically adjust to emitWithAck call
 const result = await emitter.handleGetOnlineCount();
 console.log('Online count:', result.count); // Output: Online count: 42
@@ -219,7 +219,7 @@ export class ChatGateway {}
 
 ```ts
 // Automatically connect to /chat namespace
-const { emitter } = _socket('http://localhost:3001', ChatGateway);
+const { emitter } = _socket('http://localhost:3000', ChatGateway);
 ```
 
 ## Native Socket Access
@@ -231,7 +231,7 @@ You can directly access the native Socket instance for custom operations:
 ```ts
 import { _socket } from 'vtzac/hook';
 
-const { socket } = _socket('http://localhost:3001', ChatGateway);
+const { socket } = _socket('http://localhost:3000', ChatGateway);
 
 // Use native Socket API
 socket.on('connect', () => {

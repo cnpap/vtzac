@@ -45,7 +45,7 @@ export const useWebSocket = ({
 
     try {
       const { emitter, createListener, socket } = _socket(
-        'http://localhost:3001',
+        'http://localhost:3000',
         WebSocketTestGateway,
         {
           socketIoOptions: {

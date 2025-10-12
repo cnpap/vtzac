@@ -133,10 +133,10 @@ const api = _http(UserController, {
 
 ```typescript
 setGlobalZacOfetchOptions({
-  baseURL: 'http://localhost:3001',
+  baseURL: 'http://localhost:3000',
   timeout: 10000, // Extend timeout for development environment
   onRequest({ request }) {
-    console.log('Development request:', request); // Output: Development request: http://localhost:3001/api/user
+    console.log('Development request:', request); // Output: Development request: http://localhost:3000/api/user
   },
 });
 ```

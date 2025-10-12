@@ -11,7 +11,7 @@ const { Title, Text, Paragraph } = Typography;
 // 创建控制器实例
 const testController = _http(TestInputController, {
   ofetchOptions: {
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://localhost:3000',
   },
 });
 

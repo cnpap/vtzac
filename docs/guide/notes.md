@@ -31,7 +31,7 @@ import { _http } from 'vtzac/hook';
 import { TestController } from './backend/test.controller';
 
 const api = _http(TestController, {
-  ofetchOptions: { baseURL: 'http://localhost:3001' },
+  ofetchOptions: { baseURL: 'http://localhost:3000' },
 });
 
 // Only pass required parameters, Headers handled by interceptor

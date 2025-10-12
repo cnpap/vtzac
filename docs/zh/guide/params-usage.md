@@ -25,7 +25,7 @@ import { TestController } from './backend/test.controller';
 // 创建控制器实例（指定后端地址）
 const testController = _http(TestController, {
   ofetchOptions: {
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://localhost:3000',
   },
 });
 

@@ -25,6 +25,27 @@ packages:
   - nestjs-example
 ```
 
+**Recommended Configuration:** Add startup scripts to the root `package.json` for convenient frontend and backend startup:
+
+```json
+{
+  "scripts": {
+    "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\"",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter nestjs-example start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+```
+
+Install concurrently dependency:
+
+```bash
+pnpm add -D concurrently
+```
+
 ## 2. Install vtzac in Vite Project
 
 ```bash
@@ -58,7 +79,36 @@ Add backend project as workspace dependency to frontend `package.json`:
 
 At this point, frontend can directly import backend controller types and make type-safe calls.
 
-## 4. Example: Zero-Configuration Direct Backend Controller Calls
+## 4. Configure Backend CORS Support
+
+To enable frontend to properly call backend APIs, you need to configure CORS support in the NestJS project.
+
+Add CORS configuration in `nestjs-example/src/main.ts`:
+
+```ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // Configure CORS support
+  app.enableCors({
+    origin: [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:4173',
+      'http://127.0.0.1:4173',
+    ], // Support both localhost and 127.0.0.1
+    credentials: true,
+  });
+
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+## 5. Example: Zero-Configuration Direct Backend Controller Calls
 
 **Backend Controller Example:**
 
@@ -83,7 +133,7 @@ import { AppController } from 'nestjs-example/src/app.controller';
 // Create controller instance (specify backend address)
 const defaultController = _http(AppController, {
   ofetchOptions: {
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://localhost:3000',
     timeout: 5000,
   },
 });
@@ -102,18 +152,31 @@ console.log(res._data); // Output: 'Hello World!'
 
 No need to write any additional API client code; vtzac automatically generates corresponding frontend call code and type bindings during build time. The `getHello()` call you see in the frontend will be transformed into the above HTTP request, providing type-safe return value access through `res._data`.
 
-## 5. Start and Verify
+## 6. Start and Verify
 
-Start backend and frontend separately:
+### Method 1: Using Root Directory Startup Scripts (Recommended)
+
+If you have configured the root directory startup scripts as described in step 1, you can start both frontend and backend with one command:
 
 ```bash
-# Start NestJS backend (default port 3001)
+# Execute in root directory to start both frontend and backend
+pnpm dev
+```
+
+### Method 2: Start Separately
+
+You can also start backend and frontend separately:
+
+```bash
+# Start NestJS backend (default port 3000)
 pnpm --filter nestjs-example start
 
-# Start Vite frontend
+# Start Vite frontend (default port 5173)
 pnpm --filter frontend dev
 ```
 
-Access the frontend page in browser and trigger the example call. If the backend returns `Hello World!`, the basic setup is complete.
+### Verify Functionality
+
+Access the frontend page in browser (usually `http://localhost:5173`) and trigger the example call. If the backend returns `Hello World!`, the basic setup is complete.
 
 At this point, we have completed the most basic usage. You can refer to the example code in the project to learn more about additional features.

@@ -38,7 +38,7 @@ import { _http } from 'vtzac/hook';
 import { AppController } from 'nestjs-example/src/app.controller';
 
 const api = _http(AppController, {
-  ofetchOptions: { baseURL: 'http://localhost:3001', timeout: 5000 },
+  ofetchOptions: { baseURL: 'http://localhost:3000', timeout: 5000 },
 });
 
 async function demo() {
@@ -71,7 +71,7 @@ import { WebSocketTestGateway } from 'nestjs-example/src/websocket.gateway';
 import { WebSocketEventEmitter } from 'nestjs-example/src/websocket.emitter';
 
 const { emitter, createListener, socket, disconnect } = _socket(
-  'http://localhost:3001',
+  'http://localhost:3000',
   WebSocketTestGateway,
   { socketIoOptions: { transports: ['websocket'] } }
 );

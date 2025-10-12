@@ -36,7 +36,7 @@ import { UploadController } from './backend/upload.controller';
 // Create upload controller instance
 const uploadController = _http(UploadController, {
   ofetchOptions: {
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://localhost:3000',
   },
 });
 

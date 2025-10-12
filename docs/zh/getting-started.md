@@ -25,6 +25,27 @@ packages:
   - nestjs-example
 ```
 
+**推荐配置：** 在根目录的 `package.json` 中添加启动脚本，方便同时启动前后端：
+
+```json
+{
+  "scripts": {
+    "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\"",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter nestjs-example start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+```
+
+安装 concurrently 依赖：
+
+```bash
+pnpm add -D concurrently
+```
+
 ## 2. 在 Vite 项目中安装 vtzac
 
 ```bash
@@ -58,7 +79,36 @@ export default defineConfig({
 
 此时，前端可以直接 import 后端的控制器类型并进行类型安全调用。
 
-## 4. 示例：零配置直接调用后端控制器
+## 4. 配置后端跨域支持
+
+为了让前端能够正常调用后端 API，需要在 NestJS 项目中配置跨域支持。
+
+在 `nestjs-example/src/main.ts` 中添加跨域配置：
+
+```ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // 配置跨域支持
+  app.enableCors({
+    origin: [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:4173',
+      'http://127.0.0.1:4173',
+    ], // 支持 localhost 和 127.0.0.1
+    credentials: true,
+  });
+
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+## 5. 示例：零配置直接调用后端控制器
 
 **后端控制器示例：**
 
@@ -83,7 +133,7 @@ import { AppController } from 'nestjs-example/src/app.controller';
 // 创建控制器实例（指定后端地址）
 const defaultController = _http(AppController, {
   ofetchOptions: {
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://localhost:3000',
     timeout: 5000,
   },
 });
@@ -102,18 +152,31 @@ console.log(res._data); // 输出：'Hello World!'
 
 无需编写任何额外的 API 客户端代码；vtzac 会在构建期为你自动生成对应的前端调用代码与类型绑定。你在前端看到的 `getHello()` 调用，会被转换为上述的 HTTP 请求，并通过 `res._data` 提供类型安全的返回值读取。
 
-## 5. 启动与验证
+## 6. 启动与验证
 
-分别启动后端与前端：
+### 方式一：使用根目录启动脚本（推荐）
+
+如果已按照步骤 1 配置了根目录启动脚本，可以一键启动前后端：
 
 ```bash
-# 启动 NestJS 后端（默认端口 3001）
+# 在根目录执行，同时启动前后端
+pnpm dev
+```
+
+### 方式二：分别启动
+
+也可以分别启动后端与前端：
+
+```bash
+# 启动 NestJS 后端（默认端口 3000）
 pnpm --filter nestjs-example start
 
-# 启动 Vite 前端
+# 启动 Vite 前端（默认端口 5173）
 pnpm --filter frontend dev
 ```
 
-在浏览器访问前端页面并触发示例调用，若后端返回 `Hello World!`，说明最基本的使用已经完成。
+### 验证功能
+
+在浏览器访问前端页面（通常是 `http://localhost:5173`）并触发示例调用，若后端返回 `Hello World!`，说明最基本的使用已经完成。
 
 到此为止，我们就完成了最基本的使用。你可以参考项目中的示例代码进一步了解更多功能。

@@ -5,7 +5,7 @@ import api, { setGlobalZacOfetchOptions } from '../src/fetch'
 describe('api Function Tests - Real HTTP Requests', () => {
   beforeAll(() => {
     // 设置基础 URL 用于测试
-    setGlobalZacOfetchOptions({ baseURL: 'http://localhost:3001/api' })
+    setGlobalZacOfetchOptions({ baseURL: 'http://localhost:3000/api' })
   })
 
   describe('基础功能测试', () => {

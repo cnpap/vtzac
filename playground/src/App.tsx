@@ -24,7 +24,7 @@ import AskTest from './components/AskTest';
 import 'antd/dist/reset.css';
 
 setGlobalZacOfetchOptions({
-  baseURL: 'http://localhost:3001',
+  baseURL: 'http://localhost:3000',
 });
 
 function App() {
