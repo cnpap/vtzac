@@ -1,178 +1,169 @@
-# WebSocket Backend Message Sending
+# WebSocket: Backend Message Emit
 
-This document explains how to send WebSocket messages from the backend using `vtzac/typed-emit` in a type-safe and concise manner to different targets (individual clients, rooms, global). All examples use decorators within `class` for intuitive understanding and reusability.
+## Overview
 
-## Core Concepts
+Send WebSocket messages to different targets in a **type-safe** manner using `vtzac/typed-emit`, supporting scenarios like single client, rooms, global broadcast, etc.
 
-- `@Emit(eventName)`: Declares an event name for a class method, with the method's return value being the data to send.
-- `emitWith(fn, ctx)`: A method-first approach to send messages, automatically reading event names and return data, then selecting dispatch targets:
-  - `toClient(client)` sends to a single client
-  - `toRoom(client, room)` sends to a room (excluding current client)
-  - `toRoomAll(server, room)` sends to a room (including current client)
-  - `toServer(server)` broadcasts to the entire server
+## Core Features
 
-## Defining Events (Backend)
+### Event Definition
 
-Use decorators in classes to define events and return the data structure to send. Event names should be short and semantically clear.
+Use the `@Emit` decorator to define events, with method return values as the data structure to be sent:
 
-```typescript
-import { Emit } from 'vtzac/typed-emit'
+**Event Definition Example:**
 
-class ChatEmitter {
-  // Welcome event: send welcome message
-  @Emit('greet')
-  greet(nickname: string) {
-    return { text: `Welcome ${nickname}` }
+```ts
+import { Emit } from 'vtzac/typed-emit';
+
+class ChatEvents {
+  @Emit('welcome')
+  welcome(nickname: string) {
+    return { text: `Welcome ${nickname}!`, timestamp: Date.now() };
   }
 
-  // Regular message event: send text content
   @Emit('message')
   message(text: string) {
-    return { text }
+    return { text, timestamp: Date.now() };
   }
 }
 ```
 
-Notes:
+### Message Sending
 
-- Event names are primarily taken from `@Emit('...')`, if not annotated, the method name is used as the event name.
-- The method's return value is the final data sent to the frontend, with types controlled and inferable throughout.
+Use the `emitWith` method to select sending targets:
 
-## Sending Messages in Gateway
+**Target Selection:**
 
-After instantiating the event class, dispatch to different targets as needed in the NestJS gateway. Examples include: connection welcome, global broadcast, room join notification.
+```ts
+import { emitWith } from 'vtzac/typed-emit';
 
-```typescript
-import type { Server, Socket } from 'socket.io'
+const events = new ChatEvents();
+
+// Send to single client
+emitWith(events.welcome, events)('Alice').toClient(client);
+
+// Send to room (excluding current client)
+emitWith(events.message, events)('Hello room').toRoom(client, 'room1');
+
+// Send to room (including current client)
+emitWith(events.message, events)('Hello all').toRoomAll(server, 'room1');
+
+// Broadcast to entire server
+emitWith(events.message, events)('Global message').toServer(server);
+```
+
+## Gateway Integration
+
+### Complete Example
+
+**Backend Gateway Example:**
+
+```ts
+import type { Server, Socket } from 'socket.io';
 import {
   ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-} from '@nestjs/websockets'
-import { emitWith } from 'vtzac/typed-emit'
+} from '@nestjs/websockets';
+import { emitWith } from 'vtzac/typed-emit';
 
-class ChatEmitter {
-  @Emit('greet')
-  greet(nickname: string) {
-    return { text: `Welcome ${nickname}` }
+class ChatEvents {
+  @Emit('welcome')
+  welcome(nickname: string) {
+    return { text: `Welcome ${nickname}!`, timestamp: Date.now() };
   }
 
   @Emit('message')
   message(text: string) {
-    return { text }
+    return { text, timestamp: Date.now() };
   }
 }
 
 @WebSocketGateway({ cors: { origin: '*' } })
-class ChatGateway {
-  private readonly emitter = new ChatEmitter()
+export class ChatGateway {
+  private readonly events = new ChatEvents();
 
   @WebSocketServer()
-  server!: Server
+  server!: Server;
 
-  // Send welcome message to new client connection
+  // Send welcome message when new client connects
   handleConnection(client: Socket) {
-    const nickname = `User${client.id.slice(-4)}`
-    emitWith(this.emitter.greet, this.emitter)(nickname).toClient(client)
+    const nickname = `User${client.id.slice(-4)}`;
+    emitWith(this.events.welcome, this.events)(nickname).toClient(client);
+    // Actual event sent:
+    // emit 'welcome' { text: 'Welcome User1234!', timestamp: 1703123456789 }
   }
 
-  // Client sends message: broadcast to all online users
+  // Handle client message and broadcast
   @SubscribeMessage('say')
   handleSay(
     @MessageBody() data: { text: string },
     @ConnectedSocket() client?: Socket
   ) {
-    emitWith(
-      this.emitter.message,
-      this.emitter
-    )(data.text).toServer(this.server)
+    emitWith(this.events.message, this.events)(data.text).toServer(this.server);
+    // Actual event sent:
+    // Broadcast 'message' { text: 'Hello everyone!', timestamp: 1703123456789 } to all clients
   }
 
-  // Join room and notify all users in the room (including self)
+  // Join room and notify
   @SubscribeMessage('joinRoom')
   handleJoinRoom(
     @MessageBody() room: string,
     @ConnectedSocket() client?: Socket
   ) {
-    client!.join(room)
+    client!.join(room); // Join room first
     emitWith(
-      this.emitter.message,
-      this.emitter
-    )(`Joined room ${room}`).toRoomAll(this.server, room)
+      this.events.message,
+      this.events
+    )(`Joined room ${room}`).toRoomAll(this.server, room);
+    // Actual event sent:
+    // Send 'message' event to all clients in room 'room1'
   }
 }
 ```
 
-### Quick Reference for Different Targets
+## Quick Start
 
-```typescript
-// Send to current client
-emitWith(emitter.message, emitter)('hello').toClient(client)
+**Minimal Example:**
 
-// Send to room (excluding current client)
-emitWith(emitter.message, emitter)('room only').toRoom(client, 'roomA')
-
-// Send to room (including current client)
-emitWith(emitter.message, emitter)('room all').toRoomAll(server, 'roomA')
-
-// Broadcast to entire server (all online clients)
-emitWith(emitter.message, emitter)('broadcast').toServer(server)
-```
-
-## Minimal Working Example
-
-Place the following two code segments in your backend project (e.g., NestJS gateway) to run:
-
-```typescript
-// Import statements
-import type { Server, Socket } from 'socket.io'
+```ts
+import { Emit, emitWith } from 'vtzac/typed-emit';
 import {
-  ConnectedSocket,
-  SubscribeMessage,
   WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets'
-import { Emit, emitWith } from 'vtzac/typed-emit'
+  SubscribeMessage,
+  ConnectedSocket,
+} from '@nestjs/websockets';
+import type { Socket } from 'socket.io';
 
-// 1) Define events
-
-class SimpleEmitter {
-  @Emit('ping')
-  ping() {
-    return { message: 'pong' }
+class PingEvents {
+  @Emit('pong')
+  pong() {
+    return { message: 'pong', timestamp: Date.now() };
   }
 }
 
 @WebSocketGateway({ cors: { origin: '*' } })
-class SimpleGateway {
-  private readonly emitter = new SimpleEmitter()
+export class PingGateway {
+  private readonly events = new PingEvents();
 
-  @WebSocketServer()
-  server!: Server
-
-  // When client initiates 'ping', backend replies 'pong' (to that client only)
   @SubscribeMessage('ping')
   handlePing(@ConnectedSocket() client?: Socket) {
-    emitWith(this.emitter.ping, this.emitter)().toClient(client!)
+    emitWith(this.events.pong, this.events)().toClient(client!);
+    console.log('Sent pong response'); // Output: Sent pong response
   }
 }
 ```
 
-## Summary and Recommendations
-
-- Decouple "event definition" from "dispatch location": event classes only care about data structure and event names, gateways are responsible for selecting targets and sending.
-- Always use `emitWith(fn, ctx)(...args)` to get type-safe data and event names, then select dispatch targets, avoiding errors from hand-written strings and objects.
-- Room-related sending requires `client.join(room)` first, choose `toRoom` or `toRoomAll` depending on whether to include the current client.
-
-For more flexible custom dispatch logic, you can use the dispatcher constructor provided by this library:
-
-```typescript
-import { dispatch } from 'vtzac/typed-emit'
-
-const sendTo = dispatch.client(client) // or dispatch.server(server), dispatch.room(client, room)
-sendTo('message', { text: 'hello' })
+```
+// Actual WebSocket events:
+// Client sends: emit 'ping'
+// Server responds: emit 'pong' { message: 'pong', timestamp: 1703123456789 }
 ```
 
-This covers the core usage of sending WebSocket messages from the backend. You can freely extend event classes and gateway handling logic according to your business needs while maintaining type safety for events and data.
+## Summary
+
+- **Event Definition**: Use `@Emit` decorator to define event names and data structures
+- **Message Sending**: Select sending targets (client, room, global) through `emitWith` method
+- **Type Safety**: Maintain type inference throughout, avoiding manual string and object errors

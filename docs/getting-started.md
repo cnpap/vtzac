@@ -1,82 +1,119 @@
-# Getting Started with vtzac
+# Getting Started with vtzac (Quick Setup)
 
-Welcome to vtzac! This is a tool specifically designed for Vite + NestJS full-stack development that automatically generates frontend API client code, enabling seamless type-safe integration between frontend and backend.
+Goal: Use minimal steps to enable Vite frontend to directly call NestJS controller code in a pnpm workspace, with zero additional configuration and easy navigation to backend code.
 
-## What is vtzac?
+## 1. Create Vite + NestJS with pnpm
 
-vtzac provides a complete solution that allows you to:
+Execute in an empty directory:
 
-- 🚀 **Minimal Learning Curve** - Built on familiar Vite and NestJS technology stack
-- 🔒 **Type Safety** - Automatically generates type-safe frontend API clients
-- 🎯 **Unified Development** - Develop both frontend and backend in the same project
+```bash
+mkdir my-vtzac-demo && cd my-vtzac-demo
+pnpm init
 
-## Documentation Navigation
+# Create frontend (using React + TS as example)
+pnpm create vite frontend -- --template react-ts
 
-### 🏗️ Integration Guide
+# Create backend (NestJS example)
+pnpm dlx @nestjs/cli new nestjs-example --package-manager pnpm
+```
 
-#### [Step 1: NestJS Integration](/nestjs-integration)
+Create pnpm workspace configuration file `pnpm-workspace.yaml` in the root directory:
 
-Detailed guide on integrating NestJS backend in your project, including:
+```yaml
+packages:
+  - frontend
+  - nestjs-example
+```
 
-- Project structure setup
-- Dependency installation and configuration
-- TypeScript configuration
-- Development and build process
+## 2. Install vtzac in Vite Project
 
-#### [Step 2: Vite Plugin Integration](/vite-plugin-integration)
+```bash
+cd frontend
+pnpm add vtzac
+```
 
-Learn how to configure the vtzac Vite plugin:
+Add plugin to `vite.config.ts` using default configuration:
 
-- Plugin installation and basic configuration
-- Glob pattern configuration
-- Automatic API client code generation
+```ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import vtzac from 'vtzac';
 
-### 📚 Usage Guide
+export default defineConfig({
+  plugins: [vtzac(), react()],
+});
+```
 
-#### [Parameter Handling Examples](/guide/params-usage)
+## 3. Reference Backend Example in Frontend Project
 
-Learn how to handle various types of API parameters:
+Add backend project as workspace dependency to frontend `package.json`:
 
-- No-parameter interfaces
-- Path parameters (`@Param`)
-- Query parameters (`@Query`)
-- Request body parameters (`@Body`)
-- Combined parameter usage
+```json
+{
+  "dependencies": {
+    "nestjs-example": "workspace:*"
+  }
+}
+```
 
-#### [File Upload Examples](/guide/file-upload-usage)
+At this point, frontend can directly import backend controller types and make type-safe calls.
 
-Master file upload functionality implementation:
+## 4. Example: Zero-Configuration Direct Backend Controller Calls
 
-- Single file upload
-- Multiple file upload
-- File upload combined with other parameters
-- Frontend file selection and upload
+**Backend Controller Example:**
 
-#### [Important Notes](/guide/notes)
+```ts
+import { Controller, Get } from '@nestjs/common';
 
-Important development considerations and best practices:
+@Controller('api')
+export class AppController {
+  @Get('hello')
+  getHello(): string {
+    return 'Hello World!';
+  }
+}
+```
 
-- Parameter order best practices
-- Headers parameter handling
-- Type safety recommendations
-- Performance optimization tips
+**Frontend Call Example:**
 
-### 🔧 Troubleshooting
+```ts
+import { _http } from 'vtzac/hook';
+import { AppController } from 'nestjs-example/src/app.controller';
 
-#### [Common Issues and Solutions](/troubleshooting)
+// Create controller instance (specify backend address)
+const defaultController = _http(AppController, {
+  ofetchOptions: {
+    baseURL: 'http://localhost:3001',
+    timeout: 5000,
+  },
+});
 
-Problem-solving guide when encountering issues:
+// Directly call backend methods in a type-safe manner
+const res = await defaultController.getHello();
+console.log(res._data); // Output: 'Hello World!'
+```
 
-- Decorator-related errors
-- TypeScript configuration issues
-- Dependency injection problems
-- Build and runtime errors
+```
+// Actual request made:
+// GET /api/hello
+// Returned content:
+// 'Hello World!'
+```
 
-## Next Steps
+No need to write any additional API client code; vtzac automatically generates corresponding frontend call code and type bindings during build time. The `getHello()` call you see in the frontend will be transformed into the above HTTP request, providing type-safe return value access through `res._data`.
 
-- If you're using this for the first time, we recommend starting with [NestJS Integration](/nestjs-integration)
-- If you've already integrated NestJS in your Vite project, you can directly check [Vite Plugin Integration](/vite-plugin-integration)
-- To understand specific usage, check the [Usage Guide](/guide/params-usage) section
-- When encountering problems, please refer to the [Troubleshooting](/troubleshooting) documentation
+## 5. Start and Verify
 
-Start your vtzac full-stack development journey! 🎉
+Start backend and frontend separately:
+
+```bash
+# Start NestJS backend (default port 3001)
+pnpm --filter nestjs-example start
+
+# Start Vite frontend
+pnpm --filter frontend dev
+```
+
+Access the frontend page in browser and trigger the example call. If the backend returns `Hello World!`, the basic setup is complete.
+
+At this point, we have completed the most basic usage. You can refer to the example code in the project to learn more about additional features.

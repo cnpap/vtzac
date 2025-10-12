@@ -1,18 +1,13 @@
-# File Upload Use Cases
+# File Upload
 
-## Single File Upload
+vtzac supports multiple file upload methods, allowing you to handle file upload functionality in a **type-safe** manner.
 
-### Backend Implementation
+## Single File: Basic File Upload
+
+**Backend Controller Example:**
 
 ```typescript
-import {
-  Body,
-  Controller,
-  Post,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common'
-import { FileInterceptor } from '@nestjs/platform-express'
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('api/upload')
 export class UploadController {
@@ -27,47 +22,54 @@ export class UploadController {
       filename: file.originalname,
       size: file.size,
       metadata,
-    }
+    };
   }
 }
 ```
 
-### Frontend Usage
+**Frontend Usage Example:**
 
 ```tsx
-import { _http } from 'vtzac/hook'
-import { UploadController } from './backend/upload.controller'
+import { _http } from 'vtzac/hook';
+import { UploadController } from './backend/upload.controller';
 
+// Create upload controller instance
 const uploadController = _http(UploadController, {
   ofetchOptions: {
     baseURL: 'http://localhost:3001',
   },
-})
+});
 
 async function handleSingleUpload(file: File) {
-  const res = await uploadController
-    .uploadSingle(
-      file as unknown as Express.Multer.File, // File object
-      { description: 'Test file' } // Metadata
-    )
-    .catch(error => console.error('Single file upload failed:', error))
+  // Directly pass file object and metadata
+  const res = await uploadController.uploadSingle(
+    file as unknown as Express.Multer.File,
+    { description: 'Test file' }
+  );
 
-  console.log(res._data)
+  console.log(res._data);
   // Output: { success: true, filename: 'test.txt', size: 1024, metadata: { description: 'Test file' } }
 }
 ```
 
-## Multiple File Upload
+```
+// Actual request sent:
+// POST /api/upload/single
+// Content-Type: multipart/form-data
+// Contains file data and metadata
+```
 
-### Backend Implementation
+## Multiple Files: Batch File Upload
+
+**Backend Controller Example:**
 
 ```typescript
-import { FilesInterceptor } from '@nestjs/platform-express'
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('api/upload')
 export class UploadController {
   @Post('multiple')
-  @UseInterceptors(FilesInterceptor('files', 5)) // Maximum 5 files
+  @UseInterceptors(FilesInterceptor('files', 5))
   uploadMultiple(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() metadata?: any
@@ -80,48 +82,54 @@ export class UploadController {
         size: file.size,
       })),
       metadata,
-    }
+    };
   }
 }
 ```
 
-### Frontend Usage
+**Frontend Usage Example:**
 
 ```tsx
 async function handleMultipleUpload(files: File[]) {
-  const res = await uploadController
-    .uploadMultiple(
-      files as unknown as Express.Multer.File[], // File array
-      { description: 'Batch upload' } // Metadata
-    )
-    .catch(error => console.error('Multiple file upload failed:', error))
+  // Pass file array and metadata
+  const res = await uploadController.uploadMultiple(
+    files as unknown as Express.Multer.File[],
+    { description: 'Batch upload' }
+  );
 
-  console.log(res._data)
-  // Output: { success: true, count: 3, files: [...], metadata: { description: 'Batch upload' } }
+  console.log(res._data);
+  // Output: { success: true, count: 3, files: [{ filename: 'file1.txt', size: 1024 }, ...], metadata: { description: 'Batch upload' } }
 }
 ```
 
-## Named Multiple File Upload
+```
+// Actual request sent:
+// POST /api/upload/multiple
+// Content-Type: multipart/form-data
+// Contains multiple files and metadata, maximum 5 files
+```
 
-### Backend Implementation
+## Categorized Upload: Different File Types Grouped
+
+**Backend Controller Example:**
 
 ```typescript
-import { FileFieldsInterceptor } from '@nestjs/platform-express'
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('api/upload')
 export class UploadController {
-  @Post('named-multiple')
+  @Post('categorized')
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'documents', maxCount: 3 },
       { name: 'images', maxCount: 2 },
     ])
   )
-  uploadNamedMultiple(
+  uploadCategorized(
     @UploadedFiles()
     files: {
-      documents?: Express.Multer.File[]
-      images?: Express.Multer.File[]
+      documents?: Express.Multer.File[];
+      images?: Express.Multer.File[];
     },
     @Body() metadata?: any
   ) {
@@ -138,26 +146,34 @@ export class UploadController {
           size: file.size,
         })) || [],
       metadata,
-    }
+    };
   }
 }
 ```
 
-### Frontend Usage
+**Frontend Usage Example:**
 
 ```tsx
-async function handleNamedUpload(documents: File[], images: File[]) {
-  const res = await uploadController
-    .uploadNamedMultiple(
-      {
-        documents: documents as unknown as Express.Multer.File[],
-        images: images as unknown as Express.Multer.File[],
-      },
-      { description: 'Categorized upload' }
-    )
-    .catch(error => console.error('Named multiple file upload failed:', error))
+async function handleCategorizedUpload(documents: File[], images: File[]) {
+  // Upload files grouped by type
+  const res = await uploadController.uploadCategorized(
+    {
+      documents: documents as unknown as Express.Multer.File[],
+      images: images as unknown as Express.Multer.File[],
+    },
+    { description: 'Categorized upload' }
+  );
 
-  console.log(res._data)
+  console.log(res._data);
   // Output: { success: true, documents: [...], images: [...], metadata: { description: 'Categorized upload' } }
 }
 ```
+
+```
+// Actual request sent:
+// POST /api/upload/categorized
+// Content-Type: multipart/form-data
+// Maximum 3 document files, maximum 2 image files
+```
+
+vtzac automatically handles the `multipart/form-data` format conversion for file uploads, ensuring that files and metadata are correctly passed to the backend while maintaining **type safety**.

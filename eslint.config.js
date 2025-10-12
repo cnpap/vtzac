@@ -5,11 +5,13 @@ export default antfu(
   {
     type: 'lib',
     pnpm: true,
-    // 明确排除子项目目录，避免 tsconfigRootDir 冲突
+    // 明确排除子项目目录和 README 文件，避免 tsconfigRootDir 冲突
     ignores: [
       'playground/**/*',
       'examples/**/*',
       'docs/**/*',
+      'README.md',
+      'README.zh.md',
     ],
     typescript: {
       tsconfigPath: './tsconfig.json',

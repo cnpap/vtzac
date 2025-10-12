@@ -27,25 +27,17 @@ export default defineConfig({
         ],
         sidebar: [
           {
-            text: 'Getting Started',
+            text: 'Quick Start',
             items: [
-              { text: 'Quick Start', link: '/getting-started' },
-              { text: '[Step1]NestJS Integration', link: '/nestjs-integration' },
-              { text: '[Step2]Vite Plugin Integration', link: '/vite-plugin-integration' },
+              { text: 'Introduction', link: '/intro' },
+              { text: 'Getting Started', link: '/getting-started' },
             ],
           },
           {
-            text: 'How It Works',
+            text: 'User Guide',
             items: [
-              { text: 'Transformation Logic', link: '/how-it-works' },
-            ],
-          },
-          {
-            text: 'Guide',
-            items: [
-              { text: '[Important]Notes', link: '/guide/notes' },
+              { text: '[Must Read] Notes', link: '/guide/notes' },
               { text: 'Configuration', link: '/guide/configuration' },
-              { text: 'Troubleshooting', link: '/troubleshooting' },
             ],
           },
           {
@@ -58,8 +50,8 @@ export default defineConfig({
           {
             text: 'WebSocket',
             items: [
-              { text: 'Backend Message Sending', link: '/guide/websocket-backend-emit' },
-              { text: 'Frontend-Backend Mutual Calls', link: '/guide/websocket-mutual-call' },
+              { text: 'Backend Message Emit', link: '/guide/websocket-backend-emit' },
+              { text: 'Mutual Calls', link: '/guide/websocket-mutual-call' },
             ],
           },
         ],
@@ -81,15 +73,8 @@ export default defineConfig({
           {
             text: '快速开始',
             items: [
+              { text: '项目介绍', link: '/zh/intro' },
               { text: '开始', link: '/zh/getting-started' },
-              { text: '[步骤1]集成 NestJS', link: '/zh/nestjs-integration' },
-              { text: '[步骤2]集成 Vite 插件', link: '/zh/vite-plugin-integration' },
-            ],
-          },
-          {
-            text: '工作原理',
-            items: [
-              { text: '转换逻辑', link: '/zh/how-it-works' },
             ],
           },
           {
@@ -97,7 +82,6 @@ export default defineConfig({
             items: [
               { text: '[必读]注意事项', link: '/zh/guide/notes' },
               { text: '配置说明', link: '/zh/guide/configuration' },
-              { text: '故障排除', link: '/zh/troubleshooting' },
             ],
           },
           {

@@ -1,54 +1,42 @@
 # Configuration
 
-This guide covers how to configure vtzac for optimal performance and customization.
+## HTTP: Instance Configuration and Global Configuration
 
-## API Configuration
+### Basic Configuration
 
-### Basic Usage
-
-The `zac` function accepts two parameters: a controller class or instance, and optional configuration options.
+**Frontend Configuration Example:**
 
 ```typescript
-import { _http, setGlobalZacOfetchOptions } from 'vtzac/hook'
-import { UserController } from './controllers/user.controller'
+import { _http, setGlobalZacOfetchOptions } from 'vtzac/hook';
+import { UserController } from './controllers/user.controller';
 
-// Method 1: Pass controller class with options
+// Create controller instance (specify backend URL and timeout)
 const api = _http(UserController, {
   ofetchOptions: {
     baseURL: 'https://api.example.com',
     timeout: 5000,
   },
-})
+});
 
-// Method 2: Pass controller instance
-const api2 = _http(new UserController())
+// Call backend method
+const user = await api.getUser('123');
+console.log(user._data); // Output: { id: '123', name: 'Alice' }
 ```
 
-### Configuration Options
-
-#### ZacHttpOptions Interface
-
-```typescript
-interface ZacHttpOptions {
-  ofetchOptions?: FetchOptions<any>
-}
+```
+// Actual request sent:
+// GET https://api.example.com/api/user/123
+// Timeout: 5000ms
 ```
 
-The `ofetchOptions` field accepts all standard ofetch configuration options.
+### Global Configuration
 
-::: tip
-For complete documentation on all available options and interceptors, please refer to the [official ofetch documentation](https://github.com/unjs/ofetch).
-:::
-
-## Global Configuration
-
-### Setting Global Options
-
-Use `setGlobalZacOfetchOptions` to set default configuration for all API calls:
+**Global Configuration Example:**
 
 ```typescript
-import { setGlobalZacOfetchOptions } from 'vtzac/hook'
+import { setGlobalZacOfetchOptions } from 'vtzac/hook';
 
+// Set global default configuration
 setGlobalZacOfetchOptions({
   baseURL: 'https://api.example.com',
   timeout: 5000,
@@ -56,40 +44,112 @@ setGlobalZacOfetchOptions({
     'Content-Type': 'application/json',
   },
   retry: 3,
-})
+});
+
+// All subsequent _http calls will use these default configurations
+const api = _http(UserController); // Automatically uses global configuration
 ```
 
 ## Configuration Priority
 
-Configuration options are merged in the following order (later options override earlier ones):
+Configuration options are merged in the following order:
 
-1. **Global configuration** - Options set via `setGlobalZacOfetchOptions()` (base layer)
-2. **Instance configuration** - Options passed to `_http()` function (overrides global)
+1. **Global configuration**: Set via `setGlobalZacOfetchOptions()`
+2. **Instance configuration**: Passed to `_http()` function (overrides global configuration)
 
-The merging follows JavaScript object spread syntax: `{ ...globalOptions, ...instanceOptions }`
+**Configuration Merging Example:**
+
+```typescript
+// Global configuration
+setGlobalZacOfetchOptions({
+  baseURL: 'https://api.example.com',
+  timeout: 3000,
+  retry: 1,
+});
+
+// Instance configuration (overrides global timeout and retry)
+const api = _http(UserController, {
+  ofetchOptions: {
+    timeout: 8000,
+    retry: 5,
+  },
+});
+
+// Final effective configuration:
+// baseURL: 'https://api.example.com' (from global)
+// timeout: 8000 (from instance, overrides global)
+// retry: 5 (from instance, overrides global)
+```
 
 ## Interceptors
 
-vtzac supports all ofetch interceptors for hooking into the request/response lifecycle.
+### Request Interceptor
 
-### Available Interceptors
+**Authentication Interceptor Example:**
 
-- **`onRequest`** - Called before sending the request
-- **`onRequestError`** - Called when request fails
-- **`onResponse`** - Called after receiving response
-- **`onResponseError`** - Called when response has an error status
+```typescript
+const api = _http(UserController, {
+  ofetchOptions: {
+    baseURL: 'https://api.example.com',
+    onRequest({ request, options }) {
+      // Automatically add auth token
+      const token = localStorage.getItem('auth-token');
+      if (token) {
+        options.headers = {
+          ...options.headers,
+          Authorization: `Bearer ${token}`,
+        };
+      }
+      console.log('Sending request:', request); // Output: Sending request: https://api.example.com/api/user/123
+    },
+  },
+});
+```
 
-### Interceptor Parameters
+### Response Interceptor
 
-Each interceptor receives different parameters based on its type. For detailed information about interceptor usage, parameters, and advanced patterns, see the [ofetch interceptors documentation](https://github.com/unjs/ofetch#interceptors).
+**Error Handling Interceptor Example:**
 
-## Common Use Cases
+```typescript
+const api = _http(UserController, {
+  ofetchOptions: {
+    onResponseError({ response }) {
+      if (response.status === 401) {
+        // Automatically redirect to login page
+        window.location.href = '/login';
+        console.log('Authentication failed, redirecting to login'); // Output: Authentication failed, redirecting to login
+      }
+    },
+    onResponse({ response }) {
+      console.log('Response status:', response.status); // Output: Response status: 200
+    },
+  },
+});
+```
 
-vtzac supports various configuration scenarios through ofetch options:
+## Common Configuration Scenarios
 
-- **Development Environment** - Configure local development settings with extended timeouts and request/response logging
-- **Production Environment** - Set production API endpoints with appropriate timeouts and retry policies
-- **Authentication** - Add authentication tokens through request interceptors
-- **Error Handling** - Handle different error scenarios using response error interceptors
+### Development Environment Configuration
 
-For specific implementation examples and patterns, please refer to the [ofetch documentation](https://github.com/unjs/ofetch).
+```typescript
+setGlobalZacOfetchOptions({
+  baseURL: 'http://localhost:3001',
+  timeout: 10000, // Extend timeout for development environment
+  onRequest({ request }) {
+    console.log('Development request:', request); // Output: Development request: http://localhost:3001/api/user
+  },
+});
+```
+
+### Production Environment Configuration
+
+```typescript
+setGlobalZacOfetchOptions({
+  baseURL: 'https://api.production.com',
+  timeout: 5000,
+  retry: 3, // Enable retry in production environment
+  onRequestError({ error }) {
+    console.error('Request failed:', error.message); // Output: Request failed: Network Error
+  },
+});
+```

@@ -1,78 +1,106 @@
-# Important Notes
+# Best Practices
 
-## Parameter Order Best Practices
-
-When using vtzac, to achieve the best development experience and type safety, it is recommended to follow these parameter order conventions:
+## Parameter Order: Required First, Optional Last
 
 ### Parameter Order Rules
 
-1. **Required parameters first**: `@Param`, `@Body`, `@Query` and other business-required parameters
-2. **Optional parameters last**: `@Headers`, `@Res`, `@Req` and other framework-related parameters
+1. **Required parameters first**: `@Param`, `@Body`, `@Query` and other business parameters
+2. **Optional parameters last**: `@Headers`, `@Res`, `@Req` and other framework parameters
 
-### Headers Parameter Handling
-
-Since Headers can usually be injected through middleware or global configuration, it is recommended to place `@Headers` parameters last and make them optional:
+**Backend Controller Example:**
 
 ```typescript
 @Controller('api/test')
 export class TestController {
-  // ✅ Recommended: Headers parameter last and optional
+  // ✅ Recommended: Headers parameter is optional and placed last
   @Get('user/:id')
   getUser(
     @Param('id') id: string,
     @Query('include') include?: string,
     @Headers('authorization') auth?: string // Optional, placed last
   ) {
-    return { id, include, auth }
-  }
-
-  // ❌ Not recommended: Headers parameter in front
-  @Get('user/:id')
-  getUserBad(
-    @Headers('authorization') auth: string, // Not recommended position, as valid headers might be passed by interceptors rather than function calls
-    @Param('id') id: string,
-    @Query('include') include?: string
-  ) {
-    return { id, include, auth }
+    return { id, include, auth };
   }
 }
 ```
 
-### Response and Request Objects
+**Frontend Usage Example:**
 
-When you need to use `@Res` or `@Req`, you must follow these rules:
+```typescript
+import { _http } from 'vtzac/hook';
+import { TestController } from './backend/test.controller';
 
-#### Response Object Usage
+const api = _http(TestController, {
+  ofetchOptions: { baseURL: 'http://localhost:3001' },
+});
+
+// Only pass required parameters, Headers handled by interceptor
+const res = await api.getUser('123', 'profile');
+console.log(res._data); // Output: { id: '123', include: 'profile', auth: 'Bearer token' }
+```
+
+```
+// Actual request sent:
+// GET /api/test/user/123?include=profile
+// Headers: { authorization: 'Bearer token' }
+```
+
+## Response Object: Use passthrough for Type Safety
+
+### Correct Usage
+
+**Backend Controller Example:**
 
 ```typescript
 @Controller('api/test')
 export class TestController {
-  // ✅ Correct: Use passthrough: true and make it optional
+  // ✅ Correct: Use passthrough: true and set as optional parameter
   @Post('create')
   createItem(
     @Body() data: any,
     @Res({ passthrough: true }) response?: Response
   ) {
-    // Can use response object to set status code
-    response!.status(201)
+    // Set status code
+    response!.status(201);
 
-    // Must use return to return data to ensure type safety
-    return { success: true, data }
-  }
-
-  // ❌ Wrong: Not using passthrough: true
-  @Post('create-bad')
-  createItemBad(
-    @Body() data: any,
-    @Res() response?: Response // Missing passthrough: true
-  ) {
-    response!.status(201).json({ success: true, data })
-    // This will lose type safety
+    // Must use return to ensure type safety
+    return { success: true, data };
   }
 }
 ```
 
-#### Request Object Usage
+**Frontend Usage Example:**
+
+```typescript
+// Response object doesn't need to be passed from frontend
+const res = await api.createItem({ name: 'New Project' });
+console.log(res._data); // Output: { success: true, data: { name: 'New Project' } }
+```
+
+```
+// Actual request sent:
+// POST /api/test/create
+// Body: { name: 'New Project' }
+// Response status: 201
+```
+
+### Incorrect Usage
+
+```typescript
+// ❌ Wrong: Not using passthrough: true
+@Post('create-bad')
+createItemBad(
+  @Body() data: any,
+  @Res() response?: Response // Missing passthrough: true
+) {
+  response!.status(201).json({ success: true, data })
+  // This loses type safety, frontend cannot get correct type inference
+}
+```
+
+## Request Object: Getting Request Information
+
+**Backend Controller Example:**
 
 ```typescript
 @Controller('api/test')
@@ -82,68 +110,77 @@ export class TestController {
     @Query('type') type?: string,
     @Req() request?: Request // Optional parameter, placed last
   ) {
-    const userAgent = request?.headers['user-agent']
-    return { type, userAgent }
+    const userAgent = request?.headers['user-agent'];
+    return { type, userAgent };
   }
 }
 ```
 
-### Frontend Usage Example
+**Frontend Usage Example:**
 
-Following the parameter order rules, frontend calls become more intuitive:
+```typescript
+const res = await api.getInfo('mobile');
+console.log(res._data); // Output: { type: 'mobile', userAgent: 'Mozilla/5.0...' }
+```
 
-```tsx
-import { _http } from 'vtzac/hook'
-import { TestController } from './backend/test.controller'
+## Headers Parameters: Handle via Interceptors
 
-const testController = _http(TestController, {
+### Recommended Approach
+
+Set `@Headers` parameters as optional and inject automatically via interceptors:
+
+**Backend Controller Example:**
+
+```typescript
+@Controller('api/user')
+export class UserController {
+  @Get('profile')
+  getProfile(
+    @Headers('authorization') auth?: string // Optional, injected by interceptor
+  ) {
+    // auth will be automatically passed by interceptor
+    return { profile: 'user data', auth };
+  }
+}
+```
+
+**Frontend Configuration Example:**
+
+```typescript
+const api = _http(UserController, {
   ofetchOptions: {
-    baseURL: 'http://localhost:3001',
+    onRequest({ options }) {
+      // Automatically add auth token
+      const token = localStorage.getItem('auth-token');
+      if (token) {
+        options.headers = {
+          ...options.headers,
+          authorization: `Bearer ${token}`,
+        };
+      }
+    },
   },
-})
+});
 
-async function handleGetUser() {
-  // Only pass required parameters, Headers handled by middleware
-  const res = await testController
-    .getUser('123', 'profile')
-    .catch(error => console.error('Request failed:', error))
-
-  console.log(res._data)
-}
-
-async function handleCreateItem() {
-  // Response object doesn't need to be passed from frontend
-  const res = await testController
-    .createItem({ name: 'New project' })
-    .catch(error => console.error('Request failed:', error))
-
-  console.log(res._data) // Type-safe return data
-}
+// Frontend call doesn't need to pass Headers
+const res = await api.getProfile();
+console.log(res._data); // Output: { profile: 'user data', auth: 'Bearer token123' }
 ```
 
 ## Type Safety Key Points
 
-### Using passthrough: true
+### Importance of passthrough: true
 
-When using the `@Res` decorator, you must set `{ passthrough: true }`, which allows:
+Using `@Res({ passthrough: true })` enables:
 
-1. Maintaining NestJS's normal response handling flow
-2. Using `return` statements to return data
-3. Ensuring the frontend gets correct type inference
+1. **Maintain response flow**: NestJS handles response normally
+2. **Support return statements**: Can return data to frontend
+3. **Ensure type inference**: Frontend gets correct type information
 
-### Using Optional Parameters
+### Benefits of Optional Parameters
 
-Benefits of making framework-related parameters optional (`?`):
+Setting framework parameters as optional (`?`) provides:
 
-1. Frontend doesn't need to pass these parameters when calling
-2. Backend can inject these values through interceptors or other means
-3. Improves code flexibility and maintainability
-
-## Summary
-
-Following these best practices can:
-
-- Improve code readability and maintainability
-- Ensure type safety
-- Simplify frontend calling logic
-- Provide better development experience
+1. **Simplified frontend calls**: No need to pass framework-related parameters
+2. **Flexible injection**: Backend can inject values via interceptors
+3. **Better maintainability**: Reduces frontend-backend coupling

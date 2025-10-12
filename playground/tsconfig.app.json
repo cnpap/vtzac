@@ -8,10 +8,6 @@
     "types": ["vite/client", "multer"],
     "skipLibCheck": true,
 
-    /* Decorator support */
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

@@ -28,7 +28,7 @@ features:
       src: '/electron.svg'
       width: '48'
       height: '48'
-    title: 客户端应用开发
+    title: 客户端应用开发（规划中）
     details: NestJS + Vite 为核心，一套代码同时适配 Web 与 Electron 客户端；几乎零成本把 NestJS 运行在 Electron 中，无需额外适配，效率至少提升 100%
 ---
 
@@ -55,7 +55,7 @@ export class UserController {
       version,
       filename: file.filename,
       metadata,
-    }
+    };
   }
 }
 ```
@@ -65,16 +65,15 @@ export class UserController {
 <template #right>
 
 ```tsx
-import { _http } from 'vtzac/hook'
-import { UserController } from './backend/user.controller'
+import { _http } from 'vtzac/hook';
+import { UserController } from './backend/user.controller';
 
-const api = _http(UserController)
+const api = _http(UserController);
 
 function UploadComponent() {
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] // File 类型
-    if (!file)
-      return
+    const file = event.target.files?.[0]; // File 类型
+    if (!file) return;
 
     // 类型安全调用
     // 实际请求: POST /api/user/123/upload?version=v2
@@ -83,13 +82,13 @@ function UploadComponent() {
       'v2', // @Query('version')
       file as unknown as Express.Multer.File, // @UploadedFile()
       { title: '头像' } // @Body()
-    )
+    );
 
-    console.log(result._data)
+    console.log(result._data);
     // 打印出: { success: true, userId: '123', version: 'v2', filename: 'avatar.jpg', metadata: { title: '头像' } }
-  }
+  };
 
-  return <input type="file" onChange={handleUpload} />
+  return <input type="file" onChange={handleUpload} />;
 }
 ```
 

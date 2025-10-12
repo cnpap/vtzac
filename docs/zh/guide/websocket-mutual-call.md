@@ -1,241 +1,246 @@
-# WebSocket 前后端相互调用
+# WebSocket：前后端双向通信
 
-目标：让你快速掌握"怎么用"——前端如何调用后端、后端如何推送到前端，并保持类型安全。原理性讲解不展开，直接给清晰可复用的用法范式。
+## 概述
 
-## 用法总览
+实现前端与后端的**类型安全**双向通信，支持前端调用后端方法、后端推送消息到前端，并提供完整的类型推断。
 
-- 后端事件类：用 `@Emit('event')` 声明事件与数据结构（后端→前端）。
-- 后端网关：用 `@SubscribeMessage('event')` 声明可被前端调用的行为（前端→后端）。
-- 前端连接与 API：用 `_socket(url, GatewayClass, options)` 直接获取 `emitter` 实例和 `createListener` 方法，对应"调用后端"和"监听事件"。
-- 派发语法糖：用 `emitWith(fn, ctx)(...args)` 获取事件名与数据，再选择 `.toClient .toServer .toRoom .toRoomAll`。
+## 核心功能
 
-## 接入步骤（后端）
+- **前端调用后端**：通过 `emitter` 直接调用后端网关方法
+- **后端推送前端**：使用 `emitWith` 向不同目标发送类型安全的消息
+- **事件监听**：前端通过 `createListener` 监听后端推送的事件
+- **请求响应**：支持带 ACK 的请求-响应模式
 
-1. 定义事件类（给前端的消息、结构清晰、可复用）：
+## 后端实现
+
+### 事件定义
+
+**事件定义示例：**
 
 ```ts
-import { Emit } from 'vtzac/typed-emit'
+import { Emit } from 'vtzac/typed-emit';
 
-export class ServerEvents {
+export class ChatEvents {
   @Emit('welcome')
   welcome(nickname: string) {
     return {
       message: `欢迎 ${nickname}!`,
-      timestamp: new Date().toISOString(),
-    }
+      timestamp: Date.now(),
+    };
+  }
+
+  @Emit('message')
+  message(text: string) {
+    return { text, timestamp: Date.now() };
   }
 
   @Emit('pong')
   pong() {
-    return { message: 'pong', timestamp: new Date().toISOString() }
-  }
-
-  @Emit('error')
-  error(code: string, msg: string) {
-    return { code, message: msg, timestamp: new Date().toISOString() }
+    return { message: 'pong', timestamp: Date.now() };
   }
 }
 ```
 
-2. 定义网关（前端可调用的行为、派发目标明确）：
+### 网关实现
+
+**后端网关示例：**
 
 ```ts
-import type { Server, Socket } from 'socket.io'
+import type { Server, Socket } from 'socket.io';
 import {
   ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-} from '@nestjs/websockets'
-import { emitWith } from 'vtzac/typed-emit'
-import { ServerEvents } from './server-events'
+} from '@nestjs/websockets';
+import { emitWith } from 'vtzac/typed-emit';
+import { ChatEvents } from './chat-events';
 
 @WebSocketGateway({ cors: { origin: '*' } })
-export class ActionGateway {
-  private readonly events = new ServerEvents()
+export class ChatGateway {
+  private readonly events = new ChatEvents();
 
   @WebSocketServer()
-  server!: Server
+  server!: Server;
 
-  // 新连接欢迎：仅发给当前客户端
+  // 新客户端连接时发送欢迎消息
   handleConnection(client: Socket): void {
-    const nick = `用户${client.id.slice(-4)}`
-    emitWith(this.events.welcome, this.events)(nick).toClient(client)
+    const nickname = `用户${client.id.slice(-4)}`;
+    emitWith(this.events.welcome, this.events)(nickname).toClient(client);
+    // 实际会发送的事件：
+    // emit 'welcome' { message: '欢迎 用户1234!', timestamp: 1703123456789 }
   }
 
-  // 心跳：前端发起 'ping'，后端回复 'pong'
+  // 心跳检测
   @SubscribeMessage('ping')
   handlePing(@ConnectedSocket() client?: Socket): void {
-    emitWith(this.events.pong, this.events)().toClient(client!)
+    emitWith(this.events.pong, this.events)().toClient(client!);
+    // 实际会发送的事件：
+    // emit 'pong' { message: 'pong', timestamp: 1703123456789 }
   }
 
-  // 广播消息：前端发起 'say'，后端广播给所有在线用户
+  // 广播消息
   @SubscribeMessage('say')
   handleSay(@MessageBody() data: { text: string }): void {
-    emitWith(
-      this.events.welcome,
-      this.events
-    )(`系统：${data.text}`).toServer(this.server)
+    emitWith(this.events.message, this.events)(data.text).toServer(this.server);
+    // 实际会发送的事件：
+    // 向所有客户端广播 'message' { text: 'Hello everyone!', timestamp: 1703123456789 }
   }
 
-  // 加入房间并通知所有房间成员（含自己）
+  // 加入房间
   @SubscribeMessage('joinRoom')
   handleJoinRoom(
     @MessageBody() room: string,
     @ConnectedSocket() client?: Socket
   ) {
-    client!.join(room)
+    client!.join(room); // 先加入房间
     emitWith(
-      this.events.welcome,
+      this.events.message,
       this.events
-    )(`加入房间 ${room}`).toRoomAll(this.server, room)
+    )(`已加入房间 ${room}`).toRoomAll(this.server, room);
+    // 实际会发送的事件：
+    // 向房间中的所有客户端发送 'message' 事件
   }
 }
 ```
 
-## 接入步骤（前端）
+## 前端实现
+
+**前端调用示例：**
 
 ```ts
-import { _socket } from 'vtzac/hook'
-import { ActionGateway } from './action.gateway'
-import { ServerEvents } from './server-events'
+import { _socket } from 'vtzac/hook';
+import { ChatGateway } from './chat.gateway';
+import { ChatEvents } from './chat-events';
 
-// 建立连接，直接传入网关类
+// 建立连接
 const { emitter, createListener, socket, disconnect } = _socket(
   'http://localhost:3001',
-  ActionGateway,
+  ChatGateway,
   {
     socketIoOptions: { transports: ['websocket'] },
   }
-)
+);
 
-// emitter 就是网关实例，可直接调用方法
-// 调用后端行为
-emitter.handlePing()
-emitter.handleSay({ text: '大家好！' })
-emitter.handleJoinRoom('room-1')
+// 调用后端方法
+emitter.handlePing();
+console.log('发送心跳'); // 输出：发送心跳
+
+emitter.handleSay({ text: 'Hello everyone!' });
+console.log('发送消息'); // 输出：发送消息
+
+emitter.handleJoinRoom('room1');
+console.log('加入房间'); // 输出：加入房间
 
 // 创建事件监听器
-const events = createListener(ServerEvents) // 后端 -> 前端（监听事件）
+const events = createListener(ChatEvents);
 
-// 监听后端事件
-events.pong(data => console.log('心跳响应:', data))
-events.welcome(data => console.log('欢迎消息:', data))
+// 监听后端推送的事件
+events.pong(data => {
+  console.log('收到心跳响应:', data);
+  // 输出：收到心跳响应: { message: 'pong', timestamp: 1703123456789 }
+});
 
-// 演示完成后断开
-setTimeout(() => disconnect(), 10_000)
+events.welcome(data => {
+  console.log('收到欢迎消息:', data);
+  // 输出：收到欢迎消息: { message: '欢迎 用户1234!', timestamp: 1703123456789 }
+});
+
+events.message(data => {
+  console.log('收到消息:', data);
+  // 输出：收到消息: { text: 'Hello everyone!', timestamp: 1703123456789 }
+});
+
+// 断开连接
+setTimeout(() => disconnect(), 10000);
 ```
 
-## 常见场景与技巧
+```
+// 实际会发起的 WebSocket 事件：
+// emit 'ping' (无数据)
+// emit 'say' { text: 'Hello everyone!' }
+// emit 'joinRoom' 'room1'
+// 监听事件：'pong', 'welcome', 'message'
+```
 
-- 请求-响应（带 Ack）：后端网关方法如果 `return` 值，前端会走 `emitWithAck`，返回 `Promise<类型>`。
+## 高级功能
+
+### 请求响应模式
+
+后端方法返回值时，前端调用会返回 `Promise`：
+
+**后端 ACK 响应示例：**
 
 ```ts
-// 后端
 @WebSocketGateway()
-class ActionGateway {
+export class ChatGateway {
   @SubscribeMessage('getOnlineCount')
   handleGetOnlineCount() {
-    return { count: this.onlineUsers.size }
-  }
-}
-
-// 前端
-const { emitter } = _socket('http://localhost:3001', ActionGateway)
-const result = await emitter.handleGetOnlineCount() // 返回 Promise<{ count: number }>
-console.log('在线人数:', result.count)
-```
-
-- 广播与房间：选择合适目标；房间发送前先 `client.join(room)`。
-
-```ts
-emitWith(events.welcome, events)('全站公告').toServer(server)
-emitWith(events.welcome, events)('房间公告').toRoomAll(server, 'room-1')
-```
-
-- 点对点发送：拿到目标客户端后使用 `.toClient(client)`；常见做法是维护 `userId -> Socket` 映射。
-
-```ts
-// 伪代码：私聊
-class Xxx {
-  @SubscribeMessage('private')
-  sendPrivate(
-    @MessageBody() data: { toUserId: string, text: string },
-    @ConnectedSocket() client?: Socket
-  ) {
-    const target = this.userSockets.get(data.toUserId)
-    if (!target) {
-      return emitWith(this.events.error, this.events)(
-        'NOT_FOUND',
-        '对方不在线'
-      ).toClient(client!)
-    }
-    emitWith(
-      this.events.welcome,
-      this.events
-    )(`私聊：${data.text}`).toClient(target)
+    return { count: 42 }; // 返回在线人数
   }
 }
 ```
 
-- 错误处理：统一事件结构，配合前端集中监听。
+**前端 ACK 调用示例：**
 
 ```ts
-try {
-  /* ... */
-}
-catch (e) {
-  emitWith(this.events.error, this.events)('SERVER_ERROR', '发生错误').toClient(
-    client!
-  )
-}
-
-events.error((data) => {
-  /* 前端集中提示 */
-})
+const { emitter } = _socket('http://localhost:3001', ChatGateway);
+// 如果有返回值则会自动调整为 emitWithAck 调用
+const result = await emitter.handleGetOnlineCount();
+console.log('在线人数:', result.count); // 输出：在线人数: 42
 ```
 
-- 命名空间：网关支持 `namespace`，前端传入网关类即可自动识别命名空间。
+### 房间管理
+
+**房间广播示例：**
 
 ```ts
-@WebSocketGateway({ cors: { origin: '*' }, namespace: '/ask' })
-export class AskGateway {
-  getNamespace() {
-    return '/ask'
-  } // 库会自动调用此方法获取命名空间
-}
+// 发送到所有客户端
+emitWith(events.message, events)('全站公告').toServer(server);
 
-// 前端：_socket('http://localhost:3001', AskGateway) 会自动连接到 /ask 命名空间
-const { emitter } = _socket('http://localhost:3001', AskGateway)
+// 发送到指定房间
+emitWith(events.message, events)('房间公告').toRoomAll(server, 'room1');
 ```
 
-## 获取原生 Socket（等价说明）
+### 命名空间
 
-`_socket(...).socket` 与 `io(url, options)` 返回值等价，均为 `socket.io-client` 的 `Socket`；可直接使用 `.on/.emit/.emitWithAck`，随时回退到原生用法。
+**命名空间网关示例：**
 
 ```ts
-import { io, Socket } from 'socket.io-client'
-import { _socket } from 'vtzac/hook'
-
-const { socket } = _socket('http://localhost:3001', ActionGateway, {
-  socketIoOptions: { transports: ['websocket'] },
-})
-const raw: Socket = io('http://localhost:3001', { transports: ['websocket'] })
-
-// 两者等价，可直接使用原生API
-socket.on('connect', () => console.log('连接成功'))
-socket.emit('customEvent', { data: 'test' })
+@WebSocketGateway({ cors: { origin: '*' }, namespace: '/chat' })
+export class ChatGateway {}
 ```
 
-## 术语与映射（一目了然）
+**前端连接命名空间：**
 
-- `_socket(url, GatewayClass, options)`：返回 `{ emitter, createListener, socket, disconnect }`。
-- `emitter`：网关类的实例，`@SubscribeMessage('xxx')` 映射为前端 `handleXxx(...)`。
-- `createListener(EventsClass)`：把 `@Emit('xxx')` 映射为前端 `xxx(callback)`，回调入参类型等于该方法返回类型。
-- Ack 映射：网关方法有返回值 → 前端 `emitter.handleXxx` 返回 `Promise<返回值>`。
+```ts
+// 自动连接到 /chat 命名空间
+const { emitter } = _socket('http://localhost:3001', ChatGateway);
+```
+
+## 原生 Socket 访问
+
+可以直接访问原生 Socket 实例进行自定义操作：
+
+**原生 Socket 使用示例：**
+
+```ts
+import { _socket } from 'vtzac/hook';
+
+const { socket } = _socket('http://localhost:3001', ChatGateway);
+
+// 使用原生 Socket API
+socket.on('connect', () => {
+  console.log('连接成功'); // 输出：连接成功
+});
+
+socket.emit('customEvent', { data: 'test' });
+console.log('发送自定义事件'); // 输出：发送自定义事件
+```
 
 ## 小结
 
-- 先定义事件类，再在网关中挑选派发目标；前后职责清晰，类型安全。
-- 前端只面向类与方法，避免手写字符串事件名与裸对象，开发效率更高。
+- **类型安全**：前后端通信全程保持类型推断和检查
+- **简化开发**：避免手写事件名和数据结构，减少错误
+- **双向通信**：支持前端调用后端、后端推送前端的完整场景

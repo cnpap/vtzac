@@ -1,171 +1,170 @@
-# Parameter Handling Use Cases
+# Parameter Handling
 
-## No Parameter Interface
+vtzac supports multiple parameter passing methods, allowing you to call backend methods in a **type-safe** manner.
 
-### Backend Implementation
+## No Parameters: Direct Method Call
+
+**Backend Controller Example:**
 
 ```typescript
 @Controller('api/test')
 export class TestController {
   @Get('hello')
-  getHello() {
-    return { message: 'Hello World!' }
+  sayHello() {
+    return { message: 'Hello World!' };
   }
 }
 ```
 
-### Frontend Usage
+**Frontend Usage Example:**
 
 ```tsx
-import { _http } from 'vtzac/hook'
-import { TestController } from './backend/test.controller'
+import { _http } from 'vtzac/hook';
+import { TestController } from './backend/test.controller';
 
+// Create controller instance (specify backend URL)
 const testController = _http(TestController, {
   ofetchOptions: {
     baseURL: 'http://localhost:3001',
   },
-})
+});
 
-async function handleHello() {
-  const res = await testController
-    .getHello()
-    .catch(error => console.error('Request failed:', error))
+async function handleSayHello() {
+  // Direct call to parameterless method
+  const res = await testController.sayHello();
 
-  console.log(res._data) // { message: 'Hello World!' }
+  console.log(res._data); // Output: { message: 'Hello World!' }
 }
 ```
 
-## Named Parameter Interface
+```
+// Actual request sent:
+// GET /api/test/hello
+// Response content:
+// { message: 'Hello World!' }
+```
 
-### Backend Implementation
+## Named Parameters: Using call Method
+
+**Backend Controller Example:**
 
 ```typescript
 @Controller('api/test')
 export class TestController {
-  // Query named parameters
-  @Get('query/named')
-  testNamedQuery(@Query('page') page?: string, @Query('limit') limit?: string) {
-    return { success: true, page, limit }
+  @Get('search')
+  search(@Query('keyword') keyword: string) {
+    return { keyword, results: ['Result 1', 'Result 2'] };
   }
 
-  // Path named parameters
-  @Get('param/named/:userId/:postId')
-  testNamedParam(
-    @Param('userId') userId: string,
-    @Param('postId') postId: string
-  ) {
-    return { success: true, userId, postId }
+  @Get('user/:id')
+  getUser(@Param('id') id: string) {
+    return { id, name: `User ${id}` };
   }
 
-  // Headers named parameters
-  @Get('headers/named')
-  testNamedHeaders(@Headers('authorization') auth?: string) {
-    return { success: true, auth }
+  @Get('profile')
+  getProfile(@Headers('authorization') auth: string) {
+    return { auth, profile: 'User Profile' };
   }
 }
 ```
 
-### Frontend Usage
+**Frontend Usage Example:**
 
 ```tsx
-// Query named parameter call
-async function handleNamedQuery() {
-  const res = await testController
-    .call('testNamedQuery', '1', '10')
-    .catch(error => console.error('Request failed:', error))
+async function handleSearch() {
+  // Query parameter call
+  const res = await testController.call('search', 'vtzac');
 
-  console.log(res._data) // { success: true, page: '1', limit: '10' }
+  console.log(res._data); // Output: { keyword: 'vtzac', results: ['Result 1', 'Result 2'] }
 }
 
-// Path named parameter call
-async function handleNamedParam() {
-  const res = await testController
-    .call('testNamedParam', '123', '456')
-    .catch(error => console.error('Request failed:', error))
+async function handleGetUser() {
+  // Path parameter call
+  const res = await testController.call('getUser', '123');
 
-  console.log(res._data) // { success: true, userId: '123', postId: '456' }
+  console.log(res._data); // Output: { id: '123', name: 'User 123' }
 }
 
-// Headers named parameter call
-async function handleNamedHeaders() {
-  const res = await testController
-    .call('testNamedHeaders', 'Bearer token123')
-    .catch(error => console.error('Request failed:', error))
+async function handleGetProfile() {
+  // Headers parameter call
+  const res = await testController.call('getProfile', 'Bearer token123');
 
-  console.log(res._data) // { success: true, auth: 'Bearer token123' }
+  console.log(res._data); // Output: { auth: 'Bearer token123', profile: 'User Profile' }
 }
 ```
 
-## Mixed Parameter Interface
+```
+// Actual requests sent:
+// GET /api/test/search?keyword=vtzac
+// GET /api/test/user/123
+// GET /api/test/profile (with Authorization header)
+```
 
-### Backend Implementation
+## Mixed Parameters: Multiple Parameter Combinations
+
+**Backend Controller Example:**
 
 ```typescript
 @Controller('api/test')
 export class TestController {
-  @Put('complex/:id')
-  testComplex(
+  @Post('user/:id/update')
+  updateUser(
     @Param('id') id: string,
-    @Body() body: any,
-    @Query('version') version?: string,
+    @Body() data: { name: string; email: string },
+    @Query('notify') notify?: boolean,
     @Headers('authorization') auth?: string
   ) {
-    return { success: true, id, body, version, auth }
+    return { id, data, notify, auth, updated: true };
   }
 
-  // Parameter object form
-  @Get('param/object/:type/:id/:action')
-  testParamObject(@Param() params: any) {
-    return { success: true, params }
-  }
-
-  @Get('query/object')
-  testQueryObject(@Query() query: any) {
-    return { success: true, query }
+  @Post('create')
+  createUser(
+    @Param() params: { id: string },
+    @Query() query: { type: string; active: boolean }
+  ) {
+    return { params, query, created: true };
   }
 }
 ```
 
-### Frontend Usage
+**Frontend Usage Example:**
 
 ```tsx
-// Complex mixed parameter call
-async function handleComplex() {
-  const res = await testController
-    .call(
-      'testComplex',
-      '123', // @Param('id')
-      { name: 'Updated name', status: 'active' }, // @Body()
-      'v1.0', // @Query('version')
-      'Bearer token123' // @Headers('authorization')
-    )
-    .catch(error => console.error('Request failed:', error))
+async function handleUpdateUser() {
+  // Pass parameters in order: Path, Body, Query, Headers
+  const res = await testController.call(
+    'updateUser',
+    '123',
+    { name: 'New Name', email: 'new@example.com' },
+    true,
+    'Bearer token123'
+  );
 
-  console.log(res._data)
+  console.log(res._data);
+  // Output: { id: '123', data: { name: 'New Name', email: 'new@example.com' }, notify: true, auth: 'Bearer token123', updated: true }
 }
 
-// Parameter object call
-async function handleParamObject() {
-  const res = await testController
-    .call('testParamObject', {
-      type: 'user',
-      id: '123',
-      action: 'edit',
-    })
-    .catch(error => console.error('Request failed:', error))
+async function handleCreateUser() {
+  // Parameter object form call
+  const res = await testController.call(
+    'createUser',
+    { id: '456' },
+    { type: 'admin', active: true }
+  );
 
-  console.log(res._data) // { success: true, params: { type: 'user', id: '123', action: 'edit' } }
-}
-
-async function handleQueryObject() {
-  const res = await testController
-    .call('testQueryObject', {
-      page: '1',
-      limit: '10',
-      search: 'test',
-    })
-    .catch(error => console.error('Request failed:', error))
-
-  console.log(res._data) // { success: true, query: { page: '1', limit: '10', search: 'test' } }
+  console.log(res._data);
+  // Output: { params: { id: '456' }, query: { type: 'admin', active: true }, created: true }
 }
 ```
+
+```
+// Actual requests sent:
+// POST /api/test/user/123/update?notify=true
+// Body: { name: 'New Name', email: 'new@example.com' }
+// Headers: { authorization: 'Bearer token123' }
+//
+// POST /api/test/create?type=admin&active=true
+// Body: { id: '456' }
+```
+
+vtzac automatically handles parameter passing based on the backend method's parameter decorators (`@Param`, `@Query`, `@Body`, `@Headers`) to ensure **type safety** and correct request formatting.

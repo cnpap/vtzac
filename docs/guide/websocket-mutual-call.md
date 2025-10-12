@@ -1,245 +1,249 @@
-# WebSocket Frontend-Backend Mutual Calls
+# WebSocket: Bidirectional Communication
 
-Goal: Help you quickly master "how to use" - how frontend calls backend, how backend pushes to frontend, while maintaining type safety. We'll skip theoretical explanations and provide clear, reusable usage patterns directly.
+## Overview
 
-## Usage Overview
+Implement **type-safe** bidirectional communication between frontend and backend, supporting frontend calling backend methods, backend pushing messages to frontend, with complete type inference.
 
-- Backend Event Classes: Use `@Emit('event')` to declare events and data structures (backend → frontend).
-- Backend Gateway: Use `@SubscribeMessage('event')` to declare behaviors that can be called by frontend (frontend → backend).
-- Frontend Connection & API: Use `_socket(url, GatewayClass, options)` to directly get `emitter` instance and `createListener` method, corresponding to "calling backend" and "listening to events".
-- Dispatch Syntax Sugar: Use `emitWith(fn, ctx)(...args)` to get event name and data, then choose `.toClient .toServer .toRoom .toRoomAll`.
+## Core Features
 
-## Integration Steps (Backend)
+- **Frontend calls backend**: Call backend gateway methods directly through `emitter`
+- **Backend pushes to frontend**: Use `emitWith` to send type-safe messages to different targets
+- **Event listening**: Frontend listens to backend-pushed events through `createListener`
+- **Request-response**: Support request-response pattern with ACK
 
-1. Define event classes (messages for frontend, clear structure, reusable):
+## Backend Implementation
+
+### Event Definition
+
+**Event Definition Example:**
 
 ```ts
-import { Emit } from 'vtzac/typed-emit'
+import { Emit } from 'vtzac/typed-emit';
 
-export class ServerEvents {
+export class ChatEvents {
   @Emit('welcome')
   welcome(nickname: string) {
     return {
       message: `Welcome ${nickname}!`,
-      timestamp: new Date().toISOString(),
-    }
+      timestamp: Date.now(),
+    };
+  }
+
+  @Emit('message')
+  message(text: string) {
+    return { text, timestamp: Date.now() };
   }
 
   @Emit('pong')
   pong() {
-    return { message: 'pong', timestamp: new Date().toISOString() }
-  }
-
-  @Emit('error')
-  error(code: string, msg: string) {
-    return { code, message: msg, timestamp: new Date().toISOString() }
+    return { message: 'pong', timestamp: Date.now() };
   }
 }
 ```
 
-2. Define gateway (behaviors callable by frontend, clear dispatch targets):
+### Gateway Implementation
+
+**Backend Gateway Example:**
 
 ```ts
-import type { Server, Socket } from 'socket.io'
+import type { Server, Socket } from 'socket.io';
 import {
   ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-} from '@nestjs/websockets'
-import { emitWith } from 'vtzac/typed-emit'
-import { ServerEvents } from './server-events'
+} from '@nestjs/websockets';
+import { emitWith } from 'vtzac/typed-emit';
+import { ChatEvents } from './chat-events';
 
 @WebSocketGateway({ cors: { origin: '*' } })
-export class ActionGateway {
-  private readonly events = new ServerEvents()
+export class ChatGateway {
+  private readonly events = new ChatEvents();
 
   @WebSocketServer()
-  server!: Server
+  server!: Server;
 
-  // New connection welcome: send only to current client
+  // Send welcome message when new client connects
   handleConnection(client: Socket): void {
-    const nick = `User${client.id.slice(-4)}`
-    emitWith(this.events.welcome, this.events)(nick).toClient(client)
+    const nickname = `User${client.id.slice(-4)}`;
+    emitWith(this.events.welcome, this.events)(nickname).toClient(client);
+    // Actual event sent:
+    // emit 'welcome' { message: 'Welcome User1234!', timestamp: 1703123456789 }
   }
 
-  // Heartbeat: frontend sends 'ping', backend replies 'pong'
+  // Heartbeat detection
   @SubscribeMessage('ping')
   handlePing(@ConnectedSocket() client?: Socket): void {
-    emitWith(this.events.pong, this.events)().toClient(client!)
+    emitWith(this.events.pong, this.events)().toClient(client!);
+    // Actual event sent:
+    // emit 'pong' { message: 'pong', timestamp: 1703123456789 }
   }
 
-  // Broadcast message: frontend sends 'say', backend broadcasts to all online users
+  // Broadcast message
   @SubscribeMessage('say')
   handleSay(@MessageBody() data: { text: string }): void {
-    emitWith(
-      this.events.welcome,
-      this.events
-    )(`System: ${data.text}`).toServer(this.server)
+    emitWith(this.events.message, this.events)(data.text).toServer(this.server);
+    // Actual event sent:
+    // Broadcast 'message' { text: 'Hello everyone!', timestamp: 1703123456789 } to all clients
   }
 
-  // Join room and notify all room members (including self)
+  // Join room
   @SubscribeMessage('joinRoom')
   handleJoinRoom(
     @MessageBody() room: string,
     @ConnectedSocket() client?: Socket
   ) {
-    client!.join(room)
+    client!.join(room); // Join room first
     emitWith(
-      this.events.welcome,
+      this.events.message,
       this.events
-    )(`Joined room ${room}`).toRoomAll(this.server, room)
+    )(`Joined room ${room}`).toRoomAll(this.server, room);
+    // Actual event sent:
+    // Send 'message' event to all clients in the room
   }
 }
 ```
 
-## Integration Steps (Frontend)
+## Frontend Implementation
+
+**Frontend Usage Example:**
 
 ```ts
-import { _socket } from 'vtzac/hook'
-import { ActionGateway } from './action.gateway'
-import { ServerEvents } from './server-events'
+import { _socket } from 'vtzac/hook';
+import { ChatGateway } from './chat.gateway';
+import { ChatEvents } from './chat-events';
 
-// Establish connection, directly pass in gateway class
+// Establish connection
 const { emitter, createListener, socket, disconnect } = _socket(
   'http://localhost:3001',
-  ActionGateway,
+  ChatGateway,
   {
     socketIoOptions: { transports: ['websocket'] },
   }
-)
+);
 
-// emitter is the gateway instance, can directly call methods
-// Call backend behaviors
-emitter.handlePing()
-emitter.handleSay({ text: 'Hello everyone!' })
-emitter.handleJoinRoom('room-1')
+// Call backend methods
+emitter.handlePing();
+console.log('Sent heartbeat'); // Output: Sent heartbeat
+
+emitter.handleSay({ text: 'Hello everyone!' });
+console.log('Sent message'); // Output: Sent message
+
+emitter.handleJoinRoom('room1');
+console.log('Joined room'); // Output: Joined room
 
 // Create event listener
-const events = createListener(ServerEvents) // backend -> frontend (listen to events)
+const events = createListener(ChatEvents);
 
-// Listen to backend events
-events.pong(data => console.log('Heartbeat response:', data))
-events.welcome(data => console.log('Welcome message:', data))
+// Listen to backend-pushed events
+events.pong(data => {
+  console.log('Received heartbeat response:', data);
+  // Output: Received heartbeat response: { message: 'pong', timestamp: 1703123456789 }
+});
 
-// Disconnect after demo
-setTimeout(() => disconnect(), 10_000)
+events.welcome(data => {
+  console.log('Received welcome message:', data);
+  // Output: Received welcome message: { message: 'Welcome User1234!', timestamp: 1703123456789 }
+});
+
+events.message(data => {
+  console.log('Received message:', data);
+  // Output: Received message: { text: 'Hello everyone!', timestamp: 1703123456789 }
+});
+
+// Disconnect
+setTimeout(() => disconnect(), 10000);
 ```
 
-## Common Scenarios & Tips
+```
+// Actual WebSocket events:
+// emit 'ping' (no data)
+// emit 'say' { text: 'Hello everyone!' }
+// emit 'joinRoom' 'room1'
+// Listen to events: 'pong', 'welcome', 'message'
+```
 
-- Request-Response (with Ack): If backend gateway method `return`s a value, frontend will use `emitWithAck`, returning `Promise<Type>`.
+## Advanced Features
+
+### Request-Response Pattern
+
+When backend methods return values, frontend calls will return `Promise`:
+
+**Backend ACK Response Example:**
 
 ```ts
-// Backend
 @WebSocketGateway()
-class ActionGateway {
+export class ChatGateway {
   @SubscribeMessage('getOnlineCount')
   handleGetOnlineCount() {
-    return { count: this.onlineUsers.size }
+    return { count: 42 }; // Return online count
   }
 }
-
-// Frontend
-const { emitter } = _socket('http://localhost:3001', ActionGateway)
-const result = await emitter.handleGetOnlineCount() // Returns Promise<{ count: number }>
-console.log('Online users:', result.count)
 ```
 
-- Broadcasting & Rooms: Choose appropriate targets; join room with `client.join(room)` before sending to room.
+**Frontend ACK Call Example:**
 
 ```ts
-emitWith(events.welcome, events)('Site-wide announcement').toServer(server)
+const { emitter } = _socket('http://localhost:3001', ChatGateway);
+// If there's a return value, it will automatically adjust to emitWithAck call
+const result = await emitter.handleGetOnlineCount();
+console.log('Online count:', result.count); // Output: Online count: 42
+```
+
+### Room Management
+
+**Room Broadcast Example:**
+
+```ts
+// Send to all clients
+emitWith(events.message, events)('Site-wide announcement').toServer(server);
+
+// Send to specific room
 emitWith(
-  events.welcome,
+  events.message,
   events
-)('Room announcement').toRoomAll(server, 'room-1')
+)('Room announcement').toRoomAll(server, 'room1');
 ```
 
-- Point-to-point sending: Use `.toClient(client)` after getting target client; common approach is maintaining `userId -> Socket` mapping.
+### Namespace
+
+**Namespace Gateway Example:**
 
 ```ts
-// Pseudo code: private chat
-class Xxx {
-  @SubscribeMessage('private')
-  sendPrivate(
-    @MessageBody() data: { toUserId: string, text: string },
-    @ConnectedSocket() client?: Socket
-  ) {
-    const target = this.userSockets.get(data.toUserId)
-    if (!target) {
-      return emitWith(this.events.error, this.events)(
-        'NOT_FOUND',
-        'User is offline'
-      ).toClient(client!)
-    }
-    emitWith(
-      this.events.welcome,
-      this.events
-    )(`Private: ${data.text}`).toClient(target)
-  }
-}
+@WebSocketGateway({ cors: { origin: '*' }, namespace: '/chat' })
+export class ChatGateway {}
 ```
 
-- Error handling: Unified event structure, combined with centralized frontend listening.
+**Frontend Connect to Namespace:**
 
 ```ts
-try {
-  /* ... */
-}
-catch (e) {
-  emitWith(this.events.error, this.events)(
-    'SERVER_ERROR',
-    'An error occurred'
-  ).toClient(client!)
-}
-
-events.error((data) => {
-  /* Frontend centralized alerts */
-})
+// Automatically connect to /chat namespace
+const { emitter } = _socket('http://localhost:3001', ChatGateway);
 ```
 
-- Namespaces: Gateway supports `namespace`, frontend passing gateway class automatically recognizes namespace.
+## Native Socket Access
+
+You can directly access the native Socket instance for custom operations:
+
+**Native Socket Usage Example:**
 
 ```ts
-@WebSocketGateway({ cors: { origin: '*' }, namespace: '/ask' })
-export class AskGateway {
-  getNamespace() {
-    return '/ask'
-  } // Library will automatically call this method to get namespace
-}
+import { _socket } from 'vtzac/hook';
 
-// Frontend: _socket('http://localhost:3001', AskGateway) will automatically connect to /ask namespace
-const { emitter } = _socket('http://localhost:3001', AskGateway)
+const { socket } = _socket('http://localhost:3001', ChatGateway);
+
+// Use native Socket API
+socket.on('connect', () => {
+  console.log('Connected successfully'); // Output: Connected successfully
+});
+
+socket.emit('customEvent', { data: 'test' });
+console.log('Sent custom event'); // Output: Sent custom event
 ```
-
-## Getting Native Socket (Equivalence Explanation)
-
-`_socket(...).socket` is equivalent to `io(url, options)` return value, both are `socket.io-client`'s `Socket`; can directly use `.on/.emit/.emitWithAck`, fallback to native usage anytime.
-
-```ts
-import { io, Socket } from 'socket.io-client'
-import { _socket } from 'vtzac/hook'
-
-const { socket } = _socket('http://localhost:3001', ActionGateway, {
-  socketIoOptions: { transports: ['websocket'] },
-})
-const raw: Socket = io('http://localhost:3001', { transports: ['websocket'] })
-
-// Both are equivalent, can directly use native APIs
-socket.on('connect', () => console.log('Connected'))
-socket.emit('customEvent', { data: 'test' })
-```
-
-## Terminology & Mapping (At a Glance)
-
-- `_socket(url, GatewayClass, options)`: Returns `{ emitter, createListener, socket, disconnect }`.
-- `emitter`: Gateway class instance, `@SubscribeMessage('xxx')` maps to frontend `handleXxx(...)`.
-- `createListener(EventsClass)`: Maps `@Emit('xxx')` to frontend `xxx(callback)`, callback parameter type equals method return type.
-- Ack mapping: Gateway method has return value → frontend `emitter.handleXxx` returns `Promise<ReturnValue>`.
 
 ## Summary
 
-- Define event classes first, then select dispatch targets in gateway; clear separation of concerns, type safety.
-- Frontend only deals with classes and methods, avoiding manual string event names and bare objects, higher development efficiency.
+- **Type Safety**: Full type inference and checking throughout frontend-backend communication
+- **Simplified Development**: Avoid manual event names and data structures, reduce errors
+- **Bidirectional Communication**: Support complete scenarios of frontend calling backend and backend pushing to frontend

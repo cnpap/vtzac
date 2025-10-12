@@ -1,178 +1,169 @@
-# WebSocket 后端消息发送
+# WebSocket：后端消息发送
 
-本文介绍如何在后端通过 `vtzac/typed-emit` 以类型安全、简洁的方式向不同目标（单个客户端、房间、全局）发送 WebSocket 消息。所有示例均使用装饰器并放在 `class` 中，便于直观理解与复用。
+## 概述
 
-## 核心概念
+通过 `vtzac/typed-emit` 以**类型安全**的方式向不同目标发送 WebSocket 消息，支持单个客户端、房间、全局广播等场景。
 
-- `@Emit(eventName)`: 为类方法声明事件名，方法返回值即为要发送的数据。
-- `emitWith(fn, ctx)`: 以方法优先的方式发送消息，自动读取事件名与返回数据，然后选择派发目标：
-  - `toClient(client)` 发送给单个客户端
-  - `toRoom(client, room)` 发送到房间（不含当前客户端）
-  - `toRoomAll(server, room)` 发送到房间（含当前客户端）
-  - `toServer(server)` 广播到整个服务端
+## 核心功能
 
-## 定义事件（后端）
+### 事件定义
 
-使用装饰器在类中定义事件，并返回要发送的数据结构。事件名建议简短、语义清晰。
+使用 `@Emit` 装饰器定义事件，方法返回值即为发送的数据结构：
 
-```typescript
-import { Emit } from 'vtzac/typed-emit'
+**事件定义示例：**
 
-class ChatEmitter {
-  // 欢迎事件：发送欢迎文案
-  @Emit('greet')
-  greet(nickname: string) {
-    return { text: `欢迎 ${nickname}` }
+```ts
+import { Emit } from 'vtzac/typed-emit';
+
+class ChatEvents {
+  @Emit('welcome')
+  welcome(nickname: string) {
+    return { text: `欢迎 ${nickname}!`, timestamp: Date.now() };
   }
 
-  // 普通消息事件：发送文本内容
   @Emit('message')
   message(text: string) {
-    return { text }
+    return { text, timestamp: Date.now() };
   }
 }
 ```
 
-说明：
+### 消息发送
 
-- 事件名来源优先取自 `@Emit('...')`，未标注时会使用方法名作为事件名。
-- 方法返回值就是最终发送到前端的数据，类型全程受控、可推断。
+使用 `emitWith` 方法选择发送目标：
 
-## 在网关中发送消息
+**发送目标选择：**
 
-将事件类实例化后，在 NestJS 网关中按需派发到不同目标。示例包含：连接欢迎、全局广播、加入房间通知。
+```ts
+import { emitWith } from 'vtzac/typed-emit';
 
-```typescript
-import type { Server, Socket } from 'socket.io'
+const events = new ChatEvents();
+
+// 发送给单个客户端
+emitWith(events.welcome, events)('Alice').toClient(client);
+
+// 发送到房间（不含当前客户端）
+emitWith(events.message, events)('Hello room').toRoom(client, 'room1');
+
+// 发送到房间（含当前客户端）
+emitWith(events.message, events)('Hello all').toRoomAll(server, 'room1');
+
+// 广播到整个服务端
+emitWith(events.message, events)('Global message').toServer(server);
+```
+
+## 网关集成
+
+### 完整示例
+
+**后端网关示例：**
+
+```ts
+import type { Server, Socket } from 'socket.io';
 import {
   ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-} from '@nestjs/websockets'
-import { emitWith } from 'vtzac/typed-emit'
+} from '@nestjs/websockets';
+import { emitWith } from 'vtzac/typed-emit';
 
-class ChatEmitter {
-  @Emit('greet')
-  greet(nickname: string) {
-    return { text: `欢迎 ${nickname}` }
+class ChatEvents {
+  @Emit('welcome')
+  welcome(nickname: string) {
+    return { text: `欢迎 ${nickname}!`, timestamp: Date.now() };
   }
 
   @Emit('message')
   message(text: string) {
-    return { text }
+    return { text, timestamp: Date.now() };
   }
 }
 
 @WebSocketGateway({ cors: { origin: '*' } })
-class ChatGateway {
-  private readonly emitter = new ChatEmitter()
+export class ChatGateway {
+  private readonly events = new ChatEvents();
 
   @WebSocketServer()
-  server!: Server
+  server!: Server;
 
-  // 新客户端连接时，向该客户端发送欢迎消息
+  // 新客户端连接时发送欢迎消息
   handleConnection(client: Socket) {
-    const nickname = `用户${client.id.slice(-4)}`
-    emitWith(this.emitter.greet, this.emitter)(nickname).toClient(client)
+    const nickname = `用户${client.id.slice(-4)}`;
+    emitWith(this.events.welcome, this.events)(nickname).toClient(client);
+    // 实际会发送的事件：
+    // emit 'welcome' { text: '欢迎 用户1234!', timestamp: 1703123456789 }
   }
 
-  // 客户端发消息：向所有在线用户广播
+  // 处理客户端消息并广播
   @SubscribeMessage('say')
   handleSay(
     @MessageBody() data: { text: string },
     @ConnectedSocket() client?: Socket
   ) {
-    emitWith(
-      this.emitter.message,
-      this.emitter
-    )(data.text).toServer(this.server)
+    emitWith(this.events.message, this.events)(data.text).toServer(this.server);
+    // 实际会发送的事件：
+    // 向所有客户端广播 'message' { text: 'Hello everyone!', timestamp: 1703123456789 }
   }
 
-  // 加入房间并通知房间内所有用户（包含自己）
+  // 加入房间并通知
   @SubscribeMessage('joinRoom')
   handleJoinRoom(
     @MessageBody() room: string,
     @ConnectedSocket() client?: Socket
   ) {
-    client!.join(room)
+    client!.join(room); // 先加入房间
     emitWith(
-      this.emitter.message,
-      this.emitter
-    )(`已加入房间 ${room}`).toRoomAll(this.server, room)
+      this.events.message,
+      this.events
+    )(`已加入房间 ${room}`).toRoomAll(this.server, room);
+    // 实际会发送的事件：
+    // 向房间 'room1' 中的所有客户端发送 'message' 事件
   }
 }
 ```
 
-### 发送到不同目标的用法速览
+## 快速开始
 
-```typescript
-// 发送给当前客户端
-emitWith(emitter.message, emitter)('hello').toClient(client)
+**最小示例：**
 
-// 发送到房间（不包含当前客户端）
-emitWith(emitter.message, emitter)('room only').toRoom(client, 'roomA')
-
-// 发送到房间（包含当前客户端）
-emitWith(emitter.message, emitter)('room all').toRoomAll(server, 'roomA')
-
-// 广播到整个服务端（所有在线客户端）
-emitWith(emitter.message, emitter)('broadcast').toServer(server)
-```
-
-## 最小可用示例
-
-将以下两段代码放入你的后端项目（例如 NestJS 网关），即可运行：
-
-```typescript
-// 2) 网关发送
-import type { Server, Socket } from 'socket.io'
-
+```ts
+import { Emit, emitWith } from 'vtzac/typed-emit';
 import {
-  ConnectedSocket,
-  SubscribeMessage,
   WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets'
-// 1) 定义事件
-import { Emit, emitWith } from 'vtzac/typed-emit'
+  SubscribeMessage,
+  ConnectedSocket,
+} from '@nestjs/websockets';
+import type { Socket } from 'socket.io';
 
-class SimpleEmitter {
-  @Emit('ping')
-  ping() {
-    return { message: 'pong' }
+class PingEvents {
+  @Emit('pong')
+  pong() {
+    return { message: 'pong', timestamp: Date.now() };
   }
 }
 
 @WebSocketGateway({ cors: { origin: '*' } })
-class SimpleGateway {
-  private readonly emitter = new SimpleEmitter()
+export class PingGateway {
+  private readonly events = new PingEvents();
 
-  @WebSocketServer()
-  server!: Server
-
-  // 客户端主动发起 'ping' 时，后端回复 'pong'（仅该客户端）
   @SubscribeMessage('ping')
   handlePing(@ConnectedSocket() client?: Socket) {
-    emitWith(this.emitter.ping, this.emitter)().toClient(client!)
+    emitWith(this.events.pong, this.events)().toClient(client!);
+    console.log('发送 pong 响应'); // 输出：发送 pong 响应
   }
 }
 ```
 
-## 小结与建议
-
-- 将“事件定义”与“派发位置”解耦：事件类只关心数据结构与事件名，网关负责选择目标并发送。
-- 始终通过 `emitWith(fn, ctx)(...args)` 获取类型安全的数据与事件名，再选择派发目标，避免手写字符串与对象导致的错误。
-- 房间相关的发送需要先 `client.join(room)`，选择 `toRoom` 或 `toRoomAll` 取决于是否包含当前客户端。
-
-如需更灵活的自定义派发逻辑，可使用本库提供的派发器构造器：
-
-```typescript
-import { dispatch } from 'vtzac/typed-emit'
-
-const sendTo = dispatch.client(client) // or dispatch.server(server), dispatch.room(client, room)
-sendTo('message', { text: 'hello' })
+```
+// 实际会发起的 WebSocket 事件：
+// 客户端发送：emit 'ping'
+// 服务端响应：emit 'pong' { message: 'pong', timestamp: 1703123456789 }
 ```
 
-以上即为后端发送 WebSocket 消息的核心用法。你可以根据业务自由扩展事件类与网关处理逻辑，同时保持事件与数据的类型安全。
+## 小结
+
+- **事件定义**：使用 `@Emit` 装饰器定义事件名和数据结构
+- **消息发送**：通过 `emitWith` 方法选择发送目标（客户端、房间、全局）
+- **类型安全**：全程保持类型推断，避免手写字符串和对象错误

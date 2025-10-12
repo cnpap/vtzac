@@ -71,7 +71,7 @@ export class WebSocketEventEmitter {
   @Emit('onlineUsers')
   onlineUsers(
     users: User[],
-    count: number
+    count: number,
   ): { users: User[]; count: number; timestamp: string } {
     return {
       users,
@@ -99,7 +99,7 @@ export class WebSocketEventEmitter {
   @Emit('userStartTyping')
   userStartTyping(
     userId: string,
-    nickname: string
+    nickname: string,
   ): { userId: string; nickname: string; timestamp: string } {
     return {
       userId,
@@ -111,7 +111,7 @@ export class WebSocketEventEmitter {
   @Emit('userStopTyping')
   userStopTyping(
     userId: string,
-    nickname: string
+    nickname: string,
   ): { userId: string; nickname: string; timestamp: string } {
     return {
       userId,
