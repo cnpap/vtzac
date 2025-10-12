@@ -77,7 +77,8 @@ export type TestCase =
   | 'complex'
   | 'delete'
   | 'websocket'
-  | 'ask';
+  | 'ask'
+  | 'mastra';
 
 // 通用测试组件 Props 类型
 export interface TestComponentProps {

@@ -10,6 +10,7 @@ import {
   DeleteOutlined,
   WifiOutlined,
   QuestionCircleOutlined,
+  RobotOutlined,
 } from '@ant-design/icons';
 import type { LoadingState, ResultsState, TestCase } from './types';
 import { HelloTest } from './components/HelloTest';
@@ -21,6 +22,7 @@ import ComplexTest from './components/ComplexTest';
 import { DeleteTest } from './components/DeleteTest';
 import WebSocketTestRefactored from './components/WebSocketTestRefactored';
 import AskTest from './components/AskTest';
+import { MastraTest } from './components/MastraTest';
 import 'antd/dist/reset.css';
 
 setGlobalZacOfetchOptions({
@@ -42,6 +44,7 @@ function App() {
     { label: 'DELETE 方法', value: 'delete', icon: <DeleteOutlined /> },
     { label: 'WebSocket 测试', value: 'websocket', icon: <WifiOutlined /> },
     { label: 'Ask 模式测试', value: 'ask', icon: <QuestionCircleOutlined /> },
+    { label: 'Mastra AI 测试', value: 'mastra', icon: <RobotOutlined /> },
   ];
 
   const renderTestComponent = () => {
@@ -71,6 +74,8 @@ function App() {
         return <WebSocketTestRefactored />;
       case 'ask':
         return <AskTest />;
+      case 'mastra':
+        return <MastraTest />;
       default:
         return <HelloTest {...commonProps} />;
     }

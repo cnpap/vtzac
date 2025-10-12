@@ -15,3 +15,11 @@ docs/.vitepress/cache/
 docs/.vitepress/dist/
 
 demo/
+
+.env
+.env.*.local
+
+.mastra
+
+*.db
+*.db-*
