@@ -12,7 +12,12 @@ async function bootstrap(): Promise<void> {
 
   // 启用 CORS 以支持前端访问
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // 支持 localhost 和 127.0.0.1
+    origin: [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:4173',
+      'http://127.0.0.1:4173',
+    ], // 支持 localhost 和 127.0.0.1
     credentials: true,
   });
 
