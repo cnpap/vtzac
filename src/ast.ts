@@ -18,7 +18,7 @@ export function virtualSourceFile(id: string, code: string): ts.SourceFile {
  */
 export interface DecoratorArgument {
   type: 'string' | 'object' | 'array' | 'number' | 'boolean' | 'unknown'
-  value: any
+  value: string | number | boolean | Record<string, unknown> | unknown[] | unknown
   raw: string
 }
 
@@ -162,7 +162,7 @@ function parseDecoratorArguments(args: ts.NodeArray<ts.Expression>): DecoratorAr
     }
 
     if (ts.isObjectLiteralExpression(arg)) {
-      const obj: any = {}
+      const obj: Record<string, unknown> = {}
       arg.properties.forEach((prop) => {
         if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
           const key = prop.name.text
@@ -196,7 +196,7 @@ function parseDecoratorArguments(args: ts.NodeArray<ts.Expression>): DecoratorAr
           return Number(element.text)
         }
         else if (ts.isObjectLiteralExpression(element)) {
-          const obj: any = {}
+          const obj: Record<string, unknown> = {}
           element.properties.forEach((prop) => {
             if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
               const key = prop.name.text
@@ -231,17 +231,49 @@ function parseDecoratorArguments(args: ts.NodeArray<ts.Expression>): DecoratorAr
 }
 
 /**
+ * 类型守卫：检查节点是否有装饰器属性
+ */
+function hasDecorators(node: ts.Node): node is ts.Node & { decorators?: ts.NodeArray<ts.Decorator> } {
+  return 'decorators' in node
+}
+
+/**
+ * 类型守卫：检查节点是否有修饰符属性
+ */
+function hasModifiers(node: ts.Node): node is ts.Node & { modifiers?: ts.NodeArray<ts.ModifierLike> } {
+  return 'modifiers' in node
+}
+
+/**
+ * 类型守卫：检查修饰符是否为装饰器
+ */
+function isDecorator(modifier: ts.ModifierLike): modifier is ts.Decorator {
+  return modifier.kind === ts.SyntaxKind.Decorator
+}
+
+/**
  * 获取装饰器信息
  */
 function getDecorators(node: ts.Node): { name: string, arguments: DecoratorArgument[] }[] {
   const decorators: { name: string, arguments: DecoratorArgument[] }[] = []
 
-  // 在新版本的 TypeScript 中，装饰器可能在 modifiers 中
-  const nodeDecorators = (node as any).decorators
-    || ((node as any).modifiers?.filter((mod: any) => mod.kind === ts.SyntaxKind.Decorator))
+  // 获取装饰器节点
+  let nodeDecorators: ts.NodeArray<ts.Decorator> | undefined
+
+  // 首先检查 decorators 属性
+  if (hasDecorators(node) && node.decorators) {
+    nodeDecorators = node.decorators
+  }
+  // 然后检查 modifiers 中的装饰器
+  else if (hasModifiers(node) && node.modifiers) {
+    const decoratorModifiers = node.modifiers.filter(isDecorator)
+    if (decoratorModifiers.length > 0) {
+      nodeDecorators = decoratorModifiers as unknown as ts.NodeArray<ts.Decorator>
+    }
+  }
 
   if (nodeDecorators) {
-    nodeDecorators.forEach((decorator: any) => {
+    nodeDecorators.forEach((decorator) => {
       if (ts.isCallExpression(decorator.expression)) {
         const name = decorator.expression.expression.getText()
         const args = parseDecoratorArguments(decorator.expression.arguments)
@@ -309,7 +341,8 @@ function analyzeController(classNode: ts.ClassDeclaration): ControllerInfo | nul
 
   // 查找 @Controller 装饰器
   const controllerDecorator = classDecorators.find(d => d.name === 'Controller')
-  const prefix = controllerDecorator?.arguments[0]?.value || ''
+  const firstArg = controllerDecorator?.arguments[0]
+  const prefix = (firstArg && typeof firstArg.value === 'string') ? firstArg.value : ''
 
   const methods: HttpMethodInfo[] = []
 
@@ -324,7 +357,8 @@ function analyzeController(classNode: ts.ClassDeclaration): ControllerInfo | nul
       const httpDecorator = methodDecorators.find(d => getHttpMethod(d.name))
       if (httpDecorator) {
         const httpMethod = getHttpMethod(httpDecorator.name)!
-        const path = httpDecorator.arguments[0]?.value || ''
+        const firstArg = httpDecorator.arguments[0]
+        const path = (firstArg && typeof firstArg.value === 'string') ? firstArg.value : ''
 
         methods.push({
           name: methodName,
@@ -365,10 +399,13 @@ function analyzeGateway(classNode: ts.ClassDeclaration): GatewayInfo | null {
   let namespace = ''
   if (gatewayDecorator.arguments.length > 0) {
     const firstArg = gatewayDecorator.arguments[0]
-    if (firstArg.type === 'object' && firstArg.value && firstArg.value.namespace) {
-      namespace = firstArg.value.namespace
+    if (firstArg.type === 'object' && typeof firstArg.value === 'object' && firstArg.value !== null && 'namespace' in firstArg.value) {
+      const namespaceValue = (firstArg.value as Record<string, unknown>).namespace
+      if (typeof namespaceValue === 'string') {
+        namespace = namespaceValue
+      }
     }
-    else if (firstArg.type === 'string') {
+    else if (firstArg.type === 'string' && typeof firstArg.value === 'string') {
       namespace = firstArg.value
     }
   }
@@ -385,7 +422,8 @@ function analyzeGateway(classNode: ts.ClassDeclaration): GatewayInfo | null {
       // 查找 @SubscribeMessage 装饰器
       const subscribeDecorator = methodDecorators.find(d => d.name === 'SubscribeMessage')
       if (subscribeDecorator) {
-        const eventName = subscribeDecorator.arguments[0]?.value || methodName
+        const firstArg = subscribeDecorator.arguments[0]
+        const eventName = (firstArg && typeof firstArg.value === 'string') ? firstArg.value : methodName
 
         // 提取返回值类型
         let returnType = 'void'
@@ -434,7 +472,8 @@ function analyzeEventEmitter(classNode: ts.ClassDeclaration): EventEmitterInfo |
       // 查找 @Emit 装饰器
       const emitDecorator = methodDecorators.find(d => d.name === 'Emit')
       if (emitDecorator) {
-        const eventName = emitDecorator.arguments[0]?.value || methodName
+        const firstArg = emitDecorator.arguments[0]
+        const eventName = (firstArg && typeof firstArg.value === 'string') ? firstArg.value : methodName
 
         // 提取返回值类型
         let returnType = 'void'
@@ -652,7 +691,7 @@ export function getFileParameterInfo(methodInfo: HttpMethodInfo): FileParameterI
     parameterName: fileParam.name,
     parameterType: fileParam.type,
     fileFields,
-    uploadType: uploadInfo.type as 'single' | 'multiple' | 'named-multiple',
+    uploadType: uploadInfo.type,
   }
 }
 
@@ -663,7 +702,7 @@ export function getFileUploadInfo(methodInfo: HttpMethodInfo): {
   type: 'single' | 'multiple' | 'named-multiple' | 'none'
   fieldNames?: string[]
   maxCount?: number
-  details?: any
+  details?: Record<string, { maxCount: number }>
 } {
   // 检查 UseInterceptors 装饰器
   const interceptorDecorator = methodInfo.decorators.find(d => d.name === 'UseInterceptors')
@@ -698,7 +737,7 @@ export function getFileUploadInfo(methodInfo: HttpMethodInfo): {
   if (interceptorArg.includes('FileFieldsInterceptor')) {
     // 具名多文件上传
     const fieldNames: string[] = []
-    const details: any = {}
+    const details: Record<string, { maxCount: number }> = {}
 
     // 尝试解析字段配置
     const fieldsMatch = interceptorArg.match(/\[([^\]]+)\]/)

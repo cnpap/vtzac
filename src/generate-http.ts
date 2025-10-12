@@ -2,6 +2,48 @@ import type { AnalysisResult, ControllerInfo, HttpMethodInfo, MethodParameter } 
 import { getFileParameterInfo, getFileUploadInfo } from './ast'
 
 /**
+ * HTTP 方法配置接口
+ */
+interface HttpMethodConfig {
+  method: string
+  path: string
+  parameters: ParameterMapping[]
+  fileUpload?: FileUploadConfig
+}
+
+/**
+ * 参数映射接口
+ */
+interface ParameterMapping {
+  name: string
+  decorator: string
+  key?: string
+  fileInfo?: FileInfo
+}
+
+/**
+ * 文件信息接口
+ */
+interface FileInfo {
+  uploadType: 'single' | 'multiple' | 'named-multiple'
+  fileFields: {
+    fieldName: string
+    isArray: boolean
+    maxCount?: number
+  }[]
+}
+
+/**
+ * 文件上传配置接口
+ */
+interface FileUploadConfig {
+  type: 'single' | 'multiple' | 'named-multiple' | 'none'
+  fieldNames?: string[]
+  maxCount?: number
+  details?: Record<string, { maxCount: number }>
+}
+
+/**
  * 生成JavaScript类代码
  */
 export function generateHttpJavaScriptClass(analysisResult: AnalysisResult): string {
@@ -66,12 +108,14 @@ function generatezacOfetchCall(method: HttpMethodInfo, controller: ControllerInf
     path = methodPath
   }
 
-  const parameterMappings = method.parameters.map(param => generateParameterMapping(param, method)).filter(Boolean)
+  const parameterMappings = method.parameters
+    .map(param => generateParameterMapping(param, method))
+    .filter((mapping): mapping is ParameterMapping => mapping !== null)
 
   // 获取文件上传信息
   const fileUploadInfo = getFileUploadInfo(method)
 
-  const config: any = {
+  const config: HttpMethodConfig = {
     method: httpMethod,
     path,
     parameters: parameterMappings,
@@ -79,7 +123,7 @@ function generatezacOfetchCall(method: HttpMethodInfo, controller: ControllerInf
 
   // 如果有文件上传，添加文件上传配置
   if (fileUploadInfo.type !== 'none') {
-    config.fileUpload = fileUploadInfo
+    config.fileUpload = fileUploadInfo as FileUploadConfig
   }
 
   return JSON.stringify(config, null, 2).replace(/"/g, '\'')
@@ -88,7 +132,7 @@ function generatezacOfetchCall(method: HttpMethodInfo, controller: ControllerInf
 /**
  * 生成参数映射信息
  */
-function generateParameterMapping(parameter: MethodParameter, method: HttpMethodInfo): any {
+function generateParameterMapping(parameter: MethodParameter, method: HttpMethodInfo): ParameterMapping | null {
   const paramName = parameter.name
   const decorators = parameter.decorators
 
@@ -100,7 +144,7 @@ function generateParameterMapping(parameter: MethodParameter, method: HttpMethod
   const decoratorName = decorator.name
   const decoratorArgs = decorator.arguments
 
-  const mapping: any = {
+  const mapping: ParameterMapping = {
     name: paramName,
     decorator: decoratorName,
   }
@@ -108,7 +152,7 @@ function generateParameterMapping(parameter: MethodParameter, method: HttpMethod
   // 处理装饰器参数
   if (decoratorArgs.length > 0) {
     const firstArg = decoratorArgs[0]
-    if (firstArg.type === 'string') {
+    if (firstArg.type === 'string' && typeof firstArg.value === 'string') {
       mapping.key = firstArg.value
     }
   }

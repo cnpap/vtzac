@@ -4,30 +4,56 @@ import type { Server, Socket } from 'socket.io'
 const EVENT_SYMBOL = Symbol.for('vtzac.emit.event')
 
 /**
+ * 带有事件名元数据的函数类型
+ */
+interface EventFunction {
+  (...args: unknown[]): unknown
+  [EVENT_SYMBOL]?: string
+}
+
+/**
  * 为方法声明事件名的装饰器。
  * 事件名会被挂载到方法本身上，后续由 emitWith 读取。
  */
 export function Emit(eventName: string) {
-  return (
-    _target: any,
-    _key: string,
-    descriptor: PropertyDescriptor,
-  ): PropertyDescriptor => {
-    ;(descriptor.value as any)[EVENT_SYMBOL] = eventName
+  return <T extends object, K extends string | symbol>(
+    _target: T,
+    _key: K,
+    descriptor: TypedPropertyDescriptor<(...args: unknown[]) => unknown>,
+  ): TypedPropertyDescriptor<(...args: unknown[]) => unknown> => {
+    if (descriptor.value && typeof descriptor.value === 'function') {
+      (descriptor.value as EventFunction)[EVENT_SYMBOL] = eventName
+    }
     return descriptor
   }
 }
 
-type InferArgs<T> = T extends (...args: infer A) => any ? A : never
-type InferReturn<T> = T extends (...args: any[]) => infer R ? R : never
+type InferArgs<T> = T extends (...args: infer A) => unknown ? A : never
+type InferReturn<T> = T extends (...args: unknown[]) => infer R ? R : never
 
 /**
  * 通用派发器类型
  */
 export type Dispatcher<E extends string, D> = (event: E, data: D) => void
 
-function getEventName(fn: (...args: any[]) => any): string {
-  return (fn as any)[EVENT_SYMBOL] ?? fn.name
+/**
+ * 事件发射器返回类型
+ */
+interface EmitResult<T> {
+  /** 使用自定义派发器 */
+  to: (dispatch: Dispatcher<string, T>) => void
+  /** 派发到整个 server（广播） */
+  toServer: (server: Server) => void
+  /** 派发到指定客户端 */
+  toClient: (client: Socket) => void
+  /** 派发到指定房间（不包含当前 client） */
+  toRoom: (client: Socket, room: string) => void
+  /** 派发到指定房间（包含当前 client） */
+  toRoomAll: (server: Server, room: string) => void
+}
+
+function getEventName<T extends (...args: unknown[]) => unknown>(fn: T): string {
+  return (fn as EventFunction)[EVENT_SYMBOL] ?? fn.name
 }
 
 /**
@@ -46,11 +72,14 @@ function getEventName(fn: (...args: any[]) => any): string {
  *   emitWith(this.demoEmiter.sayAAA, this.demoEmiter)('yangweijie', 18)
  *     .toServer(this.server)
  */
-export function emitWith<T extends (...args: any[]) => any>(fn: T, ctx?: any) {
+export function emitWith<T extends (...args: unknown[]) => unknown>(
+  fn: T,
+  ctx?: object,
+): (...args: InferArgs<T>) => EmitResult<InferReturn<T>> {
   type Payload = InferReturn<T>
-  const event = getEventName(fn) as string
+  const event = getEventName(fn)
 
-  return (...args: InferArgs<T>) => {
+  return (...args: InferArgs<T>): EmitResult<Payload> => {
     const data = fn.apply(ctx, args) as Payload
 
     return {
@@ -77,18 +106,18 @@ export function emitWith<T extends (...args: any[]) => any>(fn: T, ctx?: any) {
  */
 export const dispatch = {
   /** 广播到整个 server */
-  server: (server: Server): Dispatcher<string, any> =>
+  server: <T = unknown>(server: Server): Dispatcher<string, T> =>
     (event, data) => server.emit(event, data),
 
   /** 发送到指定客户端 */
-  client: (client: Socket): Dispatcher<string, any> =>
+  client: <T = unknown>(client: Socket): Dispatcher<string, T> =>
     (event, data) => client.emit(event, data),
 
   /** 发送到指定房间（不包含当前 client） */
-  room: (client: Socket, room: string): Dispatcher<string, any> =>
+  room: <T = unknown>(client: Socket, room: string): Dispatcher<string, T> =>
     (event, data) => client.to(room).emit(event, data),
 
   /** 发送到指定房间（包含当前 client） */
-  roomAll: (server: Server, room: string): Dispatcher<string, any> =>
+  roomAll: <T = unknown>(server: Server, room: string): Dispatcher<string, T> =>
     (event, data) => server.to(room).emit(event, data),
 }
