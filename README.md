@@ -46,9 +46,9 @@ Frontend can directly reference backend project to achieve type-safe calls.
 import { _http } from 'vtzac/hook';
 import { AppController } from 'backend/src/app.controller';
 
-const api = _http(AppController, {
+const api = _http({
   ofetchOptions: { baseURL: 'http://localhost:3000' },
-});
+}).controller(AppController);
 
 // Type-safe method calls
 const res = await api.getHello();

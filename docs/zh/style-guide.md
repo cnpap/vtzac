@@ -68,7 +68,9 @@ export class AppController {
 
    ```ts
    // 创建控制器实例（指定后端地址）
-   const api = _http(AppController, options);
+   const api = _http({
+     ofetchOptions: { baseURL: 'http://localhost:3000', timeout: 5000 },
+   }).controller(AppController);
 
    // 直接以类型安全的方式调用后端方法
    const res = await api.getHello();

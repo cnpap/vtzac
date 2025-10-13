@@ -131,12 +131,12 @@ import { _http } from 'vtzac/hook';
 import { AppController } from 'nestjs-example/src/app.controller';
 
 // 创建控制器实例（指定后端地址）
-const defaultController = _http(AppController, {
+const defaultController = _http({
   ofetchOptions: {
     baseURL: 'http://localhost:3000',
     timeout: 5000,
   },
-});
+}).controller(AppController);
 
 // 直接以类型安全的方式调用后端方法
 const res = await defaultController.getHello();

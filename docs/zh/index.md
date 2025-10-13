@@ -68,7 +68,11 @@ export class UserController {
 import { _http } from 'vtzac/hook';
 import { UserController } from './backend/user.controller';
 
-const api = _http(UserController);
+const api = _http({
+  ofetchOptions: {
+    baseURL: 'http://localhost:3000',
+  },
+}).controller(UserController);
 
 function UploadComponent() {
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {

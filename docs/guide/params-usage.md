@@ -23,11 +23,13 @@ import { _http } from 'vtzac/hook';
 import { TestController } from './backend/test.controller';
 
 // Create controller instance (specify backend URL)
-const testController = _http(TestController, {
+const testController = _http({
   ofetchOptions: {
     baseURL: 'http://localhost:3000',
   },
-});
+}).controller(TestController);
+
+
 
 async function handleSayHello() {
   // Direct call to parameterless method

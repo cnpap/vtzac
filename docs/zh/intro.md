@@ -37,9 +37,9 @@ export class AppController {
 import { _http } from 'vtzac/hook';
 import { AppController } from 'nestjs-example/src/app.controller';
 
-const api = _http(AppController, {
+const api = _http({
   ofetchOptions: { baseURL: 'http://localhost:3000', timeout: 5000 },
-});
+}).controller(AppController);
 
 async function demo() {
   const res = await api.getHello();

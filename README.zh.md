@@ -46,9 +46,9 @@ export default defineConfig({
 import { _http } from 'vtzac/hook';
 import { AppController } from 'backend/src/app.controller';
 
-const api = _http(AppController, {
+const api = _http({
   ofetchOptions: { baseURL: 'http://localhost:3000' },
-});
+}).controller(AppController);
 
 // 类型安全的方法调用
 const res = await api.getHello();

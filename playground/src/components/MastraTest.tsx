@@ -13,12 +13,12 @@ const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 // 创建控制器实例
-const mastraController = _http(MastraController, {
+const mastraController = _http({
   ofetchOptions: {
     baseURL: 'http://localhost:3000',
     timeout: 30000, // Mastra 调用可能需要更长时间
   },
-});
+}).controller(MastraController);
 
 export const MastraTest: React.FC = () => {
   const [loading, setLoading] = useState({

@@ -30,9 +30,9 @@ export class TestController {
 import { _http } from 'vtzac/hook';
 import { TestController } from './backend/test.controller';
 
-const api = _http(TestController, {
+const api = _http({
   ofetchOptions: { baseURL: 'http://localhost:3000' },
-});
+}).controller(TestController);
 
 // Only pass required parameters, Headers handled by interceptor
 const res = await api.getUser('123', 'profile');
@@ -147,7 +147,7 @@ export class UserController {
 **Frontend Configuration Example:**
 
 ```typescript
-const api = _http(UserController, {
+const api = _http({
   ofetchOptions: {
     onRequest({ options }) {
       // Automatically add auth token
@@ -160,7 +160,7 @@ const api = _http(UserController, {
       }
     },
   },
-});
+}).controller(UserController);
 
 // Frontend call doesn't need to pass Headers
 const res = await api.getProfile();

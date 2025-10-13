@@ -11,12 +11,12 @@ import { _http, setGlobalZacOfetchOptions } from 'vtzac/hook';
 import { UserController } from './controllers/user.controller';
 
 // Create controller instance (specify backend URL and timeout)
-const api = _http(UserController, {
+const api = _http({
   ofetchOptions: {
     baseURL: 'https://api.example.com',
     timeout: 5000,
   },
-});
+}).controller(UserController);
 
 // Call backend method
 const user = await api.getUser('123');
@@ -47,7 +47,7 @@ setGlobalZacOfetchOptions({
 });
 
 // All subsequent _http calls will use these default configurations
-const api = _http(UserController); // Automatically uses global configuration
+const api = _http().controller(UserController); // Automatically uses global configuration
 ```
 
 ## Configuration Priority
@@ -68,12 +68,12 @@ setGlobalZacOfetchOptions({
 });
 
 // Instance configuration (overrides global timeout and retry)
-const api = _http(UserController, {
+const api = _http({
   ofetchOptions: {
     timeout: 8000,
     retry: 5,
   },
-});
+}).controller(UserController);
 
 // Final effective configuration:
 // baseURL: 'https://api.example.com' (from global)
@@ -88,7 +88,7 @@ const api = _http(UserController, {
 **Authentication Interceptor Example:**
 
 ```typescript
-const api = _http(UserController, {
+const api = _http({ 
   ofetchOptions: {
     baseURL: 'https://api.example.com',
     onRequest({ request, options }) {
@@ -103,7 +103,7 @@ const api = _http(UserController, {
       console.log('Sending request:', request); // Output: Sending request: https://api.example.com/api/user/123
     },
   },
-});
+}).controller(UserController);
 ```
 
 ### Response Interceptor
@@ -111,7 +111,7 @@ const api = _http(UserController, {
 **Error Handling Interceptor Example:**
 
 ```typescript
-const api = _http(UserController, {
+const api = _http({
   ofetchOptions: {
     onResponseError({ response }) {
       if (response.status === 401) {
@@ -124,7 +124,7 @@ const api = _http(UserController, {
       console.log('Response status:', response.status); // Output: Response status: 200
     },
   },
-});
+}).controller(UserController);
 ```
 
 ## Common Configuration Scenarios

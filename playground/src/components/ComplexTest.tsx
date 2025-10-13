@@ -17,7 +17,7 @@ const ComplexTest: React.FC<TestComponentProps> = ({
   results,
   setResults,
 }) => {
-  const testController = _http(TestInputController);
+  const testController = _http().controller(TestInputController);
 
   const handleComplexTest = async () => {
     setLoading((prev: LoadingState) => ({ ...prev, complex: true }));

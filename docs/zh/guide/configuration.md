@@ -11,12 +11,12 @@ import { _http, setGlobalZacOfetchOptions } from 'vtzac/hook';
 import { UserController } from './controllers/user.controller';
 
 // 创建控制器实例（指定后端地址和超时时间）
-const api = _http(UserController, {
+const api = _http({
   ofetchOptions: {
     baseURL: 'https://api.example.com',
     timeout: 5000,
   },
-});
+}).controller(UserController);
 
 // 调用后端方法
 const user = await api.getUser('123');
@@ -47,7 +47,7 @@ setGlobalZacOfetchOptions({
 });
 
 // 所有后续的 _http 调用都会使用这些默认配置
-const api = _http(UserController); // 自动使用全局配置
+const api = _http().controller(UserController); // 自动使用全局配置
 ```
 
 ## 配置优先级
@@ -68,12 +68,12 @@ setGlobalZacOfetchOptions({
 });
 
 // 实例配置（会覆盖全局的 timeout 和 retry）
-const api = _http(UserController, {
+const api = _http({
   ofetchOptions: {
     timeout: 8000,
     retry: 5,
   },
-});
+}).controller(UserController);
 
 // 最终生效的配置：
 // baseURL: 'https://api.example.com' (来自全局)
@@ -88,7 +88,7 @@ const api = _http(UserController, {
 **身份验证拦截器示例：**
 
 ```typescript
-const api = _http(UserController, {
+const api = _http({
   ofetchOptions: {
     baseURL: 'https://api.example.com',
     onRequest({ request, options }) {
@@ -103,7 +103,7 @@ const api = _http(UserController, {
       console.log('发送请求:', request); // 输出：发送请求: https://api.example.com/api/user/123
     },
   },
-});
+}).controller(UserController);
 ```
 
 ### 响应拦截器
@@ -111,7 +111,7 @@ const api = _http(UserController, {
 **错误处理拦截器示例：**
 
 ```typescript
-const api = _http(UserController, {
+const api = _http({
   ofetchOptions: {
     onResponseError({ response }) {
       if (response.status === 401) {
@@ -124,7 +124,7 @@ const api = _http(UserController, {
       console.log('响应状态:', response.status); // 输出：响应状态: 200
     },
   },
-});
+}).controller(UserController);
 ```
 
 ## 常见配置场景

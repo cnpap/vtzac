@@ -1,5 +1,13 @@
 import type { FetchResponse } from 'ofetch'
 
+interface ResponseMap {
+  blob: Blob
+  text: string
+  arrayBuffer: ArrayBuffer
+  stream: ReadableStream<Uint8Array>
+}
+export type ResponseType = keyof ResponseMap | 'json'
+
 // 类型工具：检测是否为构造函数
 export type Constructor<T = object> = new (...args: any[]) => T
 

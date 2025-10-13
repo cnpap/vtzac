@@ -9,12 +9,12 @@ import type { TestComponentProps, TestResult } from '../types';
 const { Title, Text, Paragraph } = Typography;
 
 // 创建控制器实例
-const defaultController = _http(AppController, {
+const defaultController = _http({
   ofetchOptions: {
     baseURL: 'http://localhost:3000',
     timeout: 5000,
   },
-});
+}).controller(AppController);
 
 export const HelloTest: React.FC<TestComponentProps> = ({
   loading,

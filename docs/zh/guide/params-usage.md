@@ -23,11 +23,11 @@ import { _http } from 'vtzac/hook';
 import { TestController } from './backend/test.controller';
 
 // 创建控制器实例（指定后端地址）
-const testController = _http(TestController, {
+const testController = _http({
   ofetchOptions: {
     baseURL: 'http://localhost:3000',
   },
-});
+}).controller(TestController);  
 
 async function handleSayHello() {
   // 直接调用无参数方法

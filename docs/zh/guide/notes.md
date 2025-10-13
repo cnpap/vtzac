@@ -30,9 +30,9 @@ export class TestController {
 import { _http } from 'vtzac/hook';
 import { TestController } from './backend/test.controller';
 
-const api = _http(TestController, {
+const api = _http({
   ofetchOptions: { baseURL: 'http://localhost:3000' },
-});
+}).controller(TestController);  
 
 // 只传递必需参数，Headers 通过拦截器处理
 const res = await api.getUser('123', 'profile');
@@ -147,7 +147,7 @@ export class UserController {
 **前端配置示例：**
 
 ```typescript
-const api = _http(UserController, {
+const api = _http({
   ofetchOptions: {
     onRequest({ options }) {
       // 自动添加认证令牌
@@ -160,7 +160,7 @@ const api = _http(UserController, {
       }
     },
   },
-});
+}).controller(UserController);
 
 // 前端调用时不需要传递 Headers
 const res = await api.getProfile();

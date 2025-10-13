@@ -9,11 +9,11 @@ import type { TestComponentProps, TestResult, QueryTestType } from '../types';
 const { Title, Text, Paragraph } = Typography;
 
 // 创建控制器实例
-const testController = _http(TestInputController, {
+const testController = _http({
   ofetchOptions: {
     baseURL: 'http://localhost:3000',
   },
-});
+}).controller(TestInputController);
 
 export const QueryTest: React.FC<TestComponentProps> = ({
   loading,

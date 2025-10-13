@@ -11,7 +11,7 @@ export const DeleteTest: React.FC<TestComponentProps> = ({
   results,
   setResults,
 }) => {
-  const testController = _http(TestInputController);
+  const testController = _http().controller(TestInputController);
 
   const handleDeleteTest = async () => {
     setLoading(prev => ({ ...prev, delete: true }));

@@ -34,11 +34,11 @@ import { _http } from 'vtzac/hook';
 import { UploadController } from './backend/upload.controller';
 
 // Create upload controller instance
-const uploadController = _http(UploadController, {
+const uploadController = _http({
   ofetchOptions: {
     baseURL: 'http://localhost:3000',
   },
-});
+}).controller(UploadController);  
 
 async function handleSingleUpload(file: File) {
   // Directly pass file object and metadata

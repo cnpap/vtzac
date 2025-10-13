@@ -9,12 +9,13 @@ const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 // 创建控制器实例
-const mastraController = _http(MastraController, {
+const mastraController = _http({
   ofetchOptions: {
     baseURL: 'http://localhost:3000',
     timeout: 30000,
+    responseType: 'stream',
   },
-});
+}).controller(MastraController);
 
 export const MastraStreamTest: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -24,7 +25,7 @@ export const MastraStreamTest: React.FC = () => {
   const controllerRef = useRef<AbortController | null>(null);
 
   // ofetch 流式相关状态
-  const [ofetchMessage, setOfetchMessage] = useState('');
+  const [ofetchMessage, setOfetchMessage] = useState('南充环境如何');
   const [ofetchLoading, setOfetchLoading] = useState(false);
   const [ofetchError, setOfetchError] = useState<string | null>(null);
   const [ofetchOutput, setOfetchOutput] = useState('');
@@ -65,6 +66,25 @@ export const MastraStreamTest: React.FC = () => {
     setLoading(false);
   };
 
+  // SSE 解析函数
+  const parseSSEData = (text: string): string => {
+    const lines = text.split('\n');
+    const dataLines: string[] = [];
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6); // 移除 'data: ' 前缀
+        if (data === '[DONE]') {
+          break; // 结束标志
+        }
+        dataLines.push(data);
+      }
+    }
+
+    // 将多行 data 用换行符连接，保留原始格式
+    return dataLines.join('\n');
+  };
+
   // ofetch 流式处理函数
   const startOfetchStream = async (): Promise<void> => {
     if (!ofetchMessage.trim()) return;
@@ -76,18 +96,41 @@ export const MastraStreamTest: React.FC = () => {
 
     try {
       const stream = await mastraController.chatStream(ofetchMessage);
-      // console.log('stream', stream)
-      // const reader = stream.body!.getReader();
-      // const decoder = new TextDecoder();
+      console.log('stream', stream);
+      const reader = stream.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = ''; // 用于处理不完整的 SSE 消息
 
-      // while (true) {
-      //   const { done, value } = await reader.read();
-      //   if (done) break;
-      //   // Here is the chunked text of the SSE response.
-      //   const text = decoder.decode(value);
-      //   setOfetchOutput(prev => prev + text);
-      // }
-      setOfetchOutput(stream._data as unknown as string);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // 解码当前块
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+
+        // 按双换行符分割 SSE 消息
+        const messages = buffer.split('\n\n');
+        buffer = messages.pop() || ''; // 保留最后一个可能不完整的消息
+
+        // 处理完整的 SSE 消息
+        for (const message of messages) {
+          if (message.trim()) {
+            const data = parseSSEData(message);
+            if (data) {
+              setOfetchOutput(prev => prev + data);
+            }
+          }
+        }
+      }
+
+      // 处理剩余的缓冲区内容
+      if (buffer.trim()) {
+        const data = parseSSEData(buffer);
+        if (data) {
+          setOfetchOutput(prev => prev + data);
+        }
+      }
     } catch (err) {
       setOfetchError((err as Error).message);
     } finally {
