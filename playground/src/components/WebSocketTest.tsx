@@ -503,7 +503,7 @@ export function WebSocketTest({ loading, setLoading }: TestComponentProps) {
             {renderMessageTag(message.type)}
             <span style={{ marginLeft: 6 }}>
               {message.text || message.message}
-              {message.count !== undefined && ` 在线人数: ${message.count}`}
+              {message.count && ` 在线人数: ${message.count}`}
             </span>
           </div>
         </div>

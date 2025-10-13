@@ -80,7 +80,7 @@ export default async function _api<T>(config: HttpConfig, args: unknown[]): Prom
   if (formData) {
     ofetchOptions.body = formData
   }
-  else if (body !== undefined) {
+  else if (body) {
     ofetchOptions.body = body
   }
 
@@ -97,11 +97,11 @@ function buildUrl(path: string, parameters: ParameterMapping[], args: unknown[])
 
   // 处理路径参数
   parameters.forEach((param, index) => {
-    if (param.decorator === 'Param' && param.key && args[index] !== undefined) {
+    if (param.decorator === 'Param' && param.key && args[index]) {
       const placeholder = `:${param.key}`
       url = url.replace(placeholder, encodeURIComponent(String(args[index])))
     }
-    else if (param.decorator === 'Param' && !param.key && args[index] !== undefined) {
+    else if (param.decorator === 'Param' && !param.key && args[index]) {
       // 处理参数对象的情况
       const paramObj = args[index] as Record<string, unknown>
       if (typeof paramObj === 'object' && paramObj !== null) {
@@ -163,7 +163,7 @@ function processParameters(
               formData.append(key, String(val))
             })
           }
-          else if (value !== undefined) {
+          else if (value) {
             formData.append('data', String(value))
           }
         }
