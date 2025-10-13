@@ -131,7 +131,7 @@ import { _http } from 'vtzac/hook';
 import { AppController } from 'nestjs-example/src/app.controller';
 
 // Create controller instance (specify backend address)
-const defaultController = _http(C{
+const defaultController = _http({
   ofetchOptions: {
     baseURL: 'http://localhost:3000',
     timeout: 5000,
