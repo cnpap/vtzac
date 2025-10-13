@@ -11,7 +11,7 @@ mkdir my-vtzac-demo && cd my-vtzac-demo
 pnpm init
 
 # 创建前端（以 React + TS 为例）
-pnpm create vite frontend -- --template react-ts
+pnpm create vite frontend --no-rolldown --no-interactive --template react-swc-ts
 
 # 创建后端（NestJS 示例）
 pnpm dlx @nestjs/cli new nestjs-example --package-manager pnpm
