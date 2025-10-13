@@ -23,6 +23,7 @@ import { DeleteTest } from './components/DeleteTest';
 import WebSocketTestRefactored from './components/WebSocketTestRefactored';
 import AskTest from './components/AskTest';
 import { MastraTest } from './components/MastraTest';
+import MastraStreamTest from './components/MastraStreamTest';
 import 'antd/dist/reset.css';
 
 setGlobalZacOfetchOptions({
@@ -45,6 +46,11 @@ function App() {
     { label: 'WebSocket 测试', value: 'websocket', icon: <WifiOutlined /> },
     { label: 'Ask 模式测试', value: 'ask', icon: <QuestionCircleOutlined /> },
     { label: 'Mastra AI 测试', value: 'mastra', icon: <RobotOutlined /> },
+    {
+      label: 'Mastra 原生流式',
+      value: 'mastra-stream',
+      icon: <RobotOutlined />,
+    },
   ];
 
   const renderTestComponent = () => {
@@ -76,6 +82,8 @@ function App() {
         return <AskTest />;
       case 'mastra':
         return <MastraTest />;
+      case 'mastra-stream':
+        return <MastraStreamTest />;
       default:
         return <HelloTest {...commonProps} />;
     }
