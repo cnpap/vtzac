@@ -9,6 +9,7 @@ interface HttpMethodConfig {
   path: string
   parameters: ParameterMapping[]
   fileUpload?: FileUploadConfig
+  isSSE?: boolean
 }
 
 /**
@@ -119,6 +120,11 @@ function generatezacOfetchCall(method: HttpMethodInfo, controller: ControllerInf
     method: httpMethod,
     path,
     parameters: parameterMappings,
+  }
+
+  // 如果是 SSE 方法，添加 SSE 标记
+  if (httpMethod === 'SSE') {
+    config.isSSE = true
   }
 
   // 如果有文件上传，添加文件上传配置

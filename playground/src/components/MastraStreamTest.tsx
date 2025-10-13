@@ -1,65 +1,121 @@
 import React, { useRef, useState } from 'react';
 import { Card, Button, Input, Space, Typography, Alert } from 'antd';
-import { RobotOutlined, SendOutlined } from '@ant-design/icons';
+import { RobotOutlined, SendOutlined, ApiOutlined } from '@ant-design/icons';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
+import { _http } from 'vtzac/hook';
+import { MastraController } from 'nestjs-example/src/mastra.controller';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
+
+// 创建控制器实例
+const mastraController = _http(MastraController, {
+  ofetchOptions: {
+    baseURL: 'http://localhost:3000',
+    timeout: 30000,
+  },
+});
 
 export const MastraStreamTest: React.FC = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [output, setOutput] = useState('');
-  const esRef = useRef<EventSource | null>(null);
+  const controllerRef = useRef<AbortController | null>(null);
+
+  // ofetch 流式相关状态
+  const [ofetchMessage, setOfetchMessage] = useState('');
+  const [ofetchLoading, setOfetchLoading] = useState(false);
+  const [ofetchError, setOfetchError] = useState<string | null>(null);
+  const [ofetchOutput, setOfetchOutput] = useState('');
+  const ofetchControllerRef = useRef<AbortController | null>(null);
 
   const startStream = async (): Promise<void> => {
     if (!message.trim()) return;
     setLoading(true);
     setError(null);
     setOutput('');
+    controllerRef.current?.abort();
+    controllerRef.current = new AbortController();
 
     try {
-      // 使用 @Sse GET 接口，直接通过 query 携带 message
-      const url = new URL('http://localhost:3000/api/mastra/chat/stream');
-      url.searchParams.set('message', message);
-      const es = new EventSource(url.toString());
-      esRef.current = es;
-
-      es.onmessage = ev => {
-        if (ev.data === '[DONE]') return;
-        setOutput(prev => prev + ev.data);
-      };
-
-      es.addEventListener('end', () => {
-        setLoading(false);
-        es.close();
-      });
-
-      es.addEventListener('error', () => {
-        setError('EventSource error');
-        setLoading(false);
-        es.close();
-      });
+      await fetchEventSource(
+        `http://localhost:3000/api/mastra/chat/stream?message=${encodeURIComponent(message)}`,
+        {
+          signal: controllerRef.current.signal,
+          onmessage(ev) {
+            if (ev.data === '[DONE]') return;
+            setOutput(prev => prev + ev.data);
+          },
+          onerror(err) {
+            setError(err.message);
+          },
+          openWhenHidden: true,
+        }
+      );
     } catch (err) {
       setError((err as Error).message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const stopStream = (): void => {
-    esRef.current?.close();
+    controllerRef.current?.abort();
     setLoading(false);
+  };
+
+  // ofetch 流式处理函数
+  const startOfetchStream = async (): Promise<void> => {
+    if (!ofetchMessage.trim()) return;
+    setOfetchLoading(true);
+    setOfetchError(null);
+    setOfetchOutput('');
+    ofetchControllerRef.current?.abort();
+    ofetchControllerRef.current = new AbortController();
+
+    try {
+      const stream = await mastraController.chatStream(ofetchMessage);
+      // console.log('stream', stream)
+      // const reader = stream.body!.getReader();
+      // const decoder = new TextDecoder();
+
+      // while (true) {
+      //   const { done, value } = await reader.read();
+      //   if (done) break;
+      //   // Here is the chunked text of the SSE response.
+      //   const text = decoder.decode(value);
+      //   setOfetchOutput(prev => prev + text);
+      // }
+      setOfetchOutput(stream._data as unknown as string);
+    } catch (err) {
+      setOfetchError((err as Error).message);
+    } finally {
+      setOfetchLoading(false);
+    }
+  };
+
+  const stopOfetchStream = (): void => {
+    ofetchControllerRef.current?.abort();
+    setOfetchLoading(false);
   };
 
   return (
     <div>
-      <Title level={3}>Mastra 原生流式测试</Title>
+      <Title level={3}>Mastra 流式测试</Title>
       <Paragraph>
-        使用 <Text code>EventSource</Text> 直接消费后端 <Text code>@Sse</Text>{' '}
-        流式响应，逐字展示。
+        测试两种流式响应方式：使用{' '}
+        <Text code>@microsoft/fetch-event-source</Text> 和{' '}
+        <Text code>ofetch</Text> 直接消费后端 SSE 流式响应，逐字展示。
       </Paragraph>
 
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Card title="原生流式聊天" size="small" extra={<RobotOutlined />}>
+        {/* 原生 fetch-event-source 流式聊天 */}
+        <Card
+          title="fetch-event-source 流式聊天"
+          size="small"
+          extra={<RobotOutlined />}
+        >
           <Space direction="vertical" style={{ width: '100%' }}>
             <TextArea
               placeholder="输入你想和 AI 聊天的内容..."
@@ -91,6 +147,57 @@ export const MastraStreamTest: React.FC = () => {
                   <div>
                     <Text copyable style={{ whiteSpace: 'pre-wrap' }}>
                       {output}
+                    </Text>
+                  </div>
+                }
+                showIcon
+              />
+            )}
+          </Space>
+        </Card>
+
+        {/* ofetch 流式聊天 */}
+        <Card title="ofetch 流式聊天" size="small" extra={<ApiOutlined />}>
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <TextArea
+              placeholder="输入你想和 AI 聊天的内容..."
+              value={ofetchMessage}
+              onChange={e => setOfetchMessage(e.target.value)}
+              rows={3}
+            />
+            <Space>
+              <Button
+                type="primary"
+                icon={<SendOutlined />}
+                loading={ofetchLoading}
+                onClick={startOfetchStream}
+              >
+                开始 ofetch 流式
+              </Button>
+              <Button
+                danger
+                disabled={!ofetchLoading}
+                onClick={stopOfetchStream}
+              >
+                停止
+              </Button>
+            </Space>
+            {ofetchError && (
+              <Alert
+                type="error"
+                message="错误"
+                description={ofetchError}
+                showIcon
+              />
+            )}
+            {ofetchOutput && (
+              <Alert
+                type="success"
+                message="ofetch 流式输出"
+                description={
+                  <div>
+                    <Text copyable style={{ whiteSpace: 'pre-wrap' }}>
+                      {ofetchOutput}
                     </Text>
                   </div>
                 }

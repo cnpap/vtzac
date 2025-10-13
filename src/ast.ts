@@ -39,7 +39,7 @@ export interface MethodParameter {
  */
 export interface HttpMethodInfo {
   name: string
-  httpMethod: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD'
+  httpMethod: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD' | 'SSE'
   path?: string
   parameters: MethodParameter[]
   decorators: {
@@ -292,8 +292,8 @@ function getDecorators(node: ts.Node): { name: string, arguments: DecoratorArgum
 /**
  * 获取 HTTP 方法类型
  */
-function getHttpMethod(decoratorName: string): 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD' | null {
-  const methodMap: Record<string, 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD'> = {
+function getHttpMethod(decoratorName: string): 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD' | 'SSE' | null {
+  const methodMap: Record<string, 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD' | 'SSE'> = {
     Get: 'GET',
     Post: 'POST',
     Put: 'PUT',
@@ -301,6 +301,7 @@ function getHttpMethod(decoratorName: string): 'GET' | 'POST' | 'PUT' | 'DELETE'
     Patch: 'PATCH',
     Options: 'OPTIONS',
     Head: 'HEAD',
+    Sse: 'SSE',
   }
 
   return methodMap[decoratorName] || null

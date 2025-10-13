@@ -1,7 +1,6 @@
-import { Controller, Post, Body, Get, Query, Res, Sse } from '@nestjs/common';
-import type { Observable } from 'rxjs';
-import { Observable as RxObservable } from 'rxjs';
-import type { Response } from 'express';
+import { Controller, Post, Body, Get, Query, Sse } from '@nestjs/common';
+import type { MessageEvent } from '@nestjs/common';
+import { from, map, Observable } from 'rxjs';
 import { MastraService } from './mastra.service';
 
 @Controller('api/mastra')
@@ -12,29 +11,17 @@ export class MastraController {
   async chatWithAgent(@Body() body: { message: string }) {
     return this.mastraService.chatWithWeatherAgent(body.message);
   }
-  // 使用 NestJS 原生 @Sse 装饰器的流式接口（适配 EventSource）
+
+  // 原生流式 SSE 接口（GET）
   @Sse('chat/stream')
-  sseChatStream(
+  async chatStream(
     @Query('message') message: string,
-  ): Observable<{ data: string; type?: string }> {
-    return new RxObservable<{ data: string; type?: string }>((subscriber) => {
-      (async () => {
-        try {
-          const stream = await this.mastraService.streamWeatherAgent(message);
-          for await (const chunk of stream) {
-            subscriber.next({ data: chunk });
-          }
-          subscriber.next({ data: '[DONE]', type: 'end' });
-          subscriber.complete();
-        } catch (err) {
-          subscriber.next({
-            data: JSON.stringify({ message: (err as Error).message }),
-            type: 'error',
-          });
-          subscriber.complete();
-        }
-      })();
-    });
+  ): Promise<Observable<MessageEvent>> {
+    if (!message) {
+      throw new Error('Message parameter is required');
+    }
+    const stream = await this.mastraService.streamWeatherAgent(message);
+    return from(stream).pipe(map((data): MessageEvent => ({ data })));
   }
 
   @Get('weather')

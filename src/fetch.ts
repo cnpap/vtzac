@@ -70,6 +70,9 @@ export default async function _api<T>(config: HttpConfig, args: unknown[]): Prom
   let ofetchOptions = config.ofetchOptions || {}
   ofetchOptions = { ...globalZacOfetchOptions, ...ofetchOptions }
   ofetchOptions.method = method.toUpperCase()
+  if (ofetchOptions.method === 'SSE') {
+    ofetchOptions.method = 'GET'
+  }
   ofetchOptions.headers = Object.assign({}, ofetchOptions.headers, headers)
   ofetchOptions.query = Object.assign({}, ofetchOptions.query, query)
 
