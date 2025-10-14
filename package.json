@@ -100,7 +100,7 @@
   },
   "lint-staged": {
     "playground/**/*.{ts,tsx,js,jsx,json,css,md}": "prettier --write",
-    "!(playground/**)": "eslint --fix",
+    "src/**/*.{ts,tsx}": "eslint --fix",
     "playground/**/*.{ts,tsx,js,jsx}": "eslint -c playground/eslint.config.js --fix"
   }
 }

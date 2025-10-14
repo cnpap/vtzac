@@ -19,7 +19,7 @@ export class TestController {
 **Frontend Usage Example:**
 
 ```tsx
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { TestController } from './backend/test.controller';
 
 // Create controller instance (specify backend URL)
@@ -28,8 +28,6 @@ const testController = _http({
     baseURL: 'http://localhost:3000',
   },
 }).controller(TestController);
-
-
 
 async function handleSayHello() {
   // Direct call to parameterless method

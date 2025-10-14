@@ -1,6 +1,6 @@
 import { WebSocketEventEmitter } from '../websocket.emitter';
 import { WebSocketTestGateway } from '../websocket.gateway';
-import { _socket } from 'vtzac/hook';
+import { _socket } from 'vtzac';
 
 // 初始化 socket 连接，类似于原始的 io('http://localhost:3001', { transports: ['websocket'] })
 const { emitter, createListener, socket, disconnect } = _socket(

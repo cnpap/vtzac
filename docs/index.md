@@ -65,7 +65,7 @@ export class UserController {
 <template #right>
 
 ```tsx
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { UserController } from './backend/user.controller';
 
 const api = _http({

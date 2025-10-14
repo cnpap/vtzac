@@ -43,7 +43,7 @@ Frontend can directly reference backend project to achieve type-safe calls.
 ### HTTP Calls
 
 ```ts
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { AppController } from 'backend/src/app.controller';
 
 const api = _http({
@@ -58,7 +58,7 @@ console.log(res._data); // Output: 'Hello World!'
 ### WebSocket Communication
 
 ```ts
-import { _socket } from 'vtzac/hook';
+import { _socket } from 'vtzac';
 import { WebSocketGateway } from 'backend/src/websocket.gateway';
 
 const { emitter, createListener } = _socket(

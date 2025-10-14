@@ -7,7 +7,7 @@
 **前端配置示例：**
 
 ```typescript
-import { _http, setGlobalZacOfetchOptions } from 'vtzac/hook';
+import { _http, setGlobalZacOfetchOptions } from 'vtzac';
 import { UserController } from './controllers/user.controller';
 
 // 创建控制器实例（指定后端地址和超时时间）
@@ -34,7 +34,7 @@ console.log(user._data); // 输出：{ id: '123', name: 'Alice' }
 **全局配置示例：**
 
 ```typescript
-import { setGlobalZacOfetchOptions } from 'vtzac/hook';
+import { setGlobalZacOfetchOptions } from 'vtzac';
 
 // 设置全局默认配置
 setGlobalZacOfetchOptions({

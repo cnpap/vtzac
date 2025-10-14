@@ -27,12 +27,12 @@ export class TestController {
 **前端调用示例：**
 
 ```typescript
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { TestController } from './backend/test.controller';
 
 const api = _http({
   ofetchOptions: { baseURL: 'http://localhost:3000' },
-}).controller(TestController);  
+}).controller(TestController);
 
 // 只传递必需参数，Headers 通过拦截器处理
 const res = await api.getUser('123', 'profile');

@@ -79,7 +79,8 @@ export type TestCase =
   | 'websocket'
   | 'ask'
   | 'mastra'
-  | 'mastra-stream';
+  | 'mastra-stream'
+  | 'ai-hooks';
 
 // 通用测试组件 Props 类型
 export interface TestComponentProps {

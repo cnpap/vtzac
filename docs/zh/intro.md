@@ -34,7 +34,7 @@ export class AppController {
 **前端调用示例：**
 
 ```ts
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { AppController } from 'nestjs-example/src/app.controller';
 
 const api = _http({
@@ -66,7 +66,7 @@ async function demo() {
 **前端 WebSocket 调用示例：**
 
 ```ts
-import { _socket } from 'vtzac/hook';
+import { _socket } from 'vtzac';
 import { WebSocketTestGateway } from 'nestjs-example/src/websocket.gateway';
 import { WebSocketEventEmitter } from 'nestjs-example/src/websocket.emitter';
 

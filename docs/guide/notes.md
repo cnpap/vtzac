@@ -27,7 +27,7 @@ export class TestController {
 **Frontend Usage Example:**
 
 ```typescript
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { TestController } from './backend/test.controller';
 
 const api = _http({

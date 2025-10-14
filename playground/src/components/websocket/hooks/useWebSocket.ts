@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { notification } from 'antd';
 import type { User, Message } from '../types';
 import type { LoadingState } from '../../../types';
-import { _socket } from 'vtzac/hook';
+import { _socket } from 'vtzac';
 import { WebSocketTestGateway } from 'nestjs-example/src/websocket.gateway';
 import { WebSocketEventEmitter } from 'nestjs-example/src/websocket.emitter';
 

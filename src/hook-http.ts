@@ -1,6 +1,7 @@
-import type { FetchOptions } from 'ofetch'
-import type { Constructor, OfetchWrappedInstance, ResponseType } from './types'
+import type { FetchOptions, FetchResponse } from 'ofetch'
+import type { Constructor, ConsumeEventStreamOptions, OfetchWrappedInstance, ResponseType } from './types'
 import { ofetch } from 'ofetch'
+import { consumeEventStream } from './stream'
 
 // ZAC 配置选项类型，与 ofetch.create 参数保持一致
 export interface ZacHttpOptions {
@@ -50,3 +51,18 @@ export function _http<T = object>(options?: ZacHttpOptions): {
 }
 
 export { setGlobalZacOfetchOptions } from './fetch'
+export { consumeEventStream } from './stream'
+
+/**
+ * 消费流式响应的便捷函数
+ * @param responsePromise ofetch 返回的 Promise<FetchResponse<T>>
+ * @param options 消费选项，包含各种回调函数
+ * @returns Promise<void>
+ */
+export async function consumeStream<T = any>(
+  responsePromise: Promise<FetchResponse<T>>,
+  options: ConsumeEventStreamOptions = {},
+): Promise<void> {
+  const response = await responsePromise
+  return consumeEventStream(response, options)
+}

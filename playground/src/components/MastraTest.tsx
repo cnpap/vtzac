@@ -6,7 +6,7 @@ import {
   EnvironmentOutlined,
 } from '@ant-design/icons';
 import { message } from 'antd';
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { MastraController } from 'nestjs-example/src/mastra.controller';
 
 const { Title, Text, Paragraph } = Typography;

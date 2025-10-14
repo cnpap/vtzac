@@ -34,7 +34,7 @@ export class AppController {
 **Frontend Call Example:**
 
 ```ts
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { AppController } from 'nestjs-example/src/app.controller';
 
 const api = _http({
@@ -66,7 +66,7 @@ Frontend initializes connection once through `_socket(url, GatewayClass, options
 **Frontend WebSocket Call Example:**
 
 ```ts
-import { _socket } from 'vtzac/hook';
+import { _socket } from 'vtzac';
 import { WebSocketTestGateway } from 'nestjs-example/src/websocket.gateway';
 import { WebSocketEventEmitter } from 'nestjs-example/src/websocket.emitter';
 

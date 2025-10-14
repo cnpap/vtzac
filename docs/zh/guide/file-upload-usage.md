@@ -30,7 +30,7 @@ export class UploadController {
 **前端调用示例：**
 
 ```tsx
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { UploadController } from './backend/upload.controller';
 
 // 创建上传控制器实例
@@ -38,7 +38,7 @@ const uploadController = _http({
   ofetchOptions: {
     baseURL: 'http://localhost:3000',
   },
-}).controller(UploadController);  
+}).controller(UploadController);
 
 async function handleSingleUpload(file: File) {
   // 直接传递文件对象和元数据

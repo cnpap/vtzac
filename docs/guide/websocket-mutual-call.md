@@ -110,7 +110,7 @@ export class ChatGateway {
 **Frontend Usage Example:**
 
 ```ts
-import { _socket } from 'vtzac/hook';
+import { _socket } from 'vtzac';
 import { ChatGateway } from './chat.gateway';
 import { ChatEvents } from './chat-events';
 
@@ -229,7 +229,7 @@ You can directly access the native Socket instance for custom operations:
 **Native Socket Usage Example:**
 
 ```ts
-import { _socket } from 'vtzac/hook';
+import { _socket } from 'vtzac';
 
 const { socket } = _socket('http://localhost:3000', ChatGateway);
 

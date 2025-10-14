@@ -60,3 +60,128 @@ export type SocketWrappedInstance<T> = {
     ? (...args: A) => SocketWrappedReturn<R>
     : ExcludeLifecycleMethods<T>[K]
 }
+
+// EventSource 相关类型定义
+export interface EventSourceMessage {
+  /** The event ID to set the EventSource object's last event ID value. */
+  id: string
+  /** A string identifying the type of event described. */
+  event: string
+  /** The event data */
+  data: string
+  /** The reconnection interval (in milliseconds) to wait before retrying the connection */
+  retry?: number
+}
+
+// 流式消费选项
+export interface ConsumeEventStreamOptions {
+  /**
+   * Called when a response is received. Use this to validate that the response
+   * actually matches what you expect (and throw if it doesn't.)
+   */
+  onOpen?: (response: Response) => Promise<void> | void
+
+  /**
+   * Called when a message is received. NOTE: Unlike the default browser
+   * EventSource.onmessage, this callback is called for _all_ events,
+   * even ones with a custom `event` field.
+   */
+  onMessage?: (ev: EventSourceMessage) => void
+
+  /**
+   * Called when a response finishes.
+   */
+  onClose?: () => void
+
+  /**
+   * Called when the stream finishes successfully (after onClose).
+   */
+  onFinish?: () => void
+
+  /**
+   * Called when there is any error processing messages / handling callbacks etc.
+   */
+  onError?: (err: Error) => void
+
+  /**
+   * AbortController signal to control the stream consumption
+   */
+  signal?: AbortSignal
+
+  /**
+   * 是否跳过自动过滤 [DONE] 消息的检查
+   * 默认为 false，即默认会自动过滤掉 data 为 '[DONE]' 的消息
+   * 设置为 true 时，所有消息都会传递给 onMessage 回调
+   */
+  skipDoneCheck?: boolean
+}
+
+// React hooks 相关类型定义
+
+// 消息类型定义
+export interface AIMessage {
+  /** 消息唯一标识 */
+  id: string
+  /** 消息角色：用户或助手 */
+  role: 'user' | 'assistant'
+  /** 消息内容 */
+  content: string
+  /** 创建时间戳 */
+  createdAt?: Date
+}
+
+// useAICompletion hook 的选项
+export interface UseAICompletionOptions {
+  /** 流式消息回调 */
+  onMessage?: ConsumeEventStreamOptions['onMessage']
+  /** 完成回调 */
+  onFinish?: (completion: string) => void
+  /** 错误回调 */
+  onError?: ConsumeEventStreamOptions['onError']
+}
+
+// useAICompletion hook 的返回值
+export interface UseAICompletionReturn {
+  /** 当前生成的文本内容 */
+  completion: string
+  /** 是否正在加载 */
+  isLoading: boolean
+  /** 错误信息 */
+  error: Error | null
+  /** 发起文本生成 */
+  complete: (prompt: string) => Promise<void>
+  /** 停止生成 */
+  stop: () => void
+  /** 重置状态 */
+  reset: () => void
+}
+
+// useAIChat hook 的选项
+export interface UseAIChatOptions {
+  /** 初始消息列表 */
+  initialMessages?: AIMessage[]
+  /** 流式消息回调 */
+  onMessage?: ConsumeEventStreamOptions['onMessage']
+  /** 完成回调 */
+  onFinish?: (message: AIMessage) => void
+  /** 错误回调 */
+  onError?: ConsumeEventStreamOptions['onError']
+}
+
+// useAIChat hook 的返回值
+export interface UseAIChatReturn {
+  /** 消息列表 */
+  messages: AIMessage[]
+  /** 是否正在加载 */
+  isLoading: boolean
+  /** 错误信息 */
+  error: Error | null
+  /** 发送消息 */
+  append: (content: string) => Promise<void>
+  /** 重新生成最后一条消息 */
+  reload: () => Promise<void>
+  /** 停止生成 */
+  stop: () => void
+  /** 重置聊天 */
+  reset: () => void
+}

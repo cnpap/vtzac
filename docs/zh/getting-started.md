@@ -127,7 +127,7 @@ export class AppController {
 **前端调用示例：**
 
 ```ts
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { AppController } from 'nestjs-example/src/app.controller';
 
 // 创建控制器实例（指定后端地址）

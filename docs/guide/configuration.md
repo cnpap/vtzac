@@ -7,7 +7,7 @@
 **Frontend Configuration Example:**
 
 ```typescript
-import { _http, setGlobalZacOfetchOptions } from 'vtzac/hook';
+import { _http, setGlobalZacOfetchOptions } from 'vtzac';
 import { UserController } from './controllers/user.controller';
 
 // Create controller instance (specify backend URL and timeout)
@@ -34,7 +34,7 @@ console.log(user._data); // Output: { id: '123', name: 'Alice' }
 **Global Configuration Example:**
 
 ```typescript
-import { setGlobalZacOfetchOptions } from 'vtzac/hook';
+import { setGlobalZacOfetchOptions } from 'vtzac';
 
 // Set global default configuration
 setGlobalZacOfetchOptions({
@@ -88,7 +88,7 @@ const api = _http({
 **Authentication Interceptor Example:**
 
 ```typescript
-const api = _http({ 
+const api = _http({
   ofetchOptions: {
     baseURL: 'https://api.example.com',
     onRequest({ request, options }) {

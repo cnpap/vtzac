@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Space, Typography, Alert, Card, Upload, Row, Col } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { message } from 'antd';
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { TestInputController } from 'nestjs-example/src/test-input.controller';
 import type { TestComponentProps } from '../types';
 

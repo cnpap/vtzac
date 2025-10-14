@@ -2,20 +2,21 @@ import React, { useRef, useState } from 'react';
 import { Card, Button, Input, Space, Typography, Alert } from 'antd';
 import { RobotOutlined, SendOutlined, ApiOutlined } from '@ant-design/icons';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import { _http } from 'vtzac/hook';
+import { consumeStream, _http } from 'vtzac';
 import { MastraController } from 'nestjs-example/src/mastra.controller';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 // 创建控制器实例
-const mastraController = _http({
+const { controller } = _http({
   ofetchOptions: {
     baseURL: 'http://localhost:3000',
     timeout: 30000,
     responseType: 'stream',
   },
-}).controller(MastraController);
+});
+const mastraController = controller(MastraController);
 
 export const MastraStreamTest: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -24,12 +25,12 @@ export const MastraStreamTest: React.FC = () => {
   const [output, setOutput] = useState('');
   const controllerRef = useRef<AbortController | null>(null);
 
-  // ofetch 流式相关状态
-  const [ofetchMessage, setOfetchMessage] = useState('南充环境如何');
-  const [ofetchLoading, setOfetchLoading] = useState(false);
-  const [ofetchError, setOfetchError] = useState<string | null>(null);
-  const [ofetchOutput, setOfetchOutput] = useState('');
-  const ofetchControllerRef = useRef<AbortController | null>(null);
+  // 独立 consumeStream 相关状态
+  const [standaloneMessage, setStandaloneMessage] = useState('介绍一下成都');
+  const [standaloneLoading, setStandaloneLoading] = useState(false);
+  const [standaloneError, setStandaloneError] = useState<string | null>(null);
+  const [standaloneOutput, setStandaloneOutput] = useState('');
+  const standaloneControllerRef = useRef<AbortController | null>(null);
 
   const startStream = async (): Promise<void> => {
     if (!message.trim()) return;
@@ -66,90 +67,51 @@ export const MastraStreamTest: React.FC = () => {
     setLoading(false);
   };
 
-  // SSE 解析函数
-  const parseSSEData = (text: string): string => {
-    const lines = text.split('\n');
-    const dataLines: string[] = [];
-
-    for (const line of lines) {
-      if (line.startsWith('data: ')) {
-        const data = line.slice(6); // 移除 'data: ' 前缀
-        if (data === '[DONE]') {
-          break; // 结束标志
-        }
-        dataLines.push(data);
-      }
-    }
-
-    // 将多行 data 用换行符连接，保留原始格式
-    return dataLines.join('\n');
-  };
-
-  // ofetch 流式处理函数
-  const startOfetchStream = async (): Promise<void> => {
-    if (!ofetchMessage.trim()) return;
-    setOfetchLoading(true);
-    setOfetchError(null);
-    setOfetchOutput('');
-    ofetchControllerRef.current?.abort();
-    ofetchControllerRef.current = new AbortController();
+  // 独立 consumeStream 流式处理函数
+  const startStandaloneStream = async (): Promise<void> => {
+    if (!standaloneMessage.trim()) return;
+    setStandaloneLoading(true);
+    setStandaloneError(null);
+    setStandaloneOutput('');
+    standaloneControllerRef.current?.abort();
+    standaloneControllerRef.current = new AbortController();
 
     try {
-      const stream = await mastraController.chatStream(ofetchMessage);
-      console.log('stream', stream);
-      const reader = stream.body!.getReader();
-      const decoder = new TextDecoder();
-      let buffer = ''; // 用于处理不完整的 SSE 消息
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        // 解码当前块
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
-
-        // 按双换行符分割 SSE 消息
-        const messages = buffer.split('\n\n');
-        buffer = messages.pop() || ''; // 保留最后一个可能不完整的消息
-
-        // 处理完整的 SSE 消息
-        for (const message of messages) {
-          if (message.trim()) {
-            const data = parseSSEData(message);
-            if (data) {
-              setOfetchOutput(prev => prev + data);
-            }
-          }
-        }
-      }
-
-      // 处理剩余的缓冲区内容
-      if (buffer.trim()) {
-        const data = parseSSEData(buffer);
-        if (data) {
-          setOfetchOutput(prev => prev + data);
-        }
-      }
+      // 使用独立的 consumeStream 函数
+      await consumeStream(mastraController.chatStream(standaloneMessage), {
+        signal: standaloneControllerRef.current.signal,
+        onMessage(ev) {
+          // 不再需要手动判断 [DONE]，consumeStream 会自动过滤
+          setStandaloneOutput(prev => prev + ev.data);
+        },
+        onError(err) {
+          setStandaloneError(err.message);
+        },
+        onClose() {
+          console.log('Standalone stream closed');
+        },
+      });
     } catch (err) {
-      setOfetchError((err as Error).message);
+      setStandaloneError((err as Error).message);
     } finally {
-      setOfetchLoading(false);
+      setStandaloneLoading(false);
     }
   };
 
-  const stopOfetchStream = (): void => {
-    ofetchControllerRef.current?.abort();
-    setOfetchLoading(false);
+  const stopStandaloneStream = (): void => {
+    standaloneControllerRef.current?.abort();
+    setStandaloneLoading(false);
   };
 
   return (
     <div>
       <Title level={3}>Mastra 流式测试</Title>
       <Paragraph>
-        测试两种流式响应方式：使用{' '}
-        <Text code>@microsoft/fetch-event-source</Text> 和{' '}
-        <Text code>ofetch</Text> 直接消费后端 SSE 流式响应，逐字展示。
+        测试三种流式响应方式：使用{' '}
+        <Text code>@microsoft/fetch-event-source</Text>、{' '}
+        <Text code>vtzac 集成的 httpConsumeStream</Text> 和{' '}
+        <Text code>独立的 consumeStream</Text> 函数来消费后端 SSE
+        流式响应，逐字展示。
       </Paragraph>
 
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -199,48 +161,52 @@ export const MastraStreamTest: React.FC = () => {
           </Space>
         </Card>
 
-        {/* ofetch 流式聊天 */}
-        <Card title="ofetch 流式聊天" size="small" extra={<ApiOutlined />}>
+        {/* 独立 consumeStream 流式聊天 */}
+        <Card
+          title="独立 consumeStream 流式聊天"
+          size="small"
+          extra={<ApiOutlined />}
+        >
           <Space direction="vertical" style={{ width: '100%' }}>
             <TextArea
               placeholder="输入你想和 AI 聊天的内容..."
-              value={ofetchMessage}
-              onChange={e => setOfetchMessage(e.target.value)}
+              value={standaloneMessage}
+              onChange={e => setStandaloneMessage(e.target.value)}
               rows={3}
             />
             <Space>
               <Button
                 type="primary"
                 icon={<SendOutlined />}
-                loading={ofetchLoading}
-                onClick={startOfetchStream}
+                loading={standaloneLoading}
+                onClick={startStandaloneStream}
               >
-                开始 ofetch 流式
+                开始独立流式
               </Button>
               <Button
                 danger
-                disabled={!ofetchLoading}
-                onClick={stopOfetchStream}
+                disabled={!standaloneLoading}
+                onClick={stopStandaloneStream}
               >
                 停止
               </Button>
             </Space>
-            {ofetchError && (
+            {standaloneError && (
               <Alert
                 type="error"
                 message="错误"
-                description={ofetchError}
+                description={standaloneError}
                 showIcon
               />
             )}
-            {ofetchOutput && (
+            {standaloneOutput && (
               <Alert
                 type="success"
-                message="ofetch 流式输出"
+                message="独立流式输出"
                 description={
                   <div>
                     <Text copyable style={{ whiteSpace: 'pre-wrap' }}>
-                      {ofetchOutput}
+                      {standaloneOutput}
                     </Text>
                   </div>
                 }

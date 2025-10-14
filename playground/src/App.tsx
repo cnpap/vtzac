@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { setGlobalZacOfetchOptions } from 'vtzac/hook';
+import { setGlobalZacOfetchOptions } from 'vtzac';
 import { Segmented, Space, Row, Col } from 'antd';
 import {
   SendOutlined,
@@ -24,6 +24,7 @@ import WebSocketTestRefactored from './components/WebSocketTestRefactored';
 import AskTest from './components/AskTest';
 import { MastraTest } from './components/MastraTest';
 import MastraStreamTest from './components/MastraStreamTest';
+import AIHooksTest from './components/AIHooksTest';
 import 'antd/dist/reset.css';
 
 setGlobalZacOfetchOptions({
@@ -49,6 +50,11 @@ function App() {
     {
       label: 'Mastra 原生流式',
       value: 'mastra-stream',
+      icon: <RobotOutlined />,
+    },
+    {
+      label: 'AI Hooks 测试',
+      value: 'ai-hooks',
       icon: <RobotOutlined />,
     },
   ];
@@ -84,6 +90,8 @@ function App() {
         return <MastraTest />;
       case 'mastra-stream':
         return <MastraStreamTest />;
+      case 'ai-hooks':
+        return <AIHooksTest />;
       default:
         return <HelloTest {...commonProps} />;
     }

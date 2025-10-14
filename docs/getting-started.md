@@ -127,7 +127,7 @@ export class AppController {
 **Frontend Call Example:**
 
 ```ts
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import { AppController } from 'nestjs-example/src/app.controller';
 
 // Create controller instance (specify backend address)

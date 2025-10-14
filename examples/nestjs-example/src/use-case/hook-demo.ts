@@ -1,5 +1,5 @@
 import { TestInputController } from '../test-input.controller';
-import { _http, setGlobalZacOfetchOptions } from 'vtzac/hook';
+import { _http, setGlobalZacOfetchOptions } from 'vtzac';
 
 setGlobalZacOfetchOptions({
   baseURL: 'https://api.example.com',

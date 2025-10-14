@@ -110,7 +110,7 @@ export class ChatGateway {
 **前端调用示例：**
 
 ```ts
-import { _socket } from 'vtzac/hook';
+import { _socket } from 'vtzac';
 import { ChatGateway } from './chat.gateway';
 import { ChatEvents } from './chat-events';
 
@@ -226,7 +226,7 @@ const { emitter } = _socket('http://localhost:3000', ChatGateway);
 **原生 Socket 使用示例：**
 
 ```ts
-import { _socket } from 'vtzac/hook';
+import { _socket } from 'vtzac';
 
 const { socket } = _socket('http://localhost:3000', ChatGateway);
 

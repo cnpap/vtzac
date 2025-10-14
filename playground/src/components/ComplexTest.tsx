@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Button, Alert, Typography, message } from 'antd';
-import { _http } from 'vtzac/hook';
+import { _http } from 'vtzac';
 import type {
   TestComponentProps,
   TestResult,
