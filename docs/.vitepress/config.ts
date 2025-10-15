@@ -55,6 +55,7 @@ export default defineConfig({
             items: [
               { text: 'Parameter Handling', link: '/guide/params-usage' },
               { text: 'File Upload', link: '/guide/file-upload-usage' },
+              { text: 'SSE Streaming Response', link: '/guide/sse-usage' },
             ],
           },
           {
