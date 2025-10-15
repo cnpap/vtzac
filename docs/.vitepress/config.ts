@@ -99,6 +99,7 @@ export default defineConfig({
             items: [
               { text: '参数处理用例', link: '/zh/guide/params-usage' },
               { text: '文件上传用例', link: '/zh/guide/file-upload-usage' },
+              { text: 'SSE 流式响应', link: '/zh/guide/sse-usage' },
             ],
           },
           {

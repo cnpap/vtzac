@@ -16,7 +16,7 @@ const { controller } = _http({
     responseType: 'stream',
   },
 });
-const mastraController = controller(AiSdkController);
+const aiSdkController = controller(AiSdkController);
 
 export const MastraStreamTest: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -78,7 +78,7 @@ export const MastraStreamTest: React.FC = () => {
 
     try {
       // 使用独立的 consumeStream 函数
-      await consumeStream(mastraController.chatStream(standaloneMessage), {
+      await consumeStream(aiSdkController.chatStream(standaloneMessage), {
         signal: standaloneControllerRef.current.signal,
         onMessage(ev) {
           // 不再需要手动判断 [DONE]，consumeStream 会自动过滤
