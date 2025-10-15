@@ -2,8 +2,8 @@ import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 // https://vitepress.dev/guide/custom-theme
 import { h } from 'vue'
-import ExampleCard from './ExampleCard.vue'
-import VersionBadge from './VersionBadge.vue'
+import ExampleCard from '../components/ExampleCard.vue'
+import VersionBadge from '../components/VersionBadge.vue'
 import './style.css'
 
 export default {

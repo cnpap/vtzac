@@ -58,7 +58,9 @@
     "socket.io-client": ">=4.0.0"
   },
   "dependencies": {
-    "@nestjs/swagger": "catalog:"
+    "@nestjs/swagger": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "tailwindcss": "catalog:"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:cli",
@@ -97,6 +99,7 @@
     "vitepress": "catalog:",
     "vitest": "catalog:testing",
     "vitest-package-exports": "catalog:testing",
+    "vtjump": "^4.0.1",
     "wait-on": "catalog:",
     "yaml": "catalog:testing"
   },

@@ -1,7 +1,17 @@
+import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vitepress'
+// import vtjump from 'vtjump'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  vite: {
+    plugins: [
+      tailwindcss()
+      // vtjump({
+      //   protocols: ['trae']
+      // })
+    ]
+  },
   title: 'vtzac',
   description: 'Vite + NestJS Full-Stack Solution',
   lang: 'en-US',

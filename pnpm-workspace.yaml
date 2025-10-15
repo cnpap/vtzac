@@ -11,7 +11,7 @@ catalog:
   '@nestjs/core': 11.1.6
   '@nestjs/platform-express': 11.1.6
   '@nestjs/swagger': ^11.2.0
-  '@tailwindcss/vite': ^4.1.14
+  '@tailwindcss/vite': 4.1.14
   '@types/express': ^5.0.3
   '@types/multer': ^2.0.0
   '@types/react': 18.3.26
@@ -38,7 +38,7 @@ catalog:
   rxjs: 7.8.2
   socket.io: ^4.8.1
   socket.io-client: ^4.8.1
-  tailwindcss: ^4.1.14
+  tailwindcss: 4.1.14
   typescript-eslint: ^8.45.0
   vitepress: 2.0.0-alpha.12
   wait-on: ^9.0.1
