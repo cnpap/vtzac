@@ -6,8 +6,6 @@
   consumeStream: function
   default: function
   setGlobalZacOfetchOptions: function
-  useAIChat: function
-  useAICompletion: function
   vtzac: function
 ./hook:
   _controller: function
@@ -21,3 +19,6 @@
   dispatch: object
   Emit: function
   emitWith: function
+./react:
+  useAIChat: function
+  useAICompletion: function
