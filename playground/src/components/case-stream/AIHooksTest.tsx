@@ -19,6 +19,7 @@ import {
 import { _http } from 'vtzac';
 import { useAICompletion, useAIChat } from 'vtzac/react';
 import { MastraController } from 'nestjs-example/src/mastra.controller';
+import { AiSdkController } from 'nestjs-example/src/ai-sdk.controller';
 import type { UIMessage } from 'ai';
 
 const { Title, Text, Paragraph } = Typography;
@@ -33,6 +34,7 @@ const { controller } = _http({
   },
 });
 const mastraController = controller(MastraController);
+const aiSdkController = controller(AiSdkController);
 
 export const AIHooksTest: React.FC = () => {
   // useAICompletion 测试
@@ -46,14 +48,14 @@ export const AIHooksTest: React.FC = () => {
   // AI SDK 文本协议（text）流式测试
   const [aiTextPrompt, setAiTextPrompt] = useState('你好');
   const aiSdkText = useAICompletion(
-    (prompt: string) => mastraController.aiSdkCompletion({ prompt }),
+    (prompt: string) => aiSdkController.aiSdkCompletion({ prompt }),
     { protocol: 'text' }
   );
 
   // AI SDK 数据协议（data）流式测试
   const [aiDataPrompt, setAiDataPrompt] = useState('你好');
   const aiSdkData = useAICompletion(
-    (prompt: string) => mastraController.aiSdkCompletionData({ prompt }),
+    (prompt: string) => aiSdkController.aiSdkCompletionData({ prompt }),
     { protocol: 'data' }
   );
 
@@ -64,7 +66,7 @@ export const AIHooksTest: React.FC = () => {
 
   const chat = useAIChat(
     (messages: UIMessage[]) => {
-      return mastraController.multiChat({
+      return aiSdkController.multiChat({
         messages,
       });
     },

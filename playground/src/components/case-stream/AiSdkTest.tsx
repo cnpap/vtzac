@@ -19,7 +19,7 @@ export const AiSdkTest: React.FC = () => {
     error: aiSdkError,
     stop: aiSdkStop,
   } = useCompletion({
-    api: 'http://localhost:3000/api/mastra/ai-sdk/completion',
+    api: 'http://localhost:3000/api/ai-sdk/completion',
     // 后端使用的是纯文本流（pipeTextStreamToResponse），useCompletion 默认期望的是 data 流。
     // 显式声明为 text 协议，才能正确解析纯文本的 chunk。
     streamProtocol: 'text',
@@ -33,7 +33,7 @@ export const AiSdkTest: React.FC = () => {
     error: dataError,
     stop: dataStop,
   } = useCompletion({
-    api: 'http://localhost:3000/api/mastra/ai-sdk/completion-data',
+    api: 'http://localhost:3000/api/ai-sdk/completion-data',
   });
 
   // AI SDK 输入状态
