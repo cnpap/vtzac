@@ -19,7 +19,7 @@ import {
 import { _http } from 'vtzac';
 import { useAICompletion, useAIChat } from '../../../../src/react';
 import { MastraController } from 'nestjs-example/src/mastra.controller';
-import type { AIMessage } from '../../../../src/types';
+import type { UIMessage } from 'ai';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -39,54 +39,67 @@ export const AIHooksTest: React.FC = () => {
   const [completionPrompt, setCompletionPrompt] =
     useState('介绍一下成都这座城市');
 
-  const completion = useAICompletion(
-    (prompt: string) => mastraController.chatStream(prompt),
-    {
-      onMessage: message => {
-        console.log('Completion message:', message);
-      },
-      onFinish: text => {
-        console.log('Completion finished:', text);
-      },
-      onError: error => {
-        console.error('Completion error:', error);
-      },
-    }
+  const completion = useAICompletion((prompt: string) =>
+    mastraController.chatStream(prompt)
+  );
+
+  // AI SDK 文本协议（text）流式测试
+  const [aiTextPrompt, setAiTextPrompt] = useState('你好');
+  const aiSdkText = useAICompletion(
+    (prompt: string) => mastraController.aiSdkCompletion({ prompt }),
+    { protocol: 'text' }
+  );
+
+  // AI SDK 数据协议（data）流式测试
+  const [aiDataPrompt, setAiDataPrompt] = useState('你好');
+  const aiSdkData = useAICompletion(
+    (prompt: string) => mastraController.aiSdkCompletionData({ prompt }),
+    { protocol: 'data' }
   );
 
   // useAIChat 测试
-  const [chatInput, setChatInput] = useState('');
+  const [chatInput, setChatInput] = useState(
+    '你好，我是一个程序员，我打算和你聊聊天'
+  );
 
   const chat = useAIChat(
-    (messages: AIMessage[]) => {
-      // 将消息转换为简单的字符串格式发送给后端
-      const lastMessage = messages[messages.length - 1];
-      return mastraController.chatStream(lastMessage?.content || '');
+    (messages: UIMessage[]) => {
+      return mastraController.multiChat({
+        messages,
+      });
     },
     {
+      protocol: 'text',
       initialMessages: [
         {
           id: '1',
           role: 'assistant',
-          content: '你好！我是 AI 助手，有什么可以帮助你的吗？',
-          createdAt: new Date(),
+          parts: [
+            {
+              type: 'text',
+              text: '你好！我是 AI 助手，有什么可以帮助你的吗？',
+            },
+          ],
         },
       ],
-      onMessage: message => {
-        console.log('Chat message:', message);
-      },
-      onFinish: message => {
-        console.log('Chat finished:', message);
-      },
-      onError: error => {
-        console.error('Chat error:', error);
-      },
     }
   );
 
   const handleCompletionSubmit = () => {
     if (completionPrompt.trim()) {
       completion.complete(completionPrompt);
+    }
+  };
+
+  const handleAiTextSubmit = () => {
+    if (aiTextPrompt.trim()) {
+      aiSdkText.complete(aiTextPrompt);
+    }
+  };
+
+  const handleAiDataSubmit = () => {
+    if (aiDataPrompt.trim()) {
+      aiSdkData.complete(aiDataPrompt);
     }
   };
 
@@ -168,6 +181,124 @@ export const AIHooksTest: React.FC = () => {
 
         <Divider />
 
+        {/* AI SDK 文本协议（text） */}
+        <Card
+          title="AI SDK 文本协议（text）"
+          size="small"
+          extra={<RobotOutlined />}
+        >
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <TextArea
+              placeholder="输入提示词...（text 协议）"
+              value={aiTextPrompt}
+              onChange={e => setAiTextPrompt(e.target.value)}
+              rows={3}
+            />
+            <Space>
+              <Button
+                type="primary"
+                icon={<SendOutlined />}
+                loading={aiSdkText.isLoading}
+                onClick={handleAiTextSubmit}
+                disabled={!aiTextPrompt.trim()}
+              >
+                开始（text）
+              </Button>
+              <Button
+                danger
+                disabled={!aiSdkText.isLoading}
+                onClick={aiSdkText.stop}
+              >
+                停止（text）
+              </Button>
+              <Button icon={<ClearOutlined />} onClick={aiSdkText.reset}>
+                重置
+              </Button>
+            </Space>
+            {aiSdkText.error && (
+              <Alert
+                type="error"
+                message="错误（text）"
+                description={aiSdkText.error.message}
+                showIcon
+              />
+            )}
+            {aiSdkText.completion && (
+              <Alert
+                type="success"
+                message="流式输出（text）"
+                description={
+                  <div>
+                    <Text copyable style={{ whiteSpace: 'pre-wrap' }}>
+                      {aiSdkText.completion}
+                    </Text>
+                  </div>
+                }
+                showIcon
+              />
+            )}
+          </Space>
+        </Card>
+
+        {/* AI SDK 数据协议（data） */}
+        <Card
+          title="AI SDK 数据协议（data）"
+          size="small"
+          extra={<RobotOutlined />}
+        >
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <TextArea
+              placeholder="输入提示词...（data 协议）"
+              value={aiDataPrompt}
+              onChange={e => setAiDataPrompt(e.target.value)}
+              rows={3}
+            />
+            <Space>
+              <Button
+                type="primary"
+                icon={<SendOutlined />}
+                loading={aiSdkData.isLoading}
+                onClick={handleAiDataSubmit}
+                disabled={!aiDataPrompt.trim()}
+              >
+                开始（data）
+              </Button>
+              <Button
+                danger
+                disabled={!aiSdkData.isLoading}
+                onClick={aiSdkData.stop}
+              >
+                停止（data）
+              </Button>
+              <Button icon={<ClearOutlined />} onClick={aiSdkData.reset}>
+                重置
+              </Button>
+            </Space>
+            {aiSdkData.error && (
+              <Alert
+                type="error"
+                message="错误（data）"
+                description={aiSdkData.error.message}
+                showIcon
+              />
+            )}
+            {aiSdkData.completion && (
+              <Alert
+                type="success"
+                message="流式输出（data）"
+                description={
+                  <div>
+                    <Text copyable style={{ whiteSpace: 'pre-wrap' }}>
+                      {aiSdkData.completion}
+                    </Text>
+                  </div>
+                }
+                showIcon
+              />
+            )}
+          </Space>
+        </Card>
+
         {/* useAIChat 测试 */}
         <Card
           title="useAIChat - 多轮对话"
@@ -217,7 +348,13 @@ export const AIHooksTest: React.FC = () => {
                             {message.role === 'user' ? '你' : 'AI'}
                           </div>
                           <div style={{ whiteSpace: 'pre-wrap' }}>
-                            {message.content}
+                            {message.parts
+                              ?.map(part => {
+                                if (part.type === 'text') {
+                                  return part.text;
+                                }
+                              })
+                              .join('')}
                           </div>
                         </div>
                       </div>

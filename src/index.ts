@@ -57,7 +57,6 @@ export { consumeEventStream, consumeStream } from './hook-http'
 export { useAIChat, useAICompletion } from './react'
 
 export type {
-  AIMessage,
   ConsumeEventStreamOptions,
   EventSourceMessage,
   UseAIChatOptions,

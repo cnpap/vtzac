@@ -48,6 +48,7 @@
     "@nestjs/common": ">=9.0.0",
     "@nestjs/core": ">=9.0.0",
     "@nestjs/platform-express": ">=9.0.0",
+    "ai": "^5.0.68",
     "multer": ">=2.0.2",
     "ofetch": ">=1.4.1",
     "reflect-metadata": ">=0.1.0",
@@ -56,9 +57,7 @@
     "socket.io-client": ">=4.0.0"
   },
   "dependencies": {
-    "@nestjs/swagger": "catalog:",
-    "fast-glob": "catalog:",
-    "ofetch": "catalog:"
+    "@nestjs/swagger": "catalog:"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:cli",
@@ -71,13 +70,16 @@
     "@types/express": "catalog:",
     "@types/multer": "catalog:",
     "@types/node": "catalog:types",
+    "ai": "^5.0.68",
     "bumpp": "catalog:cli",
     "concurrently": "catalog:",
     "eslint": "catalog:cli",
+    "fast-glob": "catalog:",
     "globals": "catalog:",
     "lint-staged": "catalog:cli",
     "live-server": "catalog:",
     "multer": "catalog:",
+    "ofetch": "catalog:",
     "prettier": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",

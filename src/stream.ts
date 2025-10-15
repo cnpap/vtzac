@@ -276,3 +276,85 @@ export async function consumeEventStream(
     }
   }
 }
+
+/**
+ * 消费纯文本流（非 SSE），例如 AI SDK 的 pipeTextStreamToResponse 返回的内容
+ * 将每个字节块按 UTF-8 解码为字符串，并通过 onMessage 回调传递。
+ * 为了与现有 API 保持一致，onMessage 会接收到一个仿造的 EventSourceMessage，
+ * 其中 event 固定为 'text'，data 为当前文本片段。
+ */
+export async function consumeTextStream(
+  response: Response,
+  options: ConsumeEventStreamOptions = {},
+): Promise<void> {
+  const { onOpen, onMessage, onClose, onFinish, onError, signal } = options
+
+  try {
+    // 调用 onOpen 回调
+    if (onOpen) {
+      await onOpen(response)
+    }
+
+    // 检查是否已经被中断
+    if (signal?.aborted) {
+      return
+    }
+
+    // 确保响应体存在
+    if (!response.body) {
+      throw new Error('Response body is null')
+    }
+
+    // 设置中断监听
+    const abortPromise = signal
+      ? new Promise<void>((resolve) => {
+        signal.addEventListener('abort', () => resolve(), { once: true })
+      })
+      : null
+
+    const decoder = new TextDecoder()
+
+    const streamPromise = getBytes(response.body, (arr: Uint8Array) => {
+      // 按字节块解码为文本（保持流模式）
+      const chunkText = decoder.decode(arr, { stream: true })
+      if (chunkText && onMessage) {
+        const msg: EventSourceMessage = {
+          id: '',
+          event: 'text',
+          data: chunkText,
+        }
+        onMessage(msg)
+      }
+    })
+
+    // 等待流处理完成或中断
+    if (abortPromise) {
+      await Promise.race([streamPromise, abortPromise])
+    }
+    else {
+      await streamPromise
+    }
+
+    // flush 可能残留的缓冲区（通常为空）
+    const rest = decoder.decode()
+    if (rest && onMessage) {
+      const msg: EventSourceMessage = { id: '', event: 'text', data: rest }
+      onMessage(msg)
+    }
+
+    // 调用 onClose 回调
+    onClose?.()
+
+    // 调用 onFinish 回调（在 onClose 之后）
+    onFinish?.()
+  }
+  catch (error) {
+    const err = error instanceof Error ? error : new Error(String(error))
+    if (onError) {
+      onError(err)
+    }
+    else {
+      throw err
+    }
+  }
+}

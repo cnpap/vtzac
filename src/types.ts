@@ -1,3 +1,4 @@
+import type { UIMessage } from 'ai'
 import type { FetchResponse } from 'ofetch'
 
 interface ResponseMap {
@@ -118,17 +119,8 @@ export interface ConsumeEventStreamOptions {
 
 // React hooks 相关类型定义
 
-// 消息类型定义
-export interface AIMessage {
-  /** 消息唯一标识 */
-  id: string
-  /** 消息角色：用户或助手 */
-  role: 'user' | 'assistant'
-  /** 消息内容 */
-  content: string
-  /** 创建时间戳 */
-  createdAt?: Date
-}
+// 流式协议类型定义
+export type StreamProtocol = 'sse' | 'text' | 'data'
 
 // useAICompletion hook 的选项
 export interface UseAICompletionOptions {
@@ -138,6 +130,8 @@ export interface UseAICompletionOptions {
   onFinish?: (completion: string) => void
   /** 错误回调 */
   onError?: ConsumeEventStreamOptions['onError']
+  /** 指定所使用的流式协议，默认 'sse' */
+  protocol?: StreamProtocol
 }
 
 // useAICompletion hook 的返回值
@@ -159,19 +153,21 @@ export interface UseAICompletionReturn {
 // useAIChat hook 的选项
 export interface UseAIChatOptions {
   /** 初始消息列表 */
-  initialMessages?: AIMessage[]
+  initialMessages?: UIMessage[]
   /** 流式消息回调 */
   onMessage?: ConsumeEventStreamOptions['onMessage']
   /** 完成回调 */
-  onFinish?: (message: AIMessage) => void
+  onFinish?: (message: UIMessage) => void
   /** 错误回调 */
   onError?: ConsumeEventStreamOptions['onError']
+  /** 指定所使用的流式协议，默认 'sse' */
+  protocol?: StreamProtocol
 }
 
 // useAIChat hook 的返回值
 export interface UseAIChatReturn {
   /** 消息列表 */
-  messages: AIMessage[]
+  messages: UIMessage[]
   /** 是否正在加载 */
   isLoading: boolean
   /** 错误信息 */

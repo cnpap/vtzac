@@ -26,11 +26,11 @@ catalog:
   eslint-plugin-react: ^7.37.5
   eslint-plugin-react-hooks: ^5.2.0
   eslint-plugin-react-refresh: ^0.4.22
-  fast-glob: ^3.0.0
+  fast-glob: 3.3.3
   globals: ^16.4.0
   live-server: ^1.2.2
   multer: ^2.0.2
-  ofetch: ^1.4.1
+  ofetch: 1.4.1
   prettier: ^3.6.2
   react: ^18.1.1
   react-dom: ^18.1.1
