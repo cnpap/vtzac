@@ -7,11 +7,6 @@ import { MastraService } from './mastra.service';
 export class MastraController {
   constructor(private readonly mastraService: MastraService) {}
 
-  @Post('chat')
-  async chatWithAgent(@Body() body: { message: string }) {
-    return this.mastraService.chatWithWeatherAgent(body.message);
-  }
-
   // 原生流式 SSE 接口（GET）
   @Sse('chat/stream')
   async chatStream(
@@ -22,21 +17,5 @@ export class MastraController {
     }
     const stream = await this.mastraService.streamWeatherAgent(message);
     return from(stream).pipe(map((data): MessageEvent => ({ data })));
-  }
-
-  @Get('weather')
-  async getWeather(@Query('location') location: string) {
-    if (!location) {
-      throw new Error('Location parameter is required');
-    }
-    return this.mastraService.getWeatherInfo(location);
-  }
-
-  @Get('activities')
-  async getWeatherActivities(@Query('city') city: string) {
-    if (!city) {
-      throw new Error('City parameter is required');
-    }
-    return this.mastraService.getWeatherActivities(city);
   }
 }
