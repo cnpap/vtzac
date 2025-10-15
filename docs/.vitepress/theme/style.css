@@ -93,14 +93,6 @@ h2:hover .title-icon {
   border-bottom: none !important;
 }
 
-/* 导航栏容器样式 - 使用box-shadow创建装饰线 */
-.VPNav .VPNavBar {
-  background-color: var(--vp-c-bg) !important;
-  backdrop-filter: none !important;
-  box-shadow: 0 4px 0 0 var(--vp-c-brand-1) !important;
-  position: relative !important;
-}
-
 /* 使用::after为box-shadow添加渐变效果 */
 .VPNav .VPNavBar::after {
   content: '';
