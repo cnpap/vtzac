@@ -4,9 +4,9 @@ import { AppController } from './app.controller';
 import { AskGateway } from './ask.gateway';
 import { TestInputController } from './test-input.controller';
 import { WebSocketTestGateway } from './websocket.gateway';
-import { MastraService } from './mastra.service';
-import { MastraController } from './mastra.controller';
 import configuration from './config/configuration';
+import { AiSdkController } from './ai-sdk.controller';
+import { AiSdkService } from './ai-sdk.service';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import configuration from './config/configuration';
       expandVariables: true, // 支持环境变量展开
     }),
   ],
-  controllers: [AppController, TestInputController, MastraController],
-  providers: [WebSocketTestGateway, AskGateway, MastraService],
+  controllers: [AppController, TestInputController, AiSdkController],
+  providers: [WebSocketTestGateway, AskGateway, AiSdkService],
 })
 export class AppModule {}

@@ -3,7 +3,7 @@ import { Card, Button, Input, Space, Typography, Alert } from 'antd';
 import { RobotOutlined, SendOutlined, ApiOutlined } from '@ant-design/icons';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { consumeStream, _http } from 'vtzac';
-import { MastraController } from 'nestjs-example/src/mastra.controller';
+import { AiSdkController } from 'nestjs-example/src/ai-sdk.controller';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -16,7 +16,7 @@ const { controller } = _http({
     responseType: 'stream',
   },
 });
-const mastraController = controller(MastraController);
+const mastraController = controller(AiSdkController);
 
 export const MastraStreamTest: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -42,7 +42,7 @@ export const MastraStreamTest: React.FC = () => {
 
     try {
       await fetchEventSource(
-        `http://localhost:3000/api/mastra/chat/stream?message=${encodeURIComponent(message)}`,
+        `http://localhost:3000/api/ai-sdk/chat/stream?message=${encodeURIComponent(message)}`,
         {
           signal: controllerRef.current.signal,
           onmessage(ev) {

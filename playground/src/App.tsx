@@ -25,8 +25,8 @@ import { DeleteTest } from './components/case-regular/DeleteTest';
 import WebSocketTestRefactored from './components/case-stream/WebSocketTest';
 import AskTest from './components/case-stream/AskTest';
 import MastraStreamTest from './components/case-stream/SseTest';
-import AIHooksTest from './components/case-stream/AIHooksTest';
 import AiSdkTest from './components/case-stream/AiSdkTest';
+import StreamTest from './components/case-stream/StreamTest';
 import 'antd/dist/reset.css';
 
 setGlobalZacOfetchOptions({
@@ -59,13 +59,13 @@ function App() {
       icon: <RobotOutlined />,
     },
     {
-      label: 'AI Hooks 测试',
-      value: 'ai-hooks',
-      icon: <RobotOutlined />,
-    },
-    {
       label: 'AI SDK 流式',
       value: 'ai-sdk',
+      icon: <ThunderboltOutlined />,
+    },
+    {
+      label: '统一流式测试',
+      value: 'stream',
       icon: <ThunderboltOutlined />,
     },
   ];
@@ -99,10 +99,10 @@ function App() {
         return <AskTest />;
       case 'sse':
         return <MastraStreamTest />;
-      case 'ai-hooks':
-        return <AIHooksTest />;
       case 'ai-sdk':
         return <AiSdkTest />;
+      case 'stream':
+        return <StreamTest />;
       default:
         return <HelloTest {...commonProps} />;
     }

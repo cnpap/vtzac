@@ -54,11 +54,4 @@ export { _controller, _http, _socket, setGlobalZacOfetchOptions } from './hook'
 // 导出流式处理相关功能
 export { consumeEventStream, consumeStream } from './hook-http'
 
-export type {
-  ConsumeEventStreamOptions,
-  EventSourceMessage,
-  UseAIChatOptions,
-  UseAIChatReturn,
-  UseAICompletionOptions,
-  UseAICompletionReturn,
-} from './types'
+export type * from './types'
