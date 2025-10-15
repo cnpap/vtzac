@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { notification } from 'antd';
 import type { User } from './websocket/types';
 import { useWebSocket, useChat } from './websocket/hooks';
-import type { LoadingState } from '../types';
+import type { LoadingState } from '../../types';
 import {
   ConnectionPanel,
   OnlineUsersList,

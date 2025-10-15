@@ -10,7 +10,7 @@ import {
   EditOutlined,
 } from '@ant-design/icons';
 import type { User } from '../types';
-import type { LoadingState } from '../../../types';
+import type { LoadingState } from '../../../../types';
 
 const { Text } = Typography;
 

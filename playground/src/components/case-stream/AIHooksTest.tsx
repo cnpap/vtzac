@@ -17,9 +17,9 @@ import {
   ClearOutlined,
 } from '@ant-design/icons';
 import { _http } from 'vtzac';
-import { useAICompletion, useAIChat } from '../../../src/react';
+import { useAICompletion, useAIChat } from '../../../../src/react';
 import { MastraController } from 'nestjs-example/src/mastra.controller';
-import type { AIMessage } from '../../../src/types';
+import type { AIMessage } from '../../../../src/types';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;

@@ -78,8 +78,7 @@ export type TestCase =
   | 'delete'
   | 'websocket'
   | 'ask'
-  | 'mastra'
-  | 'mastra-stream'
+  | 'sse'
   | 'ai-hooks';
 
 // 通用测试组件 Props 类型

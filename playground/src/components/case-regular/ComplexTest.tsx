@@ -6,7 +6,7 @@ import type {
   TestResult,
   LoadingState,
   ResultsState,
-} from '../types';
+} from '../../types';
 import { TestInputController } from 'nestjs-example/src/test-input.controller';
 
 const { Text, Paragraph } = Typography;

@@ -17,7 +17,7 @@ import {
   CloseOutlined,
 } from '@ant-design/icons';
 import type { Message, User, ChatTarget } from '../types';
-import type { LoadingState } from '../../../types';
+import type { LoadingState } from '../../../../types';
 import { ChatMessage } from './ChatMessage';
 import { scrollToBottomSmooth } from '../utils';
 

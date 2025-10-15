@@ -15,18 +15,17 @@ import {
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import type { LoadingState, ResultsState, TestCase } from './types';
-import { HelloTest } from './components/HelloTest';
-import { QueryTest } from './components/QueryTest';
-import { ParamTest } from './components/ParamTest';
-import { HeadersTest } from './components/HeadersTest';
-import { UploadTest } from './components/UploadTest';
-import ComplexTest from './components/ComplexTest';
-import { DeleteTest } from './components/DeleteTest';
-import WebSocketTestRefactored from './components/WebSocketTestRefactored';
-import AskTest from './components/AskTest';
-import { MastraTest } from './components/MastraTest';
-import MastraStreamTest from './components/MastraStreamTest';
-import AIHooksTest from './components/AIHooksTest';
+import { HelloTest } from './components/case-regular/HelloTest';
+import { QueryTest } from './components/case-regular/QueryTest';
+import { ParamTest } from './components/case-regular/ParamTest';
+import { HeadersTest } from './components/case-regular/HeadersTest';
+import { UploadTest } from './components/case-regular/UploadTest';
+import ComplexTest from './components/case-regular/ComplexTest';
+import { DeleteTest } from './components/case-regular/DeleteTest';
+import WebSocketTestRefactored from './components/case-stream/WebSocketTest';
+import AskTest from './components/case-stream/AskTest';
+import MastraStreamTest from './components/case-stream/SseTest';
+import AIHooksTest from './components/case-stream/AIHooksTest';
 import 'antd/dist/reset.css';
 
 setGlobalZacOfetchOptions({
@@ -53,10 +52,9 @@ function App() {
   const streamingTestCases = [
     { label: 'WebSocket 测试', value: 'websocket', icon: <WifiOutlined /> },
     { label: 'Ask 模式测试', value: 'ask', icon: <QuestionCircleOutlined /> },
-    { label: 'Mastra AI 测试', value: 'mastra', icon: <RobotOutlined /> },
     {
-      label: 'Mastra 原生流式',
-      value: 'mastra-stream',
+      label: 'Sse 原生流式',
+      value: 'sse',
       icon: <RobotOutlined />,
     },
     {
@@ -93,9 +91,7 @@ function App() {
         return <WebSocketTestRefactored />;
       case 'ask':
         return <AskTest />;
-      case 'mastra':
-        return <MastraTest />;
-      case 'mastra-stream':
+      case 'sse':
         return <MastraStreamTest />;
       case 'ai-hooks':
         return <AIHooksTest />;

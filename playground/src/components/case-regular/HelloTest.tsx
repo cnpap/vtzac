@@ -4,7 +4,7 @@ import { SendOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import { _http } from 'vtzac';
 import { AppController } from 'nestjs-example/src/app.controller';
-import type { TestComponentProps, TestResult } from '../types';
+import type { TestComponentProps, TestResult } from '../../types';
 
 const { Title, Text, Paragraph } = Typography;
 

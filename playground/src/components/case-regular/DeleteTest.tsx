@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Button, Alert, message } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import { _http } from 'vtzac';
-import type { TestComponentProps } from '../types';
+import type { TestComponentProps } from '../../types';
 import { TestInputController } from 'nestjs-example/src/test-input.controller';
 
 export const DeleteTest: React.FC<TestComponentProps> = ({
