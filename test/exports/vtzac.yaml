@@ -1,7 +1,16 @@
 .:
+  _controller: function
+  _http: function
+  _socket: function
+  consumeEventStream: function
+  consumeStream: function
   default: function
+  setGlobalZacOfetchOptions: function
+  useAIChat: function
+  useAICompletion: function
   vtzac: function
 ./hook:
+  _controller: function
   _http: function
   _socket: function
   setGlobalZacOfetchOptions: function

@@ -53,8 +53,6 @@ export default vtzac
 export { _controller, _http, _socket, setGlobalZacOfetchOptions } from './hook'
 // 导出流式处理相关功能
 export { consumeEventStream, consumeStream } from './hook-http'
-// 导出 React hooks
-export { useAIChat, useAICompletion } from './react'
 
 export type {
   ConsumeEventStreamOptions,

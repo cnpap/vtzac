@@ -17,7 +17,7 @@ import {
   ClearOutlined,
 } from '@ant-design/icons';
 import { _http } from 'vtzac';
-import { useAICompletion, useAIChat } from '../../../../src/react';
+import { useAICompletion, useAIChat } from 'vtzac/react';
 import { MastraController } from 'nestjs-example/src/mastra.controller';
 import type { UIMessage } from 'ai';
 

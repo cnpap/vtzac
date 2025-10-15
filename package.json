@@ -20,6 +20,7 @@
     "./hook": "./dist/hook.js",
     "./fetch": "./dist/fetch.js",
     "./typed-emit": "./dist/typed-emit.js",
+    "./react": "./dist/react.js",
     "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
