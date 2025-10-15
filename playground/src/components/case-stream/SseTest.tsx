@@ -107,7 +107,7 @@ export const MastraStreamTest: React.FC = () => {
     <div>
       <Title level={3}>Mastra 流式测试</Title>
       <Paragraph>
-        测试三种流式响应方式：使用{' '}
+        测试三种 SSE 流式响应方式：使用{' '}
         <Text code>@microsoft/fetch-event-source</Text>、{' '}
         <Text code>vtzac 集成的 httpConsumeStream</Text> 和{' '}
         <Text code>独立的 consumeStream</Text> 函数来消费后端 SSE

@@ -79,7 +79,8 @@ export type TestCase =
   | 'websocket'
   | 'ask'
   | 'sse'
-  | 'ai-hooks';
+  | 'ai-hooks'
+  | 'ai-sdk';
 
 // 通用测试组件 Props 类型
 export interface TestComponentProps {
