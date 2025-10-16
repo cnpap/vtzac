@@ -1,16 +1,16 @@
-import tailwindcss from '@tailwindcss/vite'
-import { defineConfig } from 'vitepress'
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'vitepress';
 // import vtjump from 'vtjump'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   vite: {
     plugins: [
-      tailwindcss()
+      tailwindcss(),
       // vtjump({
       //   protocols: ['trae']
       // })
-    ]
+    ],
   },
   title: 'vtzac',
   description: 'Vite + NestJS Full-Stack Solution',
@@ -20,9 +20,7 @@ export default defineConfig({
   appearance: 'dark',
 
   // Ignore dead links for local development server
-  ignoreDeadLinks: [
-    /^http:\/\/localhost:\d+/,
-  ],
+  ignoreDeadLinks: [/^http:\/\/localhost:\d+/],
 
   // Multi-language support
   locales: {
@@ -32,9 +30,7 @@ export default defineConfig({
       title: 'vtzac',
       description: 'Vite + NestJS',
       themeConfig: {
-        nav: [
-          { text: 'Home', link: '/' },
-        ],
+        nav: [{ text: 'Home', link: '/' }],
         sidebar: [
           {
             text: 'Quick Start',
@@ -61,8 +57,18 @@ export default defineConfig({
           {
             text: 'WebSocket',
             items: [
-              { text: 'Backend Message Emit', link: '/guide/websocket-backend-emit' },
+              {
+                text: 'Backend Message Emit',
+                link: '/guide/websocket-backend-emit',
+              },
               { text: 'Mutual Calls', link: '/guide/websocket-mutual-call' },
+            ],
+          },
+          {
+            text: 'AI Agent',
+            items: [
+              { text: 'Streaming Support', link: '/guide/ai-streaming' },
+              { text: 'React Helpers', link: '/guide/ai-react-helpers' },
             ],
           },
         ],
@@ -77,9 +83,7 @@ export default defineConfig({
       title: 'vtzac',
       description: 'Vite + NestJS 全栈',
       themeConfig: {
-        nav: [
-          { text: '首页', link: '/zh/' },
-        ],
+        nav: [{ text: '首页', link: '/zh/' }],
         sidebar: [
           {
             text: '快速开始',
@@ -95,6 +99,7 @@ export default defineConfig({
               { text: '配置说明', link: '/zh/guide/configuration' },
             ],
           },
+
           {
             text: '使用用例',
             items: [
@@ -106,8 +111,21 @@ export default defineConfig({
           {
             text: 'WebSocket',
             items: [
-              { text: '后端消息发送', link: '/zh/guide/websocket-backend-emit' },
-              { text: '前后端相互调用', link: '/zh/guide/websocket-mutual-call' },
+              {
+                text: '后端消息发送',
+                link: '/zh/guide/websocket-backend-emit',
+              },
+              {
+                text: '前后端相互调用',
+                link: '/zh/guide/websocket-mutual-call',
+              },
+            ],
+          },
+          {
+            text: 'AI Agent',
+            items: [
+              { text: '流式格式支持', link: '/zh/guide/ai-streaming' },
+              { text: 'React 助手函数', link: '/zh/guide/ai-react-helpers' },
             ],
           },
         ],
@@ -117,4 +135,4 @@ export default defineConfig({
       },
     },
   },
-})
+});

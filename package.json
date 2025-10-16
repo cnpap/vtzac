@@ -32,7 +32,7 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
-    "format": "prettier --config prettier.config.cjs --write \"docs/**/*.md\" \"docs/**/*.css\" \"README.md\" \"README.zh.md\"",
+    "format": "prettier --config prettier.config.cjs --write \"docs/**/*.{md,ts,css,less}\" \"README.md\" \"README.zh.md\"",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "prepublishOnly": "nr build",
     "release": "bumpp",
