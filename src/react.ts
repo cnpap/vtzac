@@ -102,7 +102,7 @@ export function useAICompletion(
           onMessage: (ev: EventSourceMessage) => {
             // 数据协议：ev.data 是 JSON 字符串，包含多种事件类型
             try {
-              const parsed: unknown = JSON.parse(ev.data)
+              const parsed: unknown = JSON.parse(ev.data!)
               // 仅处理文本增量事件
               if (isTextDeltaEvent(parsed)) {
                 setCompletion(prev => prev + parsed.delta)
@@ -297,7 +297,7 @@ export function useAIChat(
           signal: abortControllerRef.current.signal,
           onMessage: (ev: EventSourceMessage) => {
             try {
-              const parsed: unknown = JSON.parse(ev.data)
+              const parsed: unknown = JSON.parse(ev.data!)
               if (isTextDeltaEvent(parsed)) {
                 currentAssistantMessageRef.current += parsed.delta
                 setMessages(prev => prev.map(msg =>

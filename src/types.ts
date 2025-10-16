@@ -64,10 +64,12 @@ export type SocketWrappedInstance<T> = {
 
 // EventSource 相关类型定义
 export interface EventSourceMessage {
-  /**
-   * Custom fields in the message
-   */
-  [key: string]: string
+  type?: string
+  data?: string
+  event?: string
+  id?: string
+  retry?: number
+  [key: string]: string | number | undefined
 }
 
 // 流式消费选项
