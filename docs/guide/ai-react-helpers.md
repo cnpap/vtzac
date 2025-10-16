@@ -207,12 +207,9 @@ Message object type from the `ai` package's standard message format. For detaile
 
 Event source message object for streaming:
 
-| Property | Type     | Required | Description                                                                |
-| -------- | -------- | -------- | -------------------------------------------------------------------------- |
-| `id`     | `string` | ✅       | Event ID, used to set EventSource object's last event ID                   |
-| `event`  | `string` | ✅       | Event type identifier                                                      |
-| `data`   | `string` | ✅       | Event data                                                                 |
-| `retry`  | `number` | ❌       | Reconnection interval (milliseconds), retry interval when connection fails |
+| Property           | Type     | Required | Description                                           |
+| ------------------ | -------- | -------- | ----------------------------------------------------- |
+| `[key: string]`    | `string` | ❌       | Custom fields in the message                   |
 
 ### Data Protocol Message Format
 

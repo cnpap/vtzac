@@ -2,13 +2,37 @@
 
 This guide introduces how to implement Server-Sent Events (SSE) streaming responses in vtzac for real-time data pushing and streaming content transmission.
 
-## SSE: Type-Safe Implementation of Server-Side Event Streams
-
 vtzac provides complete SSE support, including the backend `@Sse` decorator and frontend `consumeStream` function, enabling type-safe streaming data transmission.
+
+Core Features:
+
+- **Type Safety**: Frontend calls to backend SSE interfaces enjoy complete type hints and checking
+- **Automatic Handling**: `consumeStream` automatically handles SSE protocol details without manual parsing
+- **Error Handling**: Provides complete error handling mechanisms, including network errors and business errors
+- **Stream Control**: Supports interrupting streaming transmission at any time via `AbortController`
+- **Zero Configuration**: No additional configuration needed, directly use controller methods
 
 > **Important Note**: `consumeStream` automatically handles the SSE protocol format. The `onMessage` callback function receives `ev.data` as parsed clean data content, not raw SSE format data.
 
-### Backend SSE Interface Implementation
+## Configuration Example
+
+Connect to backend through "controller methods" to achieve type-safe SSE streaming transmission:
+
+```ts
+import { consumeStream, _http } from 'vtzac';
+import { AiSdkController } from 'nestjs-example/src/ai-sdk.controller';
+
+// Initialize HTTP client
+const api = _http({
+  ofetchOptions: {
+    baseURL: 'http://localhost:3000',
+    timeout: 30000,
+    responseType: 'stream',
+  },
+}).controller(AiSdkController);
+```
+
+## Backend SSE Interface Implementation
 
 **Backend Controller Example:**
 
@@ -41,24 +65,11 @@ export class AiSdkController {
 // Response body: streaming SSE event data
 ```
 
-### Frontend SSE Consumption Implementation
+## Basic Usage Example
 
-**Frontend Usage Example:**
+**Frontend SSE Consumption Implementation:**
 
 ```ts
-import { consumeStream, _http } from 'vtzac';
-import { AiSdkController } from 'nestjs-example/src/ai-sdk.controller';
-
-// Create controller instance
-const { controller } = _http({
-  ofetchOptions: {
-    baseURL: 'http://localhost:3000',
-    timeout: 30000,
-    responseType: 'stream',
-  },
-});
-const aiSdkController = controller(AiSdkController);
-
 // SSE streaming handler function
 const startStream = async () => {
   const message = 'Tell me about Chengdu';
@@ -66,7 +77,7 @@ const startStream = async () => {
 
   try {
     // Use consumeStream to consume SSE stream
-    await consumeStream(aiSdkController.chatStream(message), {
+    await consumeStream(api.chatStream(message), {
       signal: abortController.signal,
       onMessage(ev) {
         // Handle each streaming data chunk
@@ -114,19 +125,10 @@ const stopStream = () => {
 // ...
 ```
 
-### Complete React Component Example
+**React Integration Example:**
 
-**React Component Example:**
-
-```tsx
+```ts
 import React, { useRef, useState } from 'react';
-import { consumeStream, _http } from 'vtzac';
-import { AiSdkController } from 'nestjs-example/src/ai-sdk.controller';
-
-const { controller } = _http({
-  ofetchOptions: { baseURL: 'http://localhost:3000', timeout: 30000 },
-});
-const aiSdkController = controller(AiSdkController);
 
 export const SseStreamDemo: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -149,7 +151,7 @@ export const SseStreamDemo: React.FC = () => {
 
     try {
       // Start streaming
-      await consumeStream(aiSdkController.chatStream(message), {
+      await consumeStream(api.chatStream(message), {
         signal: controllerRef.current.signal,
         onMessage(ev) {
           // Append output content character by character
@@ -174,42 +176,19 @@ export const SseStreamDemo: React.FC = () => {
     setLoading(false);
   };
 
-  return (
-    <div>
-      <input
-        value={message}
-        onChange={e => setMessage(e.target.value)}
-        placeholder="Enter message..."
-      />
-      <button onClick={startStream} disabled={loading}>
-        {loading ? 'Streaming...' : 'Start Stream'}
-      </button>
-      <button onClick={stopStream} disabled={!loading}>
-        Stop
-      </button>
-
-      {error && <div style={{ color: 'red' }}>Error: {error}</div>}
-      {output && (
-        <div style={{ whiteSpace: 'pre-wrap', marginTop: '10px' }}>
-          {output}
-        </div>
-      )}
-    </div>
-  );
+  // UI rendering logic...
 };
 ```
 
-### Core Features of SSE Streaming
+## Best Practices
 
-1. **Type Safety**: Frontend calls to backend SSE interfaces enjoy complete type hints and checking
-2. **Automatic Handling**: `consumeStream` automatically handles SSE protocol details without manual parsing
-   - Server sends: `id: 1\ndata: Chengdu\n\n`
-   - onMessage receives: `ev.data = "Chengdu"` (clean data content)
-3. **Error Handling**: Provides complete error handling mechanisms, including network errors and business errors
-4. **Stream Control**: Supports interrupting streaming transmission at any time via `AbortController`
-5. **Zero Configuration**: No additional configuration needed, directly use controller methods
+- **Response Type Setting**: Ensure `responseType: 'stream'` is set to allow frontend to consume responses in streaming mode
+- **Error Handling**: Always provide `onError` callback to handle network errors and business errors
+- **Stream Control**: Use `AbortController` to implement stream pause and cancel functionality
+- **State Management**: Properly manage loading state, error state, and output content
+- **Memory Management**: Pay attention to timely cleanup of unnecessary data during long-term streaming transmission
 
-### Comparison with Traditional SSE Solutions
+## Comparison with Traditional SSE Solutions
 
 **Traditional Approach:**
 
@@ -218,6 +197,7 @@ export const SseStreamDemo: React.FC = () => {
 const eventSource = new EventSource('/api/stream');
 eventSource.onmessage = event => {
   // Manual data parsing
+  // Parse id, data and other fields
   const data = JSON.parse(event.data);
 };
 ```
@@ -234,11 +214,58 @@ await consumeStream(controller.streamMethod(params), {
 });
 ```
 
-### Real-World Use Cases
+## Real-World Use Cases
 
 - **AI Conversations**: Implement streaming AI conversations with character-by-character response display
 - **Real-time Logs**: Push server logs to frontend for real-time display
 - **Progress Updates**: Real-time progress pushing for long-running tasks
 - **Data Monitoring**: Real-time data metrics pushing and display
+
+## Next Steps
+
+- To learn about other streaming protocols, read "AI Agent: Three Streaming Format Support and Unified Calling"
+- Refer to "React: AI Streaming Helper Functions" chapter to learn about more advanced streaming interaction methods
+
+## API Documentation
+
+### consumeStream
+
+**Function Signature:** `consumeStream(response: Promise<Response>, options: ConsumeStreamOptions): Promise<void>`
+
+**Parameter Description:**
+
+| Parameter  | Type                    | Required | Description                                        |
+| ---------- | ----------------------- | -------- | -------------------------------------------------- |
+| `response` | `Promise<Response>`     | ✅       | HTTP response Promise, usually from controller method call |
+| `options`  | `ConsumeStreamOptions`  | ✅       | Stream consumption configuration options           |
+
+**ConsumeStreamOptions Configuration:**
+
+| Property    | Type                               | Required | Description                                      |
+| ----------- | ---------------------------------- | -------- | ------------------------------------------------ |
+| `signal`    | `AbortSignal`                      | ❌       | Signal for canceling streaming transmission      |
+| `onMessage` | `(ev: EventSourceMessage) => void` | ✅       | Streaming message callback, receives each data chunk |
+| `onError`   | `(err: Error) => void`             | ❌       | Error callback, handles network and business errors |
+| `onClose`   | `() => void`                       | ❌       | Connection close callback, triggered when streaming completes |
+
+## Type Definitions
+
+### EventSourceMessage
+
+Event source message object for streaming transmission:
+
+| Property           | Type     | Required | Description                                           |
+| ------------------ | -------- | -------- | ----------------------------------------------------- |
+| `[key: string]`    | `string` | ❌       | Custom fields in the message                   |
+
+### MessageEvent
+
+Message event object type from the `@nestjs/common` package for backend SSE response. For detailed structure, refer to the [NestJS official documentation](https://docs.nestjs.com/techniques/server-sent-events).
+
+### SSE Data Processing Flow
+
+1. **Server Sends**: `id: 1\ndata: Chengdu\n\n`
+2. **Protocol Parsing**: vtzac automatically parses SSE format
+3. **Callback Receives**: `onMessage` receives `ev.data = "Chengdu"` (clean data)
 
 Through vtzac's SSE support, you can easily implement high-performance real-time data transmission while maintaining code type safety and simplicity.

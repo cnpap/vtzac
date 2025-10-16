@@ -64,14 +64,10 @@ export type SocketWrappedInstance<T> = {
 
 // EventSource 相关类型定义
 export interface EventSourceMessage {
-  /** The event ID to set the EventSource object's last event ID value. */
-  id: string
-  /** A string identifying the type of event described. */
-  event: string
-  /** The event data */
-  data: string
-  /** The reconnection interval (in milliseconds) to wait before retrying the connection */
-  retry?: number
+  /**
+   * Custom fields in the message
+   */
+  [key: string]: string
 }
 
 // 流式消费选项
