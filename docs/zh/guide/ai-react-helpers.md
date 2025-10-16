@@ -10,152 +10,91 @@
 - 便捷的控制方法：`append / complete / reload / stop / reset`
 - 完整的状态与错误：`isLoading / error / messages / completion`
 
-## API 说明
+## 配置示例
 
-- `useAIChat(send: (messages) => PromiseLike<any>, options)`：多轮对话
-  - `options.protocol`：'sse' | 'text' | 'data'
-  - `options.initialMessages`：初始消息列表（`UIMessage[]`）
-  - 返回：`{ messages, append, reload, stop, reset, isLoading, error }`
-
-- `useAICompletion(send: (prompt) => PromiseLike<any>, options)`：文本完成
-  - `options.protocol`：'sse' | 'text' | 'data'
-  - 返回：`{ completion, complete, stop, reset, isLoading, error }`
-
-## 配置示例：按协议选择后端方法
-
-两类 Hook 都通过一个「发送函数」连接后端。发送函数可按协议选择不同的控制器方法（对应后端 `AiSdkController`）。
+通过「发送函数」连接后端，根据协议选择对应的控制器方法：
 
 ```ts
 import { _http, type StreamProtocol } from 'vtzac';
 import { useAIChat, useAICompletion } from 'vtzac/react';
 import { AiSdkController } from 'nestjs-example/src/ai-sdk.controller';
-import type { UIMessage } from 'ai';
 
-const { controller } = _http({
-  ofetchOptions: {
-    baseURL: 'http://localhost:3000',
-    timeout: 30000,
-    responseType: 'stream',
-  },
-});
-const api = controller(AiSdkController);
+// 初始化 HTTP 客户端
+const api = _http({
+  ofetchOptions: { baseURL: 'http://localhost:3000', responseType: 'stream' },
+}).controller(AiSdkController);
 
-const getChat = (p: StreamProtocol) => {
-  switch (p) {
+// 按协议选择聊天方法
+const getChatSender = (protocol: StreamProtocol) => {
+  switch (protocol) {
     case 'sse':
-      return (messages: UIMessage[]) => api.chatSSE(JSON.stringify(messages));
+      return messages => api.chatSSE(JSON.stringify(messages));
     case 'text':
-      return (messages: UIMessage[]) => api.multiChat({ messages });
+      return messages => api.multiChat({ messages });
     case 'data':
-      return (messages: UIMessage[]) =>
-        api.aiSdkCompletionDataMessages({ messages });
+      return messages => api.aiSdkCompletionDataMessages({ messages });
   }
 };
 
-const getCompletion = (p: StreamProtocol) => {
-  switch (p) {
+// 按协议选择完成方法
+const getCompletionSender = (protocol: StreamProtocol) => {
+  switch (protocol) {
     case 'sse':
-      return (prompt: string) => api.chatStream(prompt);
+      return prompt => api.chatStream(prompt);
     case 'text':
-      return (prompt: string) => api.aiSdkCompletion({ prompt });
+      return prompt => api.aiSdkCompletion({ prompt });
     case 'data':
-      return (prompt: string) => api.aiSdkCompletionData({ prompt });
+      return prompt => api.aiSdkCompletionData({ prompt });
   }
 };
+```
 
-// 对话模式 Hook
-const chat = useAIChat(getChat('data'), {
+## 基本使用示例
+
+**聊天模式（useAIChat）：**
+
+```ts
+// 初始化聊天 Hook
+const chat = useAIChat(getChatSender('data'), {
   protocol: 'data',
   initialMessages: [
-    {
-      id: '1',
-      role: 'assistant',
-      parts: [{ type: 'text', text: '你好！我是 AI 助手。' }],
-    },
+    { id: '1', role: 'assistant', parts: [{ type: 'text', text: '你好！' }] },
   ],
 });
 
-// 完成模式 Hook
-const completion = useAICompletion(getCompletion('text'), {
-  protocol: 'text',
-});
+// 发送消息
+chat.append('你好，介绍一下成都');
+
+// 控制操作
+chat.stop(); // 停止生成
+chat.reset(); // 重置对话
+chat.reload(); // 重新生成最后一条消息
+
+// 状态访问
+console.log(chat.messages); // 消息列表
+console.log(chat.isLoading); // 是否正在生成
+console.log(chat.error); // 错误信息
 ```
 
-## 示例：最小可用组件
+**完成模式（useAICompletion）：**
 
-以下示例演示两个常见交互：
+```ts
+// 初始化完成 Hook
+const completion = useAICompletion(getCompletionSender('text'), {
+  protocol: 'text',
+});
 
-```tsx
-import React, { useState } from 'react';
-import type { UIMessage } from 'ai';
+// 生成文本
+completion.complete('介绍一下成都');
 
-function Demo() {
-  const [msg, setMsg] = useState('你好，介绍一下成都');
+// 控制操作
+completion.stop(); // 停止生成
+completion.reset(); // 重置内容
 
-  // 聊天：Data 协议（适配 @ai-sdk/react 默认）
-  const chat = useAIChat(getChat('data'), {
-    protocol: 'data',
-    initialMessages: [
-      { id: '1', role: 'assistant', parts: [{ type: 'text', text: '你好！' }] },
-    ],
-  });
-
-  // 完成：Text 协议（纯文本分片）
-  const completion = useAICompletion(getCompletion('text'), {
-    protocol: 'text',
-  });
-
-  return (
-    <div>
-      {/* 对话输入 */}
-      <input
-        value={msg}
-        onChange={e => setMsg(e.target.value)}
-        placeholder="输入消息..."
-      />
-      <button onClick={() => chat.append(msg)} disabled={chat.isLoading}>
-        发送
-      </button>
-      <button onClick={chat.stop} disabled={!chat.isLoading}>
-        停止
-      </button>
-      <button onClick={chat.reset}>重置</button>
-
-      {/* 消息列表 */}
-      <ul>
-        {chat.messages.map(m => (
-          <li key={m.id}>
-            {m.role === 'user' ? '你' : 'AI'}:{' '}
-            {m.parts?.map(p => (p.type === 'text' ? p.text : '')).join('')}
-          </li>
-        ))}
-      </ul>
-
-      {/* 完成模式 */}
-      <button
-        onClick={() => completion.complete('介绍一下成都')}
-        disabled={completion.isLoading}
-      >
-        生成文本
-      </button>
-      <button onClick={completion.stop} disabled={!completion.isLoading}>
-        停止
-      </button>
-      <button onClick={completion.reset}>重置</button>
-
-      {/* 生成结果 */}
-      <pre>{completion.completion}</pre>
-
-      {/* 状态与错误 */}
-      <small>
-        chat: {chat.isLoading ? '生成中...' : '就绪'} | completion:{' '}
-        {completion.isLoading ? '生成中...' : '就绪'}
-      </small>
-      {chat.error && <div>聊天错误：{chat.error.message}</div>}
-      {completion.error && <div>生成错误：{completion.error.message}</div>}
-    </div>
-  );
-}
+// 状态访问
+console.log(completion.completion); // 生成的文本
+console.log(completion.isLoading); // 是否正在生成
+console.log(completion.error); // 错误信息
 ```
 
 ```
@@ -181,3 +120,147 @@ function Demo() {
 
 - 若需要了解三种协议的来源与差异，请阅读「AI Agent：三种流式格式支持与统一调用」
 - 参照「使用用例」中的 SSE 章节，掌握更多流式交互方法
+
+## API 说明
+
+### useAIChat
+
+**函数签名：** `useAIChat(send: (messages: UIMessage[]) => PromiseLike<any>, options?: UseAIChatOptions): UseAIChatReturn`
+
+**参数说明：**
+
+| 参数      | 类型                                          | 必填 | 说明                                 |
+| --------- | --------------------------------------------- | ---- | ------------------------------------ |
+| `send`    | `(messages: UIMessage[]) => PromiseLike<any>` | ✅   | 发送函数，接收消息列表并返回 Promise |
+| `options` | `UseAIChatOptions`                            | ❌   | 配置选项                             |
+
+**UseAIChatOptions 配置项：**
+
+| 属性              | 类型                               | 必填 | 默认值  | 说明                                    |
+| ----------------- | ---------------------------------- | ---- | ------- | --------------------------------------- |
+| `protocol`        | `StreamProtocol`                   | ❌   | `'sse'` | 流式协议类型：'sse' \| 'text' \| 'data' |
+| `initialMessages` | `UIMessage[]`                      | ❌   | `[]`    | 初始消息列表                            |
+| `onMessage`       | `(ev: EventSourceMessage) => void` | ❌   | -       | 流式消息回调                            |
+| `onFinish`        | `(message: UIMessage) => void`     | ❌   | -       | 完成回调，接收最终生成的消息            |
+| `onError`         | `(err: Error) => void`             | ❌   | -       | 错误回调                                |
+
+**UseAIChatReturn 返回值：**
+
+| 属性        | 类型                                 | 说明                       |
+| ----------- | ------------------------------------ | -------------------------- |
+| `messages`  | `UIMessage[]`                        | 当前消息列表               |
+| `isLoading` | `boolean`                            | 是否正在加载/生成          |
+| `error`     | `Error \| null`                      | 错误信息，无错误时为 null  |
+| `append`    | `(content: string) => Promise<void>` | 发送新消息                 |
+| `reload`    | `() => Promise<void>`                | 重新生成最后一条消息       |
+| `stop`      | `() => void`                         | 停止当前生成               |
+| `reset`     | `() => void`                         | 重置聊天状态，清空消息列表 |
+
+### useAICompletion
+
+**函数签名：** `useAICompletion(send: (prompt: string) => PromiseLike<any>, options?: UseAICompletionOptions): UseAICompletionReturn`
+
+**参数说明：**
+
+| 参数      | 类型                                   | 必填 | 说明                               |
+| --------- | -------------------------------------- | ---- | ---------------------------------- |
+| `send`    | `(prompt: string) => PromiseLike<any>` | ✅   | 发送函数，接收提示词并返回 Promise |
+| `options` | `UseAICompletionOptions`               | ❌   | 配置选项                           |
+
+**UseAICompletionOptions 配置项：**
+
+| 属性        | 类型                               | 必填 | 默认值  | 说明                                    |
+| ----------- | ---------------------------------- | ---- | ------- | --------------------------------------- |
+| `protocol`  | `StreamProtocol`                   | ❌   | `'sse'` | 流式协议类型：'sse' \| 'text' \| 'data' |
+| `onMessage` | `(ev: EventSourceMessage) => void` | ❌   | -       | 流式消息回调                            |
+| `onFinish`  | `(completion: string) => void`     | ❌   | -       | 完成回调，接收最终生成的文本            |
+| `onError`   | `(err: Error) => void`             | ❌   | -       | 错误回调                                |
+
+**UseAICompletionReturn 返回值：**
+
+| 属性         | 类型                                | 说明                      |
+| ------------ | ----------------------------------- | ------------------------- |
+| `completion` | `string`                            | 当前生成的文本内容        |
+| `isLoading`  | `boolean`                           | 是否正在加载/生成         |
+| `error`      | `Error \| null`                     | 错误信息，无错误时为 null |
+| `complete`   | `(prompt: string) => Promise<void>` | 发起文本生成              |
+| `stop`       | `() => void`                        | 停止当前生成              |
+| `reset`      | `() => void`                        | 重置状态，清空生成内容    |
+
+## 类型定义
+
+### StreamProtocol
+
+流式协议类型，支持三种不同的流式传输协议：
+
+| 值       | 说明                                                                      |
+| -------- | ------------------------------------------------------------------------- |
+| `'sse'`  | Server-Sent Events，适合 Agent 类场景或通用事件流，可自定义事件类型       |
+| `'text'` | 纯文本流，适合简化传输场景                                                |
+| `'data'` | 数据流，与 `@ai-sdk/react` 默认协议一致，适合 UI Message 流驱动的聊天体验 |
+
+### UIMessage
+
+消息对象类型，来自 `ai` 包的标准消息格式。具体结构请参考 [ai 包文档](https://sdk.vercel.ai/docs)。
+
+### EventSourceMessage
+
+事件源消息对象，用于流式传输：
+
+| 属性    | 类型     | 必填 | 说明                                               |
+| ------- | -------- | ---- | -------------------------------------------------- |
+| `id`    | `string` | ✅   | 事件 ID，用于设置 EventSource 对象的 last event ID |
+| `event` | `string` | ✅   | 事件类型标识符                                     |
+| `data`  | `string` | ✅   | 事件数据                                           |
+| `retry` | `number` | ❌   | 重连间隔（毫秒），连接失败时的重试间隔             |
+
+### Data 协议消息格式
+
+当使用 `protocol: 'data'` 时，`onMessage` 回调会接收到以下格式的消息。每条消息都包含 `type` 字段，可通过 `e.type` 访问：
+
+**基础消息类型示例：**
+
+| type            | 说明         | 示例数据                                        |
+| --------------- | ------------ | ----------------------------------------------- |
+| `'start'`       | 开始生成     | `{"type":"start"}`                              |
+| `'start-step'`  | 开始步骤     | `{"type":"start-step"}`                         |
+| `'text-start'`  | 开始文本生成 | `{"type":"text-start","id":"0"}`                |
+| `'text-delta'`  | 文本增量更新 | `{"type":"text-delta","id":"0","delta":"你好"}` |
+| `'text-end'`    | 文本生成结束 | `{"type":"text-end","id":"0"}`                  |
+| `'finish-step'` | 步骤完成     | `{"type":"finish-step"}`                        |
+| `'finish'`      | 生成完成     | `{"type":"finish"}`                             |
+
+**结束标识：**
+
+- 流的最后一条消息固定为 `data: [DONE]`
+
+**onMessage 使用示例：**
+
+```ts
+const chat = useAIChat(getChatSender('data'), {
+  protocol: 'data',
+  onMessage: e => {
+    // 解析 JSON 数据
+    const message = JSON.parse(e.data);
+
+    // 根据消息类型处理
+    switch (message.type) {
+      case 'start':
+        console.log('开始生成');
+        break;
+      case 'text-delta':
+        console.log(`文本增量: ${message.delta}, ID: ${message.id}`);
+        break;
+      case 'text-end':
+        console.log(`文本生成完成, ID: ${message.id}`);
+        break;
+      case 'finish':
+        console.log('全部完成');
+        break;
+    }
+  },
+});
+```
+
+**工具调用场景：**
+在 AI Agent 场景中，可能会有工具调用等复杂交互，此时会有更多的 `type` 类型，如 `'tool-call'`、`'tool-result'` 等。通过监听 `onMessage` 可以获取完整的执行过程信息。
