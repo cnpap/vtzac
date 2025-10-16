@@ -9,7 +9,7 @@ const IS_READY = true
 describe.runIf(IS_READY)('exports-snapshot', async () => {
   const packages: { name: string, path: string, private?: boolean }[] = JSON.parse(
     await x('pnpm', ['ls', '--only-projects', '-r', '--json']).then(r => r.stdout),
-  )
+  ) as { name: string, path: string, private?: boolean }[]
 
   for (const pkg of packages) {
     if (pkg.private)
