@@ -71,30 +71,27 @@ export const StreamTest: React.FC = () => {
     switch (protocol) {
       case 'sse':
         return (messages: UIMessage[]) =>
-          aiSdkController.chatSSE(JSON.stringify(messages));
+          aiSdkController.chatSse(JSON.stringify(messages));
       case 'text':
-        return (messages: UIMessage[]) =>
-          aiSdkController.multiChat({ messages });
+        return (messages: UIMessage[]) => aiSdkController.chat({ messages });
       case 'data':
-        return (messages: UIMessage[]) =>
-          aiSdkController.aiSdkCompletionDataMessages({ messages });
+        return (messages: UIMessage[]) => aiSdkController.chatUI({ messages });
       default:
         return (messages: UIMessage[]) =>
-          aiSdkController.multiChat({ messages });
+          aiSdkController.chatSse(JSON.stringify(messages));
     }
   };
 
   const getCompletionFunction = (protocol: StreamProtocol) => {
     switch (protocol) {
       case 'sse':
-        return (prompt: string) => aiSdkController.chatStream(prompt);
+        return (prompt: string) => aiSdkController.sse(prompt);
       case 'text':
-        return (prompt: string) => aiSdkController.aiSdkCompletion({ prompt });
+        return (prompt: string) => aiSdkController.completion({ prompt });
       case 'data':
-        return (prompt: string) =>
-          aiSdkController.aiSdkCompletionData({ prompt });
+        return (prompt: string) => aiSdkController.completionUI({ prompt });
       default:
-        return (prompt: string) => aiSdkController.chatStream(prompt);
+        return (prompt: string) => aiSdkController.sse(prompt);
     }
   };
 

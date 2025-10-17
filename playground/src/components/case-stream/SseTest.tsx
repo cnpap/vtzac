@@ -3,9 +3,9 @@ import { Card, Button, Input, Space, Typography, Alert } from 'antd';
 import { RobotOutlined, SendOutlined, ApiOutlined } from '@ant-design/icons';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { consumeStream, _http } from 'vtzac';
-import { AiSdkController } from 'nestjs-example/src/ai-sdk.controller';
+import { MastraController } from 'nestjs-example/src/mastra.controller';
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 // 创建控制器实例
@@ -16,7 +16,7 @@ const { controller } = _http({
     responseType: 'stream',
   },
 });
-const aiSdkController = controller(AiSdkController);
+const mastraController = controller(MastraController);
 
 export const MastraStreamTest: React.FC = () => {
   const [message, setMessage] = useState('介绍一下成都');
@@ -42,7 +42,7 @@ export const MastraStreamTest: React.FC = () => {
 
     try {
       await fetchEventSource(
-        `http://localhost:3000/api/ai-sdk/chat/stream?message=${encodeURIComponent(message)}`,
+        `http://localhost:3000/api/ai-sdk/sse?prompt=${encodeURIComponent(message)}`,
         {
           signal: controllerRef.current.signal,
           onmessage(ev) {
@@ -78,7 +78,7 @@ export const MastraStreamTest: React.FC = () => {
 
     try {
       // 使用独立的 consumeStream 函数
-      await consumeStream(aiSdkController.chatStream(standaloneMessage), {
+      await consumeStream(mastraController.sse(standaloneMessage), {
         signal: standaloneControllerRef.current.signal,
         onMessage(ev) {
           // 不再需要手动判断 [DONE]，consumeStream 会自动过滤
@@ -105,7 +105,6 @@ export const MastraStreamTest: React.FC = () => {
 
   return (
     <div>
-      <Title level={3}>Mastra 流式测试</Title>
       <Paragraph>
         测试三种 SSE 流式响应方式：使用{' '}
         <Text code>@microsoft/fetch-event-source</Text>、{' '}

@@ -33,7 +33,7 @@ export const AiSdkTest: React.FC = () => {
     error: dataError,
     stop: dataStop,
   } = useCompletion({
-    api: 'http://localhost:3000/api/ai-sdk/completion-data',
+    api: 'http://localhost:3000/api/ai-sdk/completion/ui',
   });
 
   // AI SDK 输入状态

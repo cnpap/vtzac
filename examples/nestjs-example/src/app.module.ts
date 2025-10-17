@@ -7,6 +7,8 @@ import { WebSocketTestGateway } from './websocket.gateway';
 import configuration from './config/configuration';
 import { AiSdkController } from './ai-sdk.controller';
 import { AiSdkService } from './ai-sdk.service';
+import { MastraController } from './mastra.controller';
+import { MastraService } from './mastra.service';
 
 @Module({
   imports: [
@@ -17,7 +19,12 @@ import { AiSdkService } from './ai-sdk.service';
       expandVariables: true, // 支持环境变量展开
     }),
   ],
-  controllers: [AppController, TestInputController, AiSdkController],
-  providers: [WebSocketTestGateway, AskGateway, AiSdkService],
+  controllers: [
+    AppController,
+    TestInputController,
+    AiSdkController,
+    MastraController,
+  ],
+  providers: [WebSocketTestGateway, AskGateway, AiSdkService, MastraService],
 })
 export class AppModule {}
