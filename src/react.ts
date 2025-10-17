@@ -2,7 +2,8 @@ import type { UIMessage } from 'ai'
 import type { FetchResponse } from 'ofetch'
 import type {
   ConsumeEventStreamOptions,
-  EventSourceMessage,
+  ParsedMessageData,
+  StreamProtocol,
   UseAIChatOptions,
   UseAIChatReturn,
   UseAICompletionOptions,
@@ -12,21 +13,16 @@ import { useCallback, useRef, useState } from 'react'
 import { consumeEventStream, consumeTextStream } from './stream'
 
 /**
- * 数据协议事件：文本增量
- */
-interface TextDeltaEvent {
-  type: 'text-delta'
-  delta: string
-}
-
-/**
  * 类型守卫：判断是否为文本增量事件
  */
-function isTextDeltaEvent(value: unknown): value is TextDeltaEvent {
+function isTextDeltaEvent(value: unknown, textDeltaEventMark: string[] = ['delta']): string | undefined {
   if (typeof value !== 'object' || value === null)
-    return false
-  const v = value as { type?: unknown, delta?: unknown }
-  return v.type === 'text-delta' && typeof v.delta === 'string'
+    return undefined
+  const keys = Object.keys(value)
+  const mark = textDeltaEventMark.find(item => keys.includes(item))
+  if (!mark)
+    return undefined
+  return mark
 }
 
 /**
@@ -34,6 +30,64 @@ function isTextDeltaEvent(value: unknown): value is TextDeltaEvent {
  */
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2)
+}
+
+// 添加：统一的流处理辅助函数，按协议路由并累加文本
+async function runStream(
+  params: {
+    protocol: StreamProtocol
+    response: Response
+    signal?: AbortSignal
+    accumulate: (delta: string) => void
+    onMessage?: ConsumeEventStreamOptions['onMessage']
+    onDataMessage?: ConsumeEventStreamOptions['onDataMessage']
+    onClose?: () => void
+    onFinish?: () => void
+    onError?: (err: Error) => void
+    textDeltaEventMark?: string[]
+  },
+): Promise<void> {
+  const {
+    protocol,
+    response,
+    signal,
+    accumulate,
+    onMessage,
+    onDataMessage,
+    onClose,
+    onFinish,
+    onError,
+    textDeltaEventMark,
+  } = params
+
+  const streamOptions: ConsumeEventStreamOptions = {
+    signal,
+    onMessage: (data: string) => {
+      if (protocol === 'text' || protocol === 'sse') {
+        accumulate(data)
+      }
+      onMessage?.(data)
+    },
+    onDataMessage: (parsed: ParsedMessageData) => {
+      if (protocol === 'data' || protocol === 'sse-data') {
+        const mark = isTextDeltaEvent(parsed, textDeltaEventMark)
+        if (mark) {
+          accumulate(parsed[mark])
+        }
+      }
+      onDataMessage?.(parsed)
+    },
+    onClose,
+    onFinish,
+    onError,
+  }
+
+  if (protocol === 'text') {
+    await consumeTextStream(response, streamOptions)
+  }
+  else {
+    await consumeEventStream(response, streamOptions)
+  }
 }
 
 /**
@@ -44,10 +98,10 @@ function generateId(): string {
  * @returns UseAICompletionReturn
  */
 export function useAICompletion(
-  streamResponsePromise: (prompt: string) => Promise<FetchResponse<any>>,
+  streamResponsePromise: (prompt: string) => Promise<FetchResponse<unknown>>,
   options: UseAICompletionOptions = {},
 ): UseAICompletionReturn {
-  const { onMessage, onFinish, onError, protocol = 'sse' } = options
+  const { onMessage, onDataMessage, onFinish, onError, protocol = 'sse', textDeltaEventMark } = options
 
   const [completion, setCompletion] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -71,90 +125,31 @@ export function useAICompletion(
     try {
       const response = await streamResponsePromise(prompt)
 
-      if (protocol === 'text') {
-        const streamOptions: ConsumeEventStreamOptions = {
-          signal: abortControllerRef.current.signal,
-          onMessage: (ev: EventSourceMessage) => {
-            // 文本协议：直接累加文本片段
-            setCompletion(prev => prev + ev.data)
-            onMessage?.(ev)
-          },
-          onClose: () => {
-            setIsLoading(false)
-          },
-          onFinish: () => {
-            setCompletion((current) => {
-              onFinish?.(current)
-              return current
-            })
-          },
-          onError: (err: Error) => {
-            setError(err)
-            setIsLoading(false)
-            onError?.(err)
-          },
-        }
-        await consumeTextStream(response, streamOptions)
-      }
-      else if (protocol === 'data') {
-        const streamOptions: ConsumeEventStreamOptions = {
-          signal: abortControllerRef.current.signal,
-          onMessage: (ev: EventSourceMessage) => {
-            // 数据协议：ev.data 是 JSON 字符串，包含多种事件类型
-            try {
-              const parsed: unknown = JSON.parse(ev.data!)
-              // 仅处理文本增量事件
-              if (isTextDeltaEvent(parsed)) {
-                setCompletion(prev => prev + parsed.delta)
-              }
-            }
-            catch {
-              // 非预期格式时忽略
-            }
-            onMessage?.(ev)
-          },
-          onClose: () => {
-            setIsLoading(false)
-          },
-          onFinish: () => {
-            setCompletion((current) => {
-              onFinish?.(current)
-              return current
-            })
-          },
-          onError: (err: Error) => {
-            setError(err)
-            setIsLoading(false)
-            onError?.(err)
-          },
-        }
-        await consumeEventStream(response, streamOptions)
-      }
-      else {
-        const streamOptions: ConsumeEventStreamOptions = {
-          signal: abortControllerRef.current.signal,
-          onMessage: (ev: EventSourceMessage) => {
-            setCompletion(prev => prev + ev.data)
-            onMessage?.(ev)
-          },
-          onClose: () => {
-            setIsLoading(false)
-          },
-          onFinish: () => {
-            // 获取最终的完整文本
-            setCompletion((current) => {
-              onFinish?.(current)
-              return current
-            })
-          },
-          onError: (err: Error) => {
-            setError(err)
-            setIsLoading(false)
-            onError?.(err)
-          },
-        }
-        await consumeEventStream(response, streamOptions)
-      }
+      await runStream({
+        protocol,
+        response,
+        signal: abortControllerRef.current.signal,
+        accumulate: (delta) => {
+          setCompletion(prev => prev + delta)
+        },
+        onMessage,
+        onDataMessage,
+        onClose: () => {
+          setIsLoading(false)
+        },
+        onFinish: () => {
+          setCompletion((current) => {
+            onFinish?.(current)
+            return current
+          })
+        },
+        onError: (err: Error) => {
+          setError(err)
+          setIsLoading(false)
+          onError?.(err)
+        },
+        textDeltaEventMark,
+      })
     }
     catch (err) {
       const error = err instanceof Error ? err : new Error(String(err))
@@ -162,7 +157,7 @@ export function useAICompletion(
       setIsLoading(false)
       onError?.(error)
     }
-  }, [streamResponsePromise, onMessage, onFinish, onError])
+  }, [streamResponsePromise, onMessage, onDataMessage, onFinish, onError])
 
   const stop = useCallback(() => {
     abortControllerRef.current?.abort()
@@ -194,10 +189,10 @@ export function useAICompletion(
  * @returns UseAIChatReturn
  */
 export function useAIChat(
-  streamResponsePromise: (messages: UIMessage[]) => Promise<FetchResponse<any>>,
+  streamResponsePromise: (messages: UIMessage[]) => Promise<FetchResponse<unknown>>,
   options: UseAIChatOptions = {},
 ): UseAIChatReturn {
-  const { initialMessages = [], onMessage, onFinish, onError, protocol = 'sse' } = options
+  const { initialMessages = [], onMessage, onDataMessage, onFinish, onError, protocol = 'sse', textDeltaEventMark = [] } = options
 
   const [messages, setMessages] = useState<UIMessage[]>(initialMessages)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -233,14 +228,38 @@ export function useAIChat(
     try {
       const response = await streamResponsePromise(messagesToSend)
 
-      if (protocol === 'text') {
-        const streamOptions: ConsumeEventStreamOptions = {
-          signal: abortControllerRef.current.signal,
-          onMessage: (ev: EventSourceMessage) => {
-            currentAssistantMessageRef.current += ev.data
+      const updateAssistant = (delta: string): void => {
+        currentAssistantMessageRef.current += delta
 
-            // 更新助手消息内容（使用 parts 而不是 content）
-            setMessages(prev => prev.map(msg =>
+        // 更新助手消息内容（使用 parts 而不是 content）
+        setMessages(prev => prev.map(msg =>
+          msg.id === assistantMessageId
+            ? {
+                ...msg,
+                parts: [
+                  {
+                    type: 'text' as const,
+                    text: currentAssistantMessageRef.current,
+                  },
+                ] as UIMessage['parts'],
+              } as UIMessage
+            : msg,
+        ))
+      }
+
+      await runStream({
+        protocol,
+        response,
+        signal: abortControllerRef.current.signal,
+        accumulate: updateAssistant,
+        onMessage,
+        onDataMessage,
+        onClose: () => {
+          setIsLoading(false)
+        },
+        onFinish: () => {
+          setMessages((prev) => {
+            const finalMessages = prev.map(msg =>
               msg.id === assistantMessageId
                 ? {
                     ...msg,
@@ -252,169 +271,24 @@ export function useAIChat(
                     ] as UIMessage['parts'],
                   } as UIMessage
                 : msg,
-            ))
-
-            onMessage?.(ev)
-          },
-          onClose: () => {
-            setIsLoading(false)
-          },
-          onFinish: () => {
-            setMessages((prev) => {
-              const finalMessages = prev.map(msg =>
-                msg.id === assistantMessageId
-                  ? {
-                      ...msg,
-                      parts: [
-                        {
-                          type: 'text' as const,
-                          text: currentAssistantMessageRef.current,
-                        },
-                      ] as UIMessage['parts'],
-                    } as UIMessage
-                  : msg,
-              )
-              const finalAssistantMessage = finalMessages.find(msg => msg.id === assistantMessageId)
-              if (finalAssistantMessage) {
-                onFinish?.(finalAssistantMessage)
-              }
-              return finalMessages
-            })
-          },
-          onError: (err: Error) => {
-            setError(err)
-            setIsLoading(false)
-            onError?.(err)
-
-            // 移除失败的助手消息
-            setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId))
-          },
-        }
-        await consumeTextStream(response, streamOptions)
-      }
-      else if (protocol === 'data') {
-        const streamOptions: ConsumeEventStreamOptions = {
-          signal: abortControllerRef.current.signal,
-          onMessage: (ev: EventSourceMessage) => {
-            try {
-              const parsed: unknown = JSON.parse(ev.data!)
-              if (isTextDeltaEvent(parsed)) {
-                currentAssistantMessageRef.current += parsed.delta
-                setMessages(prev => prev.map(msg =>
-                  msg.id === assistantMessageId
-                    ? {
-                        ...msg,
-                        parts: [
-                          {
-                            type: 'text' as const,
-                            text: currentAssistantMessageRef.current,
-                          },
-                        ] as UIMessage['parts'],
-                      } as UIMessage
-                    : msg,
-                ))
-              }
+            )
+            const finalAssistantMessage = finalMessages.find(msg => msg.id === assistantMessageId)
+            if (finalAssistantMessage) {
+              onFinish?.(finalAssistantMessage)
             }
-            catch {
-              // 忽略不可解析的片段
-            }
-            onMessage?.(ev)
-          },
-          onClose: () => {
-            setIsLoading(false)
-          },
-          onFinish: () => {
-            setMessages((prev) => {
-              const finalMessages = prev.map(msg =>
-                msg.id === assistantMessageId
-                  ? {
-                      ...msg,
-                      parts: [
-                        {
-                          type: 'text' as const,
-                          text: currentAssistantMessageRef.current,
-                        },
-                      ] as UIMessage['parts'],
-                    } as UIMessage
-                  : msg,
-              )
-              const finalAssistantMessage = finalMessages.find(msg => msg.id === assistantMessageId)
-              if (finalAssistantMessage) {
-                onFinish?.(finalAssistantMessage)
-              }
-              return finalMessages
-            })
-          },
-          onError: (err: Error) => {
-            setError(err)
-            setIsLoading(false)
-            onError?.(err)
+            return finalMessages
+          })
+        },
+        onError: (err: Error) => {
+          setError(err)
+          setIsLoading(false)
+          onError?.(err)
 
-            setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId))
-          },
-        }
-        await consumeEventStream(response, streamOptions)
-      }
-      else {
-        const streamOptions: ConsumeEventStreamOptions = {
-          signal: abortControllerRef.current.signal,
-          onMessage: (ev: EventSourceMessage) => {
-            currentAssistantMessageRef.current += ev.data
-
-            // 更新助手消息内容（使用 parts 而不是 content）
-            setMessages(prev => prev.map(msg =>
-              msg.id === assistantMessageId
-                ? {
-                    ...msg,
-                    parts: [
-                      {
-                        type: 'text' as const,
-                        text: currentAssistantMessageRef.current,
-                      },
-                    ] as UIMessage['parts'],
-                  } as UIMessage
-                : msg,
-            ))
-
-            onMessage?.(ev)
-          },
-          onClose: () => {
-            setIsLoading(false)
-          },
-          onFinish: () => {
-            // 获取最终的助手消息（更新为 parts）
-            setMessages((prev) => {
-              const finalMessages = prev.map(msg =>
-                msg.id === assistantMessageId
-                  ? {
-                      ...msg,
-                      parts: [
-                        {
-                          type: 'text' as const,
-                          text: currentAssistantMessageRef.current,
-                        },
-                      ] as UIMessage['parts'],
-                    } as UIMessage
-                  : msg,
-              )
-              const finalAssistantMessage = finalMessages.find(msg => msg.id === assistantMessageId)
-              if (finalAssistantMessage) {
-                onFinish?.(finalAssistantMessage)
-              }
-              return finalMessages
-            })
-          },
-          onError: (err: Error) => {
-            setError(err)
-            setIsLoading(false)
-            onError?.(err)
-
-            // 移除失败的助手消息
-            setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId))
-          },
-        }
-        await consumeEventStream(response, streamOptions)
-      }
+          // 移除失败的助手消息
+          setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId))
+        },
+        textDeltaEventMark,
+      })
     }
     catch (err) {
       const error = err instanceof Error ? err : new Error(String(err))
@@ -425,7 +299,7 @@ export function useAIChat(
       // 移除失败的助手消息
       setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId))
     }
-  }, [streamResponsePromise, onMessage, onFinish, onError])
+  }, [streamResponsePromise, onMessage, onDataMessage, onFinish, onError])
 
   const append = useCallback(async (content: string) => {
     if (!content.trim())

@@ -1,4 +1,4 @@
-import type { ConsumeEventStreamOptions, EventSourceMessage } from './types'
+import type { ConsumeEventStreamOptions, EventSourceMessage, ParsedMessageData } from './types'
 
 enum ControlChars {
   NewLine = 10,
@@ -194,6 +194,7 @@ export async function consumeEventStream(
   const {
     onOpen,
     onMessage,
+    onDataMessage,
     onClose,
     onFinish,
     onError,
@@ -235,14 +236,27 @@ export async function consumeEventStream(
           (_retry) => {
             // 处理 retry 字段，这里可以扩展逻辑
           },
-          // 包装 onMessage 回调，添加 [DONE] 过滤逻辑
-          onMessage
+          // 包装消息回调，处理原始数据和解析数据
+          (onMessage || onDataMessage)
             ? (msg) => {
                 // 如果不跳过 DONE 检查且消息数据为 '[DONE]'，则不调用回调
                 if (!skipDoneCheck && msg.data === '[DONE]') {
                   return
                 }
-                onMessage(msg)
+                // 调用 onMessage 传递原始数据
+                if (onMessage && msg.data) {
+                  onMessage(msg.data)
+                }
+                // 调用 onDataMessage 传递解析后的数据
+                if (onDataMessage && msg.data) {
+                  try {
+                    const parsed = JSON.parse(msg.data) as unknown as ParsedMessageData
+                    onDataMessage(parsed)
+                  }
+                  catch {
+                    // 如果解析失败，忽略该消息的 onDataMessage 调用
+                  }
+                }
               }
             : undefined,
         ),
@@ -279,15 +293,13 @@ export async function consumeEventStream(
 
 /**
  * 消费纯文本流（非 SSE），例如 AI SDK 的 pipeTextStreamToResponse 返回的内容
- * 将每个字节块按 UTF-8 解码为字符串，并通过 onMessage 回调传递。
- * 为了与现有 API 保持一致，onMessage 会接收到一个仿造的 EventSourceMessage，
- * 其中 event 固定为 'text'，data 为当前文本片段。
+ * 将每个字节块按 UTF-8 解码为字符串，并通过 onMessage 回调传递原始文本数据。
  */
 export async function consumeTextStream(
   response: Response,
   options: ConsumeEventStreamOptions = {},
 ): Promise<void> {
-  const { onOpen, onMessage, onClose, onFinish, onError, signal } = options
+  const { onOpen, onMessage, onDataMessage, onClose, onFinish, onError, signal } = options
 
   try {
     // 调用 onOpen 回调
@@ -317,13 +329,21 @@ export async function consumeTextStream(
     const streamPromise = getBytes(response.body, (arr: Uint8Array) => {
       // 按字节块解码为文本（保持流模式）
       const chunkText = decoder.decode(arr, { stream: true })
-      if (chunkText && onMessage) {
-        const msg: EventSourceMessage = {
-          id: '',
-          event: 'text',
-          data: chunkText,
+      if (chunkText) {
+        // 调用 onMessage 传递原始文本数据
+        if (onMessage) {
+          onMessage(chunkText)
         }
-        onMessage(msg)
+        // 调用 onDataMessage 尝试解析 JSON（对于文本流通常不适用，但保持一致性）
+        if (onDataMessage) {
+          try {
+            const parsed = JSON.parse(chunkText) as unknown as ParsedMessageData
+            onDataMessage(parsed)
+          }
+          catch {
+            // 文本流通常不是 JSON，忽略解析失败
+          }
+        }
       }
     })
 
@@ -337,9 +357,19 @@ export async function consumeTextStream(
 
     // flush 可能残留的缓冲区（通常为空）
     const rest = decoder.decode()
-    if (rest && onMessage) {
-      const msg: EventSourceMessage = { id: '', event: 'text', data: rest }
-      onMessage(msg)
+    if (rest) {
+      if (onMessage) {
+        onMessage(rest)
+      }
+      if (onDataMessage) {
+        try {
+          const parsed = JSON.parse(rest) as unknown as ParsedMessageData
+          onDataMessage(parsed)
+        }
+        catch {
+          // 忽略解析失败
+        }
+      }
     }
 
     // 调用 onClose 回调

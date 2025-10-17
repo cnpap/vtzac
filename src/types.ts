@@ -9,6 +9,8 @@ interface ResponseMap {
 }
 export type ResponseType = keyof ResponseMap | 'json'
 
+export type ParsedMessageData = Record<string, string>
+
 // 类型工具：检测是否为构造函数
 export type Constructor<T = object> = new (...args: any[]) => T
 
@@ -81,11 +83,16 @@ export interface ConsumeEventStreamOptions {
   onOpen?: (response: Response) => Promise<void> | void
 
   /**
-   * Called when a message is received. NOTE: Unlike the default browser
-   * EventSource.onmessage, this callback is called for _all_ events,
-   * even ones with a custom `event` field.
+   * Called when a message is received. The message data is passed as raw string
+   * without any serialization. Protocol-specific parts are removed but data is not parsed.
    */
-  onMessage?: (ev: EventSourceMessage) => void
+  onMessage?: (data: string) => void
+
+  /**
+   * Called when a data message is received and needs to be parsed as JSON.
+   * Only called when the data can be successfully parsed as JSON.
+   */
+  onDataMessage?: (data: ParsedMessageData) => void
 
   /**
    * Called when a response finishes.
@@ -118,12 +125,18 @@ export interface ConsumeEventStreamOptions {
 // React hooks 相关类型定义
 
 // 流式协议类型定义
-export type StreamProtocol = 'sse' | 'text' | 'data'
+export type StreamProtocol = 'sse' | 'sse-data' | 'text' | 'data'
 
 // useAICompletion hook 的选项
 export interface UseAICompletionOptions {
+  /**
+   * 用以判断是不是增量文本的标记
+   */
+  textDeltaEventMark?: string[]
   /** 流式消息回调 */
   onMessage?: ConsumeEventStreamOptions['onMessage']
+  /** 数据消息回调 */
+  onDataMessage?: ConsumeEventStreamOptions['onDataMessage']
   /** 完成回调 */
   onFinish?: (completion: string) => void
   /** 错误回调 */
@@ -150,10 +163,14 @@ export interface UseAICompletionReturn {
 
 // useAIChat hook 的选项
 export interface UseAIChatOptions {
+  /** 用以判断是不是增量文本的标记 */
+  textDeltaEventMark?: string[]
   /** 初始消息列表 */
   initialMessages?: UIMessage[]
   /** 流式消息回调 */
   onMessage?: ConsumeEventStreamOptions['onMessage']
+  /** 数据消息回调 */
+  onDataMessage?: ConsumeEventStreamOptions['onDataMessage']
   /** 完成回调 */
   onFinish?: (message: UIMessage) => void
   /** 错误回调 */

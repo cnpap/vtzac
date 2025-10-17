@@ -19,7 +19,7 @@ const { controller } = _http({
 const aiSdkController = controller(AiSdkController);
 
 export const MastraStreamTest: React.FC = () => {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState('介绍一下成都');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [output, setOutput] = useState('');
@@ -82,7 +82,7 @@ export const MastraStreamTest: React.FC = () => {
         signal: standaloneControllerRef.current.signal,
         onMessage(ev) {
           // 不再需要手动判断 [DONE]，consumeStream 会自动过滤
-          setStandaloneOutput(prev => prev + ev.data);
+          setStandaloneOutput(prev => prev + ev);
         },
         onError(err) {
           setStandaloneError(err.message);

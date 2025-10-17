@@ -147,6 +147,8 @@ export const StreamTest: React.FC = () => {
 
   const protocolDescriptions = {
     sse: 'Server-Sent Events 协议，使用 text/event-stream 格式',
+    'sse-data':
+      'Server-Sent Events 协议，使用 text/event-stream 格式，数据部分基于 NDJSON 格式',
     text: 'Text 协议，直接流式返回文本内容',
     data: 'Data 协议，基于 NDJSON 的数据流格式',
   };
