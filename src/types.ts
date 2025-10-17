@@ -125,14 +125,13 @@ export interface ConsumeEventStreamOptions {
 // React hooks 相关类型定义
 
 // 流式协议类型定义
-export type StreamProtocol = 'sse' | 'sse-data' | 'text' | 'data'
+export type StreamProtocol = 'text' | 'data'
+
+export type AIDrive = 'mastra' | 'ai-sdk'
 
 // useAICompletion hook 的选项
 export interface UseAICompletionOptions {
-  /**
-   * 用以判断是不是增量文本的标记
-   */
-  textDeltaEventMark?: string[]
+  drive?: AIDrive
   /** 流式消息回调 */
   onMessage?: ConsumeEventStreamOptions['onMessage']
   /** 数据消息回调 */
@@ -163,8 +162,7 @@ export interface UseAICompletionReturn {
 
 // useAIChat hook 的选项
 export interface UseAIChatOptions {
-  /** 用以判断是不是增量文本的标记 */
-  textDeltaEventMark?: string[]
+  drive?: AIDrive
   /** 初始消息列表 */
   initialMessages?: UIMessage[]
   /** 流式消息回调 */

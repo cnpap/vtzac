@@ -41,7 +41,7 @@ type TestMode = 'chat' | 'completion';
 
 export const StreamTest: React.FC = () => {
   const [mode, setMode] = useState<TestMode>('chat');
-  const [streamProtocol, setStreamProtocol] = useState<StreamProtocol>('sse');
+  const [streamProtocol, setStreamProtocol] = useState<StreamProtocol>('data');
 
   // 对话模式状态
   const [chatInput, setChatInput] = useState(
@@ -69,29 +69,23 @@ export const StreamTest: React.FC = () => {
   // 根据不同的流协议和模式选择不同的接口
   const getChatFunction = (protocol: StreamProtocol) => {
     switch (protocol) {
-      case 'sse':
-        return (messages: UIMessage[]) =>
-          aiSdkController.chatSse(JSON.stringify(messages));
       case 'text':
         return (messages: UIMessage[]) => aiSdkController.chat({ messages });
       case 'data':
         return (messages: UIMessage[]) => aiSdkController.chatUI({ messages });
       default:
-        return (messages: UIMessage[]) =>
-          aiSdkController.chatSse(JSON.stringify(messages));
+        return (messages: UIMessage[]) => aiSdkController.chat({ messages });
     }
   };
 
   const getCompletionFunction = (protocol: StreamProtocol) => {
     switch (protocol) {
-      case 'sse':
-        return (prompt: string) => aiSdkController.sse(prompt);
       case 'text':
         return (prompt: string) => aiSdkController.completion({ prompt });
       case 'data':
         return (prompt: string) => aiSdkController.completionUI({ prompt });
       default:
-        return (prompt: string) => aiSdkController.sse(prompt);
+        return (prompt: string) => aiSdkController.completion({ prompt });
     }
   };
 
@@ -143,9 +137,6 @@ export const StreamTest: React.FC = () => {
   };
 
   const protocolDescriptions = {
-    sse: 'Server-Sent Events 协议，使用 text/event-stream 格式',
-    'sse-data':
-      'Server-Sent Events 协议，使用 text/event-stream 格式，数据部分基于 NDJSON 格式',
     text: 'Text 协议，直接流式返回文本内容',
     data: 'Data 协议，基于 NDJSON 的数据流格式',
   };
@@ -192,7 +183,6 @@ export const StreamTest: React.FC = () => {
                 onChange={handleProtocolChange}
                 style={{ width: 200, marginLeft: 8 }}
               >
-                <Option value="sse">SSE 协议</Option>
                 <Option value="text">Text 协议</Option>
                 <Option value="data">Data 协议</Option>
               </Select>

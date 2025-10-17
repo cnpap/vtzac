@@ -1,6 +1,7 @@
 import type { UIMessage } from 'ai'
 import type { FetchResponse } from 'ofetch'
 import type {
+  AIDrive,
   ConsumeEventStreamOptions,
   ParsedMessageData,
   StreamProtocol,
@@ -15,14 +16,18 @@ import { consumeEventStream, consumeTextStream } from './stream'
 /**
  * 类型守卫：判断是否为文本增量事件
  */
-function isTextDeltaEvent(value: unknown, textDeltaEventMark: string[] = ['delta']): string | undefined {
-  if (typeof value !== 'object' || value === null)
+function textDeltaValue(parsed: ParsedMessageData, drive: AIDrive = 'ai-sdk'): string | undefined {
+  if (typeof parsed !== 'object' || parsed === null)
     return undefined
-  const keys = Object.keys(value)
-  const mark = textDeltaEventMark.find(item => keys.includes(item))
-  if (!mark)
-    return undefined
-  return mark
+  if (parsed.type === 'text-delta') {
+    if (drive === 'ai-sdk') {
+      return parsed.delta
+    }
+    else if (drive === 'mastra') {
+      return (parsed.payload as unknown as { text: string }).text
+    }
+  }
+  return undefined
 }
 
 /**
@@ -44,7 +49,7 @@ async function runStream(
     onClose?: () => void
     onFinish?: () => void
     onError?: (err: Error) => void
-    textDeltaEventMark?: string[]
+    drive?: AIDrive
   },
 ): Promise<void> {
   const {
@@ -57,22 +62,22 @@ async function runStream(
     onClose,
     onFinish,
     onError,
-    textDeltaEventMark,
+    drive = 'mastra',
   } = params
 
   const streamOptions: ConsumeEventStreamOptions = {
     signal,
     onMessage: (data: string) => {
-      if (protocol === 'text' || protocol === 'sse') {
+      if (protocol === 'text') {
         accumulate(data)
       }
       onMessage?.(data)
     },
     onDataMessage: (parsed: ParsedMessageData) => {
-      if (protocol === 'data' || protocol === 'sse-data') {
-        const mark = isTextDeltaEvent(parsed, textDeltaEventMark)
-        if (mark) {
-          accumulate(parsed[mark])
+      if (protocol === 'data') {
+        const delta = textDeltaValue(parsed, drive)
+        if (delta) {
+          accumulate(delta)
         }
       }
       onDataMessage?.(parsed)
@@ -101,7 +106,7 @@ export function useAICompletion(
   streamResponsePromise: (prompt: string) => Promise<FetchResponse<unknown>>,
   options: UseAICompletionOptions = {},
 ): UseAICompletionReturn {
-  const { onMessage, onDataMessage, onFinish, onError, protocol = 'sse', textDeltaEventMark } = options
+  const { onMessage, onDataMessage, onFinish, onError, protocol = 'data', drive } = options
 
   const [completion, setCompletion] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -148,7 +153,7 @@ export function useAICompletion(
           setIsLoading(false)
           onError?.(err)
         },
-        textDeltaEventMark,
+        drive,
       })
     }
     catch (err) {
@@ -192,7 +197,7 @@ export function useAIChat(
   streamResponsePromise: (messages: UIMessage[]) => Promise<FetchResponse<unknown>>,
   options: UseAIChatOptions = {},
 ): UseAIChatReturn {
-  const { initialMessages = [], onMessage, onDataMessage, onFinish, onError, protocol = 'sse', textDeltaEventMark = [] } = options
+  const { initialMessages = [], onMessage, onDataMessage, onFinish, onError, protocol = 'data', drive } = options
 
   const [messages, setMessages] = useState<UIMessage[]>(initialMessages)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -287,7 +292,7 @@ export function useAIChat(
           // 移除失败的助手消息
           setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId))
         },
-        textDeltaEventMark,
+        drive,
       })
     }
     catch (err) {
