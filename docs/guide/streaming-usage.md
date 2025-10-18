@@ -1,20 +1,20 @@
-# Streaming Response
+# Streaming
 
-This guide explains how to consume generic streaming responses in vtzac (including SSE) and clarifies callback signatures and usage patterns. vtzac is not SSE-specific — SSE is one streaming protocol. We provide two consumers: `consumeEventStream` for SSE (`text/event-stream`), and `consumeTextStream` for raw text byte streams (non-SSE). In AI scenarios, each chunk can be JSON; `consumeEventStream` exposes `onDataMessage` to parse each JSON chunk, while `consumeTextStream` does not include `onDataMessage`.
+This guide shows how to consume generic streaming in vtzac (including SSE) and explains the callback signatures and usage. vtzac does not limit you to SSE; SSE is just one protocol/format for streaming. We provide two consumer functions: `consumeEventStream` for SSE (`text/event-stream`), and `consumeTextStream` for raw text byte streams (non‑SSE). In AI scenarios, each chunk can be JSON text; `consumeEventStream` offers `onDataMessage` to parse each JSON chunk, while `consumeTextStream` does not include that option.
 
-> Important notes:
+> Recommendations:
 >
-> - Choose one callback based on your stream format:
->   - Plain text streams: use `onMessage(data: string)`.
->   - JSON text streams: use `onDataMessage(parsed: Record<string, string>)`.
-> - In AI integrations, providers often stream JSON deltas (progress/events) per chunk; prefer `onDataMessage` so you can read fields like `delta`/`text`/`content` and reflect state changes.
-> - Supplying both is optional: when `onDataMessage` exists and the data is valid JSON, both will be called — `onMessage` receives the raw string, `onDataMessage` receives the parsed object.
-> - `onDataMessage` only fires when provided and JSON parsing succeeds; otherwise it is ignored.
-> - With `consumeTextStream`, `onDataMessage` is not available; only `onMessage` is supported.
+> - Choose a callback based on the stream format:
+>   - Plain text stream: use `onMessage(data: string)`.
+>   - JSON text stream: use `onDataMessage(parsed: Record<string,string>)`.
+> - For AI integrations, many providers stream JSON fragments (progress/events). Prefer `onDataMessage` and read deltas from fields like `delta`/`text`/`content` to reflect state changes.
+> - Providing both callbacks is optional: when `onDataMessage` exists and the data can be parsed as JSON, both callbacks fire — `onMessage` receives the raw string and `onDataMessage` receives the parsed object.
+> - `onDataMessage` is only invoked when you provide the callback and JSON parsing succeeds; otherwise it is ignored.
+> - When using `consumeTextStream`, `onDataMessage` is not supported; only `onMessage` handles raw text.
 
 ## Configuration Example
 
-Connect to your backend via controller methods to achieve type-safe SSE streaming:
+Connect to your backend through “controller methods” to enable type‑safe SSE streaming:
 
 ```ts
 import { consumeEventStream, consumeTextStream, _http } from 'vtzac';
@@ -30,7 +30,7 @@ const api = _http({
 }).controller(AiSdkController);
 ```
 
-## Backend SSE Interface
+## Backend SSE Endpoint Implementation
 
 ```ts
 import { Controller, Sse, Query } from '@nestjs/common';
@@ -55,15 +55,15 @@ export class AiSdkController {
 ```
 // Actual SSE endpoint created:
 // GET /api/ai-sdk/chat/stream?message=hello
-// Response headers: content-type: text/event-stream
+// Response header: content-type: text/event-stream
 // Response body: streaming SSE event data
 ```
 
-## Basic Usage
+## Basic Usage Examples
 
 ### Text stream (data is plain text)
 
-````ts
+```ts
 const startStream = async () => {
   const message = 'Tell me about Chengdu';
   const abortController = new AbortController();
@@ -73,28 +73,28 @@ const startStream = async () => {
     await consumeEventStream(response, {
       signal: abortController.signal,
       onMessage(data) {
-        // Handle each text chunk
-        console.log('Received text:', data);
+        console.log('received text:', data);
         setOutput(prev => prev + data);
       },
       onError(err) {
-        console.error('Streaming error:', err.message);
+        console.error('streaming error:', err.message);
         setError(err.message);
       },
       onClose() {
-        console.log('Streaming connection closed');
+        console.log('stream closed');
       },
     });
   } catch (err) {
-    console.error('Request failed:', (err as Error).message);
+    console.error('request failed:', (err as Error).message);
   }
 };
 
 const stopStream = () => {
   abortController.abort();
 };
+```
 
-### Text stream (plain text)
+### Raw text stream (Text)
 
 ```ts
 const startTextStream = async () => {
@@ -102,7 +102,7 @@ const startTextStream = async () => {
   const ac = new AbortController();
 
   try {
-    const response = await api.completion(message); // assumes plain text streaming endpoint
+    const response = await api.completion(message); // assume a raw text stream endpoint
     await consumeTextStream(response, {
       signal: ac.signal,
       onMessage(data) {
@@ -113,95 +113,121 @@ const startTextStream = async () => {
       },
     });
   } catch (err) {
-    console.error('Request failed:', (err as Error).message);
+    console.error('request failed:', (err as Error).message);
   }
 };
-````
+```
+
+```
+// Server SSE example:
+// id: 1
+// data: Chengdu
+//
+// id: 2
+// data: ,
+// ...
+
+// onMessage receives:
+// data = "Chengdu"
+// data = ","
+// ...
+```
 
 ### JSON data stream (data is JSON text)
 
-When the server returns a JSON string in the SSE `data:` field:
+When the server returns a JSON string in `data`:
 
 ```ts
-const response = await api.chatStream('Who are you');
-await consumeEventStream(response, {
+await consumeEventStream(await api.chatStream('Who are you'), {
   onDataMessage(parsed) {
+    // pick the delta text based on actual fields (e.g. delta/text/content)
     const delta = parsed.delta || parsed.text || parsed.content;
-    if (delta) setOutput(prev => prev + delta);
+    if (delta) {
+      setOutput(prev => prev + delta);
+    }
   },
   onMessage(data) {
+    // if you want to keep the raw text (e.g. for logging or fallback), you can receive it too
     console.debug('raw:', data);
   },
 });
 ```
 
-> Only when `onDataMessage` is provided and the `data` is valid JSON will that callback fire. For plain text streams or failed JSON parsing, `onDataMessage` is not called.
+> Note: `onDataMessage` fires only when you provided the callback and `data` is valid JSON. For normal plain text streams, or when JSON parsing fails, `onDataMessage` is not called.
 
-## Comparison
+## Comparison with traditional SSE
 
 ```ts
-// Traditional: manual SSE protocol handling
+// Traditional: manually unpack the SSE protocol
 const es = new EventSource('/api/stream');
 es.onmessage = ev => {
-  const data = ev.data; // you must parse JSON or text yourself
+  // you need to parse JSON or text from ev.data yourself
+  const data = ev.data;
 };
 ```
 
 ```ts
-// vtzac: unified consumers and type-safe controller calls
+// vtzac: unified consumer functions and type-safe invocation
 const response = await controller.streamMethod(params);
 await consumeEventStream(response, {
   onMessage: data => {
     console.log(data); // raw text
   },
   onDataMessage: parsed => {
-    console.log(parsed); // parsed JSON (Record<string, string>)
+    // parsed JSON (Record<string,string>)
+    console.log(parsed);
   },
 });
 ```
 
-## Real-World Use Cases
+## Real‑world Use Cases
 
-- AI conversation: character-by-character or chunked replies (text or JSON delta).
-- Real-time logs: push server logs to the frontend.
-- Progress updates: long-running task updates.
-- Data monitoring: push real-time metrics for visualization.
+- AI chat: display replies progressively (text or JSON deltas).
+- Real‑time logs: push server logs to the frontend for live display.
+- Progress updates: stream progress for long‑running tasks.
+- Data monitoring: push metrics in real time and visualize them.
 
 ## Next Steps
 
-- To learn other streaming formats and unified calling, read `AI Agent: Streaming Support`.
-- See `React: AI Streaming Helpers` for more advanced interactions.
+- See “[React Helpers](/guide/ai-react-helpers)” to build richer interactions.
 
-## API
+## API Reference
 
 ### consumeEventStream
 
-- Signature: `consumeEventStream(response: Response, options: ConsumeEventStreamOptions): Promise<void>`
+Signature: `consumeEventStream(response: Response, options: ConsumeEventStreamOptions): Promise<void>`
 
 ### consumeTextStream
 
-- Signature: `consumeTextStream(response: Response, options: Omit<ConsumeEventStreamOptions, 'onDataMessage'>): Promise<void>`
+Signature: `consumeTextStream(response: Response, options: Omit<ConsumeEventStreamOptions, 'onDataMessage'>): Promise<void>`
+
+Parameters:
+
+| Param      | Type                                               | Required | Description                                          |
+| ---------- | -------------------------------------------------- | -------- | ---------------------------------------------------- |
+| `response` | `Response`                                         | Y        | HTTP response object (must provide a streaming body) |
+| `options`  | `Omit<ConsumeEventStreamOptions, 'onDataMessage'>` | N        | Consumer options for raw text streams                |
 
 ### ConsumeEventStreamOptions
 
-| Property        | Type                                     | Required | Description                                      |
-| --------------- | ---------------------------------------- | -------- | ------------------------------------------------ |
-| `signal`        | `AbortSignal`                            | N        | Signal for cancelling streaming                  |
-| `onOpen`        | `(response: Response) => void`           | N        | Fired when the response is received              |
-| `onMessage`     | `(data: string) => void`                 | N        | Raw text callback (no JSON parsing)              |
-| `onDataMessage` | `(data: Record<string, string>) => void` | N        | Tries to parse JSON and passes the parsed object |
-| `onClose`       | `() => void`                             | N        | Fired when the connection is closed              |
-| `onFinish`      | `() => void`                             | N        | Fired after `onClose` on successful completion   |
-| `onError`       | `(err: Error) => void`                   | N        | Fired on errors                                  |
+| Property        | Type                                    | Required | Description                                                     |
+| --------------- | --------------------------------------- | -------- | --------------------------------------------------------------- |
+| `signal`        | `AbortSignal`                           | N        | Used to cancel streaming                                        |
+| `onOpen`        | `(response: Response) => void`          | N        | Fired when the response is received; can be used for validation |
+| `onMessage`     | `(data: string) => void`                | N        | Raw text message callback (no JSON parsing)                     |
+| `onDataMessage` | `(data: Record<string,string>) => void` | N        | If provided, tries to parse JSON and passes the parsed object   |
+| `onClose`       | `() => void`                            | N        | Fired when the connection closes                                |
+| `onFinish`      | `() => void`                            | N        | Fired after a successful completion (after `onClose`)           |
+| `onError`       | `(err: Error) => void`                  | N        | Fired when an error occurs                                      |
 
-## Types
+## Type Definitions
 
-- `ParsedMessageData`: `Record<string, string>`, used to carry JSON-parsed data.
+- `ParsedMessageData`: `Record<string, string>`, used to carry parsed JSON data.
 
-## Event Stream Processing Flow
+## SSE Data Processing Flow
 
-1. Server sends, e.g. `id: 1\ndata: {"delta":"C"}\n\n` or `id: 1\ndata: C\n\n`.
-2. vtzac parses SSE lines and extracts the `data` text.
-3. Callbacks receive:
-   - `onMessage(data)`: raw text (e.g., `"C"`).
-   - `onDataMessage(parsed)`: parsed JSON (e.g., `{ delta: "C" }`) if you provided the callback and the data is valid JSON.
+1. Server sends: e.g. `id: 1\ndata: {"delta":"C"}\n\n` or `id: 1\ndata: C\n\n`
+2. Protocol parsing: vtzac parses SSE lines and extracts the `data` text.
+3. Callbacks:
+   - `onMessage(data)`: receives the raw text (e.g. `"C"`).
+   - `onDataMessage(parsed)`: when you provided the callback and `data` is valid JSON, receives the parsed object (e.g. `{ delta: "C" }`).

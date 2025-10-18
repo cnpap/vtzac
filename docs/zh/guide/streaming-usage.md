@@ -189,7 +189,6 @@ await consumeEventStream(response, {
 
 ## 下一步
 
-- 了解其他流式协议与统一调用方式，可阅读「[流式格式支持](/zh/guide/ai-streaming)」。
 - 参照「[React 助手函数](/zh/guide/ai-react-helpers)」章节，构建更高级的交互体验。
 
 ## API 说明
