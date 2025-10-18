@@ -52,6 +52,6 @@ export default vtzac
 
 export { _controller, _http, _socket, setGlobalZacOfetchOptions } from './hook'
 // 导出流式处理相关功能
-export { consumeEventStream, consumeStream } from './hook-http'
+export { consumeEventStream, consumeTextStream } from './stream'
 
 export type * from './types'

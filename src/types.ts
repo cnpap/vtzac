@@ -113,13 +113,6 @@ export interface ConsumeEventStreamOptions {
    * AbortController signal to control the stream consumption
    */
   signal?: AbortSignal
-
-  /**
-   * 是否跳过自动过滤 [DONE] 消息的检查
-   * 默认为 false，即默认会自动过滤掉 data 为 '[DONE]' 的消息
-   * 设置为 true 时，所有消息都会传递给 onMessage 回调
-   */
-  skipDoneCheck?: boolean
 }
 
 // React hooks 相关类型定义

@@ -51,7 +51,7 @@ export default defineConfig({
             items: [
               { text: 'Parameter Handling', link: '/guide/params-usage' },
               { text: 'File Upload', link: '/guide/file-upload-usage' },
-              { text: 'SSE Streaming Response', link: '/guide/sse-usage' },
+              { text: 'Streaming Response', link: '/guide/streaming-usage' },
             ],
           },
           {
@@ -66,10 +66,7 @@ export default defineConfig({
           },
           {
             text: 'AI Agent',
-            items: [
-              { text: 'Streaming Support', link: '/guide/ai-streaming' },
-              { text: 'React Helpers', link: '/guide/ai-react-helpers' },
-            ],
+            items: [{ text: 'React Helpers', link: '/guide/ai-react-helpers' }],
           },
         ],
         socialLinks: [
@@ -105,7 +102,7 @@ export default defineConfig({
             items: [
               { text: '参数处理用例', link: '/zh/guide/params-usage' },
               { text: '文件上传用例', link: '/zh/guide/file-upload-usage' },
-              { text: 'SSE 流式响应', link: '/zh/guide/sse-usage' },
+              { text: '流式传输', link: '/zh/guide/streaming-usage' },
             ],
           },
           {
@@ -124,7 +121,6 @@ export default defineConfig({
           {
             text: 'AI Agent',
             items: [
-              { text: '流式格式支持', link: '/zh/guide/ai-streaming' },
               { text: 'React 助手函数', link: '/zh/guide/ai-react-helpers' },
             ],
           },

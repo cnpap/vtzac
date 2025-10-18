@@ -181,6 +181,26 @@ function newMessage(): EventSourceMessage {
   }
 }
 
+function emitRawAndJson(
+  raw: string,
+  onMessage?: (raw: string) => void,
+  onDataMessage?: (parsed: ParsedMessageData) => void,
+): void {
+  if (!raw)
+    return
+  if (onMessage)
+    onMessage(raw)
+  if (onDataMessage) {
+    try {
+      const parsed = JSON.parse(raw) as unknown as ParsedMessageData
+      onDataMessage(parsed)
+    }
+    catch {
+      // ignore parse error for non-JSON chunks
+    }
+  }
+}
+
 /**
  * 消费 EventStream 响应的核心函数
  * @param response ofetch 返回的 Response 对象
@@ -191,104 +211,29 @@ export async function consumeEventStream(
   response: Response,
   options: ConsumeEventStreamOptions = {},
 ): Promise<void> {
-  const {
-    onOpen,
-    onMessage,
-    onDataMessage,
-    onClose,
-    onFinish,
-    onError,
-    signal,
-    skipDoneCheck = false,
-  } = options
+  const { onMessage, onDataMessage } = options
 
-  try {
-    // 调用 onOpen 回调
-    if (onOpen) {
-      await onOpen(response)
-    }
-
-    // 检查是否已经被中断
-    if (signal?.aborted) {
-      return
-    }
-
-    // 确保响应体存在
-    if (!response.body) {
-      throw new Error('Response body is null')
-    }
-
-    // 设置中断监听
-    const abortPromise = signal
-      ? new Promise<void>((resolve) => {
-        signal.addEventListener('abort', () => resolve(), { once: true })
-      })
-      : null
-
-    // 处理流式数据
-    const streamPromise = getBytes(
-      response.body,
+  return withStreamLifecycle(response, options, async (body) => {
+    await getBytes(
+      body,
       getLines(
         getMessages(
-          (_id) => {
-            // 处理 id 字段，这里可以扩展逻辑
-          },
-          (_retry) => {
-            // 处理 retry 字段，这里可以扩展逻辑
-          },
-          // 包装消息回调，处理原始数据和解析数据
+          (_id) => {},
+          (_retry) => {},
           (onMessage || onDataMessage)
             ? (msg) => {
-                // 如果不跳过 DONE 检查且消息数据为 '[DONE]'，则不调用回调
-                if (!skipDoneCheck && msg.data === '[DONE]') {
+                // 跳过完成标记
+                if (msg.data === '[DONE]')
                   return
-                }
-                // 调用 onMessage 传递原始数据
-                if (onMessage && msg.data) {
-                  onMessage(msg.data)
-                }
-                // 调用 onDataMessage 传递解析后的数据
-                if (onDataMessage && msg.data) {
-                  try {
-                    const parsed = JSON.parse(msg.data) as unknown as ParsedMessageData
-                    onDataMessage(parsed)
-                  }
-                  catch {
-                    // 如果解析失败，忽略该消息的 onDataMessage 调用
-                  }
-                }
+                // 保持与原实现一致：仅在 msg.data 非空时触发
+                if (msg.data)
+                  emitRawAndJson(msg.data, onMessage, onDataMessage)
               }
             : undefined,
         ),
       ),
     )
-
-    // 等待流处理完成或中断
-    if (abortPromise) {
-      await Promise.race([streamPromise, abortPromise])
-    }
-    else {
-      await streamPromise
-    }
-
-    // 调用 onClose 回调
-    onClose?.()
-
-    // 调用 onFinish 回调（在 onClose 之后）
-    onFinish?.()
-  }
-  catch (error) {
-    // 确保错误是 Error 类型
-    const err = error instanceof Error ? error : new Error(String(error))
-
-    // 调用 onError 回调
-    if (onError) {
-      onError(err)
-    }
-    else {
-      throw err
-    }
-  }
+  })
 }
 
 /**
@@ -297,94 +242,70 @@ export async function consumeEventStream(
  */
 export async function consumeTextStream(
   response: Response,
-  options: ConsumeEventStreamOptions = {},
+  options: Omit<ConsumeEventStreamOptions, 'onDataMessage'> = {},
 ): Promise<void> {
-  const { onOpen, onMessage, onDataMessage, onClose, onFinish, onError, signal } = options
+  const { onMessage } = options
 
+  return withStreamLifecycle(response, options, async (body) => {
+    const decoder = new TextDecoder()
+
+    await getBytes(body, (arr: Uint8Array) => {
+      const chunkText = decoder.decode(arr, { stream: true })
+      if (chunkText) {
+        if (!chunkText)
+          return
+        if (onMessage)
+          onMessage(chunkText)
+      }
+    })
+    const rest = decoder.decode()
+    if (rest) {
+      if (!rest)
+        return
+      if (onMessage)
+        onMessage(rest)
+    }
+  })
+}
+
+async function withStreamLifecycle(
+  response: Response,
+  options: ConsumeEventStreamOptions,
+  start: (body: ReadableStream<Uint8Array>, signal?: AbortSignal) => Promise<void>,
+): Promise<void> {
+  const { onOpen, onClose, onFinish, onError, signal } = options
   try {
-    // 调用 onOpen 回调
-    if (onOpen) {
+    if (onOpen)
       await onOpen(response)
-    }
 
-    // 检查是否已经被中断
-    if (signal?.aborted) {
+    if (signal?.aborted)
       return
-    }
 
-    // 确保响应体存在
-    if (!response.body) {
+    const body = response.body
+    if (!body)
       throw new Error('Response body is null')
-    }
 
-    // 设置中断监听
     const abortPromise = signal
       ? new Promise<void>((resolve) => {
         signal.addEventListener('abort', () => resolve(), { once: true })
       })
       : null
 
-    const decoder = new TextDecoder()
+    const streamPromise = start(body, signal)
 
-    const streamPromise = getBytes(response.body, (arr: Uint8Array) => {
-      // 按字节块解码为文本（保持流模式）
-      const chunkText = decoder.decode(arr, { stream: true })
-      if (chunkText) {
-        // 调用 onMessage 传递原始文本数据
-        if (onMessage) {
-          onMessage(chunkText)
-        }
-        // 调用 onDataMessage 尝试解析 JSON（对于文本流通常不适用，但保持一致性）
-        if (onDataMessage) {
-          try {
-            const parsed = JSON.parse(chunkText) as unknown as ParsedMessageData
-            onDataMessage(parsed)
-          }
-          catch {
-            // 文本流通常不是 JSON，忽略解析失败
-          }
-        }
-      }
-    })
-
-    // 等待流处理完成或中断
-    if (abortPromise) {
+    if (abortPromise)
       await Promise.race([streamPromise, abortPromise])
-    }
-    else {
+    else
       await streamPromise
-    }
 
-    // flush 可能残留的缓冲区（通常为空）
-    const rest = decoder.decode()
-    if (rest) {
-      if (onMessage) {
-        onMessage(rest)
-      }
-      if (onDataMessage) {
-        try {
-          const parsed = JSON.parse(rest) as unknown as ParsedMessageData
-          onDataMessage(parsed)
-        }
-        catch {
-          // 忽略解析失败
-        }
-      }
-    }
-
-    // 调用 onClose 回调
     onClose?.()
-
-    // 调用 onFinish 回调（在 onClose 之后）
     onFinish?.()
   }
   catch (error) {
     const err = error instanceof Error ? error : new Error(String(error))
-    if (onError) {
+    if (onError)
       onError(err)
-    }
-    else {
+    else
       throw err
-    }
   }
 }

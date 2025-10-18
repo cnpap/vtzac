@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Card, Button, Input, Space, Typography, Alert } from 'antd';
 import { SendOutlined, ApiOutlined } from '@ant-design/icons';
-import { consumeStream, _http } from 'vtzac';
+import { _http, consumeEventStream } from 'vtzac';
 import { MastraController } from 'nestjs-example/src/mastra.controller';
 
 const { Text, Paragraph } = Typography;
@@ -18,14 +18,14 @@ const { controller } = _http({
 const mastraController = controller(MastraController);
 
 export const MastraStreamTest: React.FC = () => {
-  // 独立 consumeStream 相关状态
+  // 独立 consumeEventStream 相关状态
   const [standaloneMessage, setStandaloneMessage] = useState('介绍一下成都');
   const [standaloneLoading, setStandaloneLoading] = useState(false);
   const [standaloneError, setStandaloneError] = useState<string | null>(null);
   const [standaloneOutput, setStandaloneOutput] = useState('');
   const standaloneControllerRef = useRef<AbortController | null>(null);
 
-  // 独立 consumeStream 流式处理函数
+  // 独立 consumeEventStream 流式处理函数
   const startStandaloneStream = async (): Promise<void> => {
     if (!standaloneMessage.trim()) return;
     setStandaloneLoading(true);
@@ -35,11 +35,11 @@ export const MastraStreamTest: React.FC = () => {
     standaloneControllerRef.current = new AbortController();
 
     try {
-      // 使用独立的 consumeStream 函数
-      await consumeStream(mastraController.sse(standaloneMessage), {
+      // 使用独立的 consumeEventStream 函数
+      await consumeEventStream(await mastraController.sse(standaloneMessage), {
         signal: standaloneControllerRef.current.signal,
         onMessage(ev) {
-          // 不再需要手动判断 [DONE]，consumeStream 会自动过滤
+          // 不再需要手动判断 [DONE]，consumeEventStreamconsumeEventStream 会自动过滤
           setStandaloneOutput(prev => prev + ev);
         },
         onError(err) {
@@ -66,15 +66,15 @@ export const MastraStreamTest: React.FC = () => {
       <Paragraph>
         测试三种 SSE 流式响应方式：使用{' '}
         <Text code>@microsoft/fetch-event-source</Text>、{' '}
-        <Text code>vtzac 集成的 httpConsumeStream</Text> 和{' '}
-        <Text code>独立的 consumeStream</Text> 函数来消费后端 SSE
+        <Text code>vtzac 集成的 consumeStream</Text> 和{' '}
+        <Text code>独立的 consumeEventStream</Text> 函数来消费后端 SSE
         流式响应，逐字展示。
       </Paragraph>
 
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        {/* 独立 consumeStream 流式聊天 */}
+        {/* 独立 consumeEventStream 流式聊天 */}
         <Card
-          title="独立 consumeStream 流式聊天"
+          title="独立 consumeEventStream 流式聊天"
           size="small"
           extra={<ApiOutlined />}
         >
