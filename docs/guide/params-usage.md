@@ -18,7 +18,7 @@ export class TestController {
 
 **Frontend Usage Example:**
 
-```tsx
+```ts
 import { _http } from 'vtzac';
 import { TestController } from './backend/test.controller';
 
@@ -70,7 +70,7 @@ export class TestController {
 
 **Frontend Usage Example:**
 
-```tsx
+```ts
 async function handleSearch() {
   // Query parameter call
   const res = await testController.call('search', 'vtzac');
@@ -129,7 +129,7 @@ export class TestController {
 
 **Frontend Usage Example:**
 
-```tsx
+```ts
 async function handleUpdateUser() {
   // Pass parameters in order: Path, Body, Query, Headers
   const res = await testController.call(

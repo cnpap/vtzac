@@ -18,7 +18,7 @@ export class TestController {
 
 **前端调用示例：**
 
-```tsx
+```ts
 import { _http } from 'vtzac';
 import { TestController } from './backend/test.controller';
 
@@ -70,7 +70,7 @@ export class TestController {
 
 **前端调用示例：**
 
-```tsx
+```ts
 async function handleSearch() {
   // Query 参数调用
   const res = await testController.call('search', 'vtzac');
@@ -129,7 +129,7 @@ export class TestController {
 
 **前端调用示例：**
 
-```tsx
+```ts
 async function handleUpdateUser() {
   // 按参数顺序传递：Path、Body、Query、Headers
   const res = await testController.call(

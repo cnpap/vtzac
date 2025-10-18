@@ -29,7 +29,7 @@ export class UploadController {
 
 **Frontend Usage Example:**
 
-```tsx
+```ts
 import { _http } from 'vtzac';
 import { UploadController } from './backend/upload.controller';
 
