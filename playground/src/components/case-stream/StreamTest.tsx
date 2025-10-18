@@ -7,7 +7,6 @@ import {
   Typography,
   Alert,
   List,
-  Select,
   Radio,
 } from 'antd';
 import {
@@ -21,11 +20,11 @@ import {
 import { _http, type StreamProtocol } from 'vtzac';
 import { useAIChat, useAICompletion } from 'vtzac/react';
 import { AiSdkController } from 'nestjs-example/src/ai-sdk.controller';
+import { MastraController } from 'nestjs-example/src/mastra.controller';
 import type { UIMessage } from 'ai';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
-const { Option } = Select;
 
 // 创建控制器实例
 const { controller } = _http({
@@ -36,12 +35,16 @@ const { controller } = _http({
   },
 });
 const aiSdkController = controller(AiSdkController);
+const mastraController = controller(MastraController);
 
 type TestMode = 'chat' | 'completion';
 
 export const StreamTest: React.FC = () => {
   const [mode, setMode] = useState<TestMode>('chat');
   const [streamProtocol, setStreamProtocol] = useState<StreamProtocol>('data');
+  const [controllerChoice, setControllerChoice] = useState<'ai' | 'mastra'>(
+    'ai'
+  );
 
   // 对话模式状态
   const [chatInput, setChatInput] = useState(
@@ -68,24 +71,50 @@ export const StreamTest: React.FC = () => {
 
   // 根据不同的流协议和模式选择不同的接口
   const getChatFunction = (protocol: StreamProtocol) => {
-    switch (protocol) {
-      case 'text':
-        return (messages: UIMessage[]) => aiSdkController.chat({ messages });
-      case 'data':
-        return (messages: UIMessage[]) => aiSdkController.chatUI({ messages });
-      default:
-        return (messages: UIMessage[]) => aiSdkController.chat({ messages });
+    if (controllerChoice === 'ai') {
+      switch (protocol) {
+        case 'text':
+          return (messages: UIMessage[]) => aiSdkController.chat({ messages });
+        case 'data':
+          return (messages: UIMessage[]) =>
+            aiSdkController.chatUI({ messages });
+        default:
+          return (messages: UIMessage[]) => aiSdkController.chat({ messages });
+      }
+    } else {
+      switch (protocol) {
+        case 'text':
+          return (messages: UIMessage[]) =>
+            mastraController.chatText({ messages });
+        case 'data':
+          return (messages: UIMessage[]) =>
+            mastraController.chatUI({ messages });
+        default:
+          return (messages: UIMessage[]) =>
+            mastraController.chatText({ messages });
+      }
     }
   };
 
   const getCompletionFunction = (protocol: StreamProtocol) => {
-    switch (protocol) {
-      case 'text':
-        return (prompt: string) => aiSdkController.completion({ prompt });
-      case 'data':
-        return (prompt: string) => aiSdkController.completionUI({ prompt });
-      default:
-        return (prompt: string) => aiSdkController.completion({ prompt });
+    if (controllerChoice === 'ai') {
+      switch (protocol) {
+        case 'text':
+          return (prompt: string) => aiSdkController.completion({ prompt });
+        case 'data':
+          return (prompt: string) => aiSdkController.completionUI({ prompt });
+        default:
+          return (prompt: string) => aiSdkController.completion({ prompt });
+      }
+    } else {
+      switch (protocol) {
+        case 'text':
+          return (prompt: string) => mastraController.completion({ prompt });
+        case 'data':
+          return (prompt: string) => mastraController.completionUI({ prompt });
+        default:
+          return (prompt: string) => mastraController.completion({ prompt });
+      }
     }
   };
 
@@ -121,11 +150,17 @@ export const StreamTest: React.FC = () => {
   };
 
   const handleProtocolChange = (value: StreamProtocol) => {
-    // 保存当前消息到引用中
     if (mode === 'chat') {
       savedMessages.current = chat.messages;
     }
     setStreamProtocol(value);
+  };
+
+  const handleControllerChange = (value: 'ai' | 'mastra') => {
+    if (mode === 'chat') {
+      savedMessages.current = chat.messages;
+    }
+    setControllerChoice(value);
   };
 
   const handleModeChange = (value: TestMode) => {
@@ -175,22 +210,35 @@ export const StreamTest: React.FC = () => {
               </Radio.Group>
             </div>
 
-            {/* 协议选择 */}
+            {/* 控制器选择 */}
+            <div>
+              <Text strong>控制器：</Text>
+              <Radio.Group
+                value={controllerChoice}
+                onChange={e => handleControllerChange(e.target.value)}
+                style={{ marginLeft: 8 }}
+              >
+                <Radio.Button value="ai">AI SDK 控制器</Radio.Button>
+                <Radio.Button value="mastra">Mastra 控制器</Radio.Button>
+              </Radio.Group>
+            </div>
+
+            {/* 协议选择（改为单选） */}
             <div>
               <Text strong>流协议：</Text>
-              <Select
+              <Radio.Group
                 value={streamProtocol}
-                onChange={handleProtocolChange}
-                style={{ width: 200, marginLeft: 8 }}
+                onChange={e => handleProtocolChange(e.target.value)}
+                style={{ marginLeft: 8 }}
               >
-                <Option value="text">Text 协议</Option>
-                <Option value="data">Data 协议</Option>
-              </Select>
+                <Radio.Button value="text">Text 协议</Radio.Button>
+                <Radio.Button value="data">Data 协议</Radio.Button>
+              </Radio.Group>
             </div>
 
             {/* 当前配置说明 */}
             <Alert
-              message={`当前配置：${mode === 'chat' ? '对话' : '完成'}模式 + ${streamProtocol.toUpperCase()}协议`}
+              message={`当前配置：${controllerChoice === 'ai' ? 'AI SDK' : 'Mastra'} 控制器 + ${mode === 'chat' ? '对话' : '完成'}模式 + ${streamProtocol.toUpperCase()}协议`}
               description={
                 <div>
                   <div>

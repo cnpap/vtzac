@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { MessageListInput } from '@mastra/core/agent/message-list';
 import { mastra } from './mastra';
+import { ModelMessage } from 'ai';
 
 @Injectable()
 export class MastraService {
-  async ask(messageList: MessageListInput) {
+  async ask(messageList: MessageListInput | ModelMessage[]) {
     const agent = mastra.getAgent('weatherAgent');
     if (!agent) {
       throw new Error('Weather agent not found');
