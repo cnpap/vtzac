@@ -3,6 +3,7 @@
   _http: function
   _socket: function
   consumeEventStream: function
+  consumeTextStream: function
   default: function
   setGlobalZacOfetchOptions: function
   vtzac: function
