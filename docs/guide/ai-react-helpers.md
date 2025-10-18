@@ -20,14 +20,12 @@ Connect the backend through “send functions”, then select controller methods
 import { _http, type StreamProtocol } from 'vtzac';
 import { useAIChat, useAICompletion } from 'vtzac/react';
 import { AiSdkController } from 'nestjs-example/src/ai-sdk.controller';
-import { MastraController } from 'nestjs-example/src/mastra.controller';
 
 // Initialize HTTP client (make sure to set responseType: 'stream')
 const { controller } = _http({
   ofetchOptions: { baseURL: 'http://localhost:3000', responseType: 'stream' },
 });
 const aiSdk = controller(AiSdkController);
-const mastra = controller(MastraController);
 
 // Select chat send function by protocol
 const getChatSender = (protocol: StreamProtocol) => {
@@ -48,10 +46,6 @@ const getCompletionSender = (protocol: StreamProtocol) => {
       return prompt => aiSdk.completionUI({ prompt });
   }
 };
-
-// When using the Mastra controller, map as:
-// - text -> mastra.chatText / mastra.completion
-// - data -> mastra.chatUI / mastra.completionUI
 ```
 
 ## Basic Usage

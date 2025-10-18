@@ -18,14 +18,12 @@
 import { _http, type StreamProtocol } from 'vtzac';
 import { useAIChat, useAICompletion } from 'vtzac/react';
 import { AiSdkController } from 'nestjs-example/src/ai-sdk.controller';
-import { MastraController } from 'nestjs-example/src/mastra.controller';
 
 // 初始化 HTTP 客户端（务必设置 responseType: 'stream'）
 const { controller } = _http({
   ofetchOptions: { baseURL: 'http://localhost:3000', responseType: 'stream' },
 });
 const aiSdk = controller(AiSdkController);
-const mastra = controller(MastraController);
 
 // 按协议选择聊天发送函数
 const getChatSender = (protocol: StreamProtocol) => {
@@ -46,10 +44,6 @@ const getCompletionSender = (protocol: StreamProtocol) => {
       return prompt => aiSdk.completionUI({ prompt });
   }
 };
-
-// 使用 Mastra 控制器时，映射为：
-// - text -> mastra.chatText / mastra.completion
-// - data -> mastra.chatUI / mastra.completionUI
 ```
 
 ## 基本使用
