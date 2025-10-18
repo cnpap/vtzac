@@ -62,7 +62,7 @@ async function runStream(
     onClose,
     onFinish,
     onError,
-    drive = 'mastra',
+    drive,
   } = params
 
   const streamOptions: ConsumeEventStreamOptions = {

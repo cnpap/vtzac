@@ -6,27 +6,9 @@ settings:
 
 catalogs:
   cli:
-    '@antfu/eslint-config':
-      specifier: ^5.4.1
-      version: 5.4.1
-    '@antfu/ni':
-      specifier: ^26.0.1
-      version: 26.0.1
-    bumpp:
-      specifier: ^10.2.3
-      version: 10.2.3
     eslint:
       specifier: ^9.36.0
       version: 9.36.0
-    lint-staged:
-      specifier: ^16.2.0
-      version: 16.2.0
-    simple-git-hooks:
-      specifier: ^2.13.1
-      version: 2.13.1
-    tsdown:
-      specifier: ^0.15.4
-      version: 0.15.4
     tsx:
       specifier: 4.20.6
       version: 4.20.6
@@ -52,15 +34,9 @@ catalogs:
     '@nestjs/platform-express':
       specifier: 11.1.6
       version: 11.1.6
-    '@nestjs/swagger':
-      specifier: ^11.2.0
-      version: 11.2.0
     '@tailwindcss/vite':
       specifier: 4.1.14
       version: 4.1.14
-    '@types/express':
-      specifier: ^5.0.3
-      version: 5.0.3
     '@types/multer':
       specifier: ^2.0.0
       version: 2.0.0
@@ -100,21 +76,12 @@ catalogs:
     eslint-plugin-react-refresh:
       specifier: ^0.4.22
       version: 0.4.23
-    fast-glob:
-      specifier: 3.3.3
-      version: 3.3.3
     globals:
       specifier: ^16.4.0
       version: 16.4.0
-    live-server:
-      specifier: ^1.2.2
-      version: 1.2.2
     multer:
       specifier: ^2.0.2
       version: 2.0.2
-    ofetch:
-      specifier: 1.4.1
-      version: 1.4.1
     prettier:
       specifier: ^3.6.2
       version: 3.6.2
@@ -130,41 +97,12 @@ catalogs:
     rxjs:
       specifier: 7.8.2
       version: 7.8.2
-    socket.io:
-      specifier: ^4.8.1
-      version: 4.8.1
-    socket.io-client:
-      specifier: ^4.8.1
-      version: 4.8.1
     tailwindcss:
       specifier: 4.1.14
       version: 4.1.14
     typescript-eslint:
       specifier: ^8.45.0
       version: 8.46.0
-    vitepress:
-      specifier: 2.0.0-alpha.12
-      version: 2.0.0-alpha.12
-    wait-on:
-      specifier: ^9.0.1
-      version: 9.0.1
-  inlined:
-    '@antfu/utils':
-      specifier: ^9.2.1
-      version: 9.2.1
-  testing:
-    tinyexec:
-      specifier: ^1.0.1
-      version: 1.0.1
-    vitest:
-      specifier: ^3.2.4
-      version: 3.2.4
-    vitest-package-exports:
-      specifier: ^0.1.1
-      version: 0.1.1
-    yaml:
-      specifier: ^2.8.1
-      version: 2.8.1
   types:
     '@types/node':
       specifier: ^24.6.0
@@ -437,9 +375,6 @@ importers:
       '@ai-sdk/react':
         specifier: ^2.0.68
         version: 2.0.68(react@18.3.1)(zod@4.1.12)
-      '@microsoft/fetch-event-source':
-        specifier: ^2.0.1
-        version: 2.0.1
       '@nestjs/common':
         specifier: 'catalog:'
         version: 11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -2121,9 +2056,6 @@ packages:
     peerDependencies:
       '@mastra/core': '>=0.20.1-0 <0.21.0-0'
       zod: ^3.25.0 || ^4.0.0
-
-  '@microsoft/fetch-event-source@2.0.1':
-    resolution: {integrity: sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==}
 
   '@microsoft/tsdoc@0.15.1':
     resolution: {integrity: sha512-4aErSrCR/On/e5G2hDP0wjooqDdauzEbIq8hIkIe5pXV0rtWJZvdCEKL0ykZxex+IxIwBp0eGeV48hQN07dXtw==}
@@ -12071,8 +12003,6 @@ snapshots:
     dependencies:
       '@mastra/core': 0.20.2(@sinclair/typebox@0.34.41)(openapi-types@12.1.3)(react@18.3.1)(zod@3.25.76)
       zod: 3.25.76
-
-  '@microsoft/fetch-event-source@2.0.1': {}
 
   '@microsoft/tsdoc@0.15.1': {}
 

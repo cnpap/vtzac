@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Card, Button, Input, Space, Typography, Alert } from 'antd';
-import { RobotOutlined, SendOutlined, ApiOutlined } from '@ant-design/icons';
-import { fetchEventSource } from '@microsoft/fetch-event-source';
+import { SendOutlined, ApiOutlined } from '@ant-design/icons';
 import { consumeStream, _http } from 'vtzac';
 import { MastraController } from 'nestjs-example/src/mastra.controller';
 
@@ -19,53 +18,12 @@ const { controller } = _http({
 const mastraController = controller(MastraController);
 
 export const MastraStreamTest: React.FC = () => {
-  const [message, setMessage] = useState('介绍一下成都');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [output, setOutput] = useState('');
-  const controllerRef = useRef<AbortController | null>(null);
-
   // 独立 consumeStream 相关状态
   const [standaloneMessage, setStandaloneMessage] = useState('介绍一下成都');
   const [standaloneLoading, setStandaloneLoading] = useState(false);
   const [standaloneError, setStandaloneError] = useState<string | null>(null);
   const [standaloneOutput, setStandaloneOutput] = useState('');
   const standaloneControllerRef = useRef<AbortController | null>(null);
-
-  const startStream = async (): Promise<void> => {
-    if (!message.trim()) return;
-    setLoading(true);
-    setError(null);
-    setOutput('');
-    controllerRef.current?.abort();
-    controllerRef.current = new AbortController();
-
-    try {
-      await fetchEventSource(
-        `http://localhost:3000/api/ai-sdk/sse?prompt=${encodeURIComponent(message)}`,
-        {
-          signal: controllerRef.current.signal,
-          onmessage(ev) {
-            if (ev.data === '[DONE]') return;
-            setOutput(prev => prev + ev.data);
-          },
-          onerror(err) {
-            setError(err.message);
-          },
-          openWhenHidden: true,
-        }
-      );
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const stopStream = (): void => {
-    controllerRef.current?.abort();
-    setLoading(false);
-  };
 
   // 独立 consumeStream 流式处理函数
   const startStandaloneStream = async (): Promise<void> => {
@@ -88,7 +46,7 @@ export const MastraStreamTest: React.FC = () => {
           setStandaloneError(err.message);
         },
         onClose() {
-          console.log('Standalone stream closed');
+          // console.log('Standalone stream closed');
         },
       });
     } catch (err) {
@@ -114,52 +72,6 @@ export const MastraStreamTest: React.FC = () => {
       </Paragraph>
 
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        {/* 原生 fetch-event-source 流式聊天 */}
-        <Card
-          title="fetch-event-source 流式聊天"
-          size="small"
-          extra={<RobotOutlined />}
-        >
-          <Space direction="vertical" style={{ width: '100%' }}>
-            <TextArea
-              placeholder="输入你想和 AI 聊天的内容..."
-              value={message}
-              onChange={e => setMessage(e.target.value)}
-              rows={3}
-            />
-            <Space>
-              <Button
-                type="primary"
-                icon={<SendOutlined />}
-                loading={loading}
-                onClick={startStream}
-              >
-                开始流式
-              </Button>
-              <Button danger disabled={!loading} onClick={stopStream}>
-                停止
-              </Button>
-            </Space>
-            {error && (
-              <Alert type="error" message="错误" description={error} showIcon />
-            )}
-            {output && (
-              <Alert
-                type="success"
-                message="流式输出"
-                description={
-                  <div>
-                    <Text copyable style={{ whiteSpace: 'pre-wrap' }}>
-                      {output}
-                    </Text>
-                  </div>
-                }
-                showIcon
-              />
-            )}
-          </Space>
-        </Card>
-
         {/* 独立 consumeStream 流式聊天 */}
         <Card
           title="独立 consumeStream 流式聊天"
