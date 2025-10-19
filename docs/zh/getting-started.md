@@ -51,7 +51,7 @@ pnpm add -D concurrently
 
 ```bash
 cd frontend
-pnpm add vtzac
+pnpm add -D vtzac
 ```
 
 在 `vite.config.ts` 中添加插件，使用默认配置即可：

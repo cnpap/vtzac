@@ -44,14 +44,14 @@ packages:
 Install concurrently dependency:
 
 ```bash
-pnpm add -D concurrently
+pnpm add -w -D concurrently
 ```
 
 ## 2. Install vtzac in Vite Project
 
 ```bash
 cd frontend
-pnpm add vtzac
+pnpm add -D vtzac
 ```
 
 Add plugin to `vite.config.ts` using default configuration:
