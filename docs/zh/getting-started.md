@@ -44,7 +44,7 @@ packages:
 安装 concurrently 依赖：
 
 ```bash
-pnpm add -D concurrently
+pnpm add -w -D concurrently
 ```
 
 ## 2. 在 Vite 项目中安装 vtzac
