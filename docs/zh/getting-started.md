@@ -8,10 +8,11 @@
 
 ```bash
 mkdir my-vtzac-demo && cd my-vtzac-demo
+# pnpm init 没有 -y 支持，默认就不需要手动确认
 pnpm init
 
 # 创建前端（以 React + TS 为例）
-pnpm create vite frontend --no-rolldown --no-interactive --template react-swc-ts
+pnpm create vite frontend --no-rolldown --no-interactive --template react-ts
 
 # 创建后端（NestJS 示例）
 pnpm dlx @nestjs/cli new nestjs-example --package-manager pnpm
@@ -57,13 +58,42 @@ pnpm add vtzac
 
 ```ts
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import vtzac from 'vtzac';
 
 export default defineConfig({
   plugins: [vtzac(), react()],
 });
 ```
+
+### 前端 TypeScript 配置（tsconfig.app.json）
+
+由于前端会直接 import 使用装饰器的 NestJS 控制器类，需要开启旧版装饰器支持，并关闭类字段的 `define` 语义。
+
+默认使用非 SWC 的 `react-ts` 模板；若你使用 SWC（`@vitejs/plugin-react-swc` 或 `react-swc-ts` 模板），还需在 `compilerOptions` 中设置 `erasableSyntaxOnly: false`。
+
+非 SWC 默认配置示例：
+
+```json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false
+  }
+}
+```
+
+使用 SWC 时需额外增加：
+
+```json
+{
+  "compilerOptions": {
+    "erasableSyntaxOnly": false
+  }
+}
+```
+
+提示：若你的 tsconfig 是分层合并，请确保这些选项在应用的最终配置中生效。
 
 ## 3. 在前端项目里引用后端示例
 
@@ -140,7 +170,7 @@ const defaultController = _http({
 
 // 直接以类型安全的方式调用后端方法
 const res = await defaultController.getHello();
-console.log(res._data); // 输出：'Hello World!'
+console.log(res._data!); // 输出：'Hello World!'
 ```
 
 ```

@@ -8,10 +8,11 @@ Execute in an empty directory:
 
 ```bash
 mkdir my-vtzac-demo && cd my-vtzac-demo
+# pnpm init does not support -y, so it is not needed
 pnpm init
 
 # Create frontend (using React + TS as example)
-pnpm create vite frontend --no-rolldown --no-interactive --template react-swc-ts
+pnpm create vite frontend --no-rolldown --no-interactive --template react-ts
 
 # Create backend (NestJS example)
 pnpm dlx @nestjs/cli new nestjs-example --package-manager pnpm
@@ -57,13 +58,42 @@ Add plugin to `vite.config.ts` using default configuration:
 
 ```ts
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import vtzac from 'vtzac';
 
 export default defineConfig({
   plugins: [vtzac(), react()],
 });
 ```
+
+### Frontend TypeScript config (tsconfig.app.json)
+
+Because the frontend directly imports NestJS controller classes that use decorators, enable legacy decorators and disable class field define semantics.
+
+Default setup uses `react-ts` (non-SWC). If you use SWC (`@vitejs/plugin-react-swc` or template `react-swc-ts`), also set `erasableSyntaxOnly: false` under `compilerOptions`.
+
+Update `frontend/tsconfig.app.json` (non-SWC) to include at least:
+
+```json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false
+  }
+}
+```
+
+When using SWC, add:
+
+```json
+{
+  "compilerOptions": {
+    "erasableSyntaxOnly": false
+  }
+}
+```
+
+Note: If your tsconfig is layered, ensure these options are applied in the effective config for the app.
 
 ## 3. Reference Backend Example in Frontend Project
 
@@ -140,7 +170,7 @@ const defaultController = _http({
 
 // Directly call backend methods in a type-safe manner
 const res = await defaultController.getHello();
-console.log(res._data); // Output: 'Hello World!'
+console.log(res._data!); // Output: 'Hello World!'
 ```
 
 ```
