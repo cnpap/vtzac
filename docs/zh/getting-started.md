@@ -47,6 +47,20 @@ packages:
 pnpm add -w -D concurrently
 ```
 
+### 初始化清理：前端构建脚本
+
+在 `frontend/package.json` 中，若 `build` 脚本包含 `tsc -b`（TypeScript 项目构建模式），请移除，直接使用 `vite build`：
+
+```json
+{
+  "scripts": {
+    "build": "vite build"
+  }
+}
+```
+
+这样可避免在前端打包阶段执行不必要的 TypeScript 项目构建。vtzac 会在 Vite 构建期生成代码，无需 `tsc -b`。
+
 ## 2. 在 Vite 项目中安装 vtzac
 
 ```bash
@@ -65,35 +79,6 @@ export default defineConfig({
   plugins: [vtzac(), react()],
 });
 ```
-
-### 前端 TypeScript 配置（tsconfig.app.json）
-
-由于前端会直接 import 使用装饰器的 NestJS 控制器类，需要开启旧版装饰器支持，并关闭类字段的 `define` 语义。
-
-默认使用非 SWC 的 `react-ts` 模板；若你使用 SWC（`@vitejs/plugin-react-swc` 或 `react-swc-ts` 模板），还需在 `compilerOptions` 中设置 `erasableSyntaxOnly: false`。
-
-非 SWC 默认配置示例：
-
-```json
-{
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false
-  }
-}
-```
-
-使用 SWC 时需额外增加：
-
-```json
-{
-  "compilerOptions": {
-    "erasableSyntaxOnly": false
-  }
-}
-```
-
-提示：若你的 tsconfig 是分层合并，请确保这些选项在应用的最终配置中生效。
 
 ## 3. 在前端项目里引用后端示例
 

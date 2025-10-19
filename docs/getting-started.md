@@ -47,6 +47,20 @@ Install concurrently dependency:
 pnpm add -w -D concurrently
 ```
 
+### Initialization cleanup: Frontend build script
+
+In `frontend/package.json`, remove any `tsc -b` usage in build scripts. Use `vite build` directly:
+
+```json
+{
+  "scripts": {
+    "build": "vite build"
+  }
+}
+```
+
+This avoids unnecessary TypeScript project builds during frontend bundling. vtzac generates code at Vite build time, so `tsc -b` is not required.
+
 ## 2. Install vtzac in Vite Project
 
 ```bash
@@ -65,35 +79,6 @@ export default defineConfig({
   plugins: [vtzac(), react()],
 });
 ```
-
-### Frontend TypeScript config (tsconfig.app.json)
-
-Because the frontend directly imports NestJS controller classes that use decorators, enable legacy decorators and disable class field define semantics.
-
-Default setup uses `react-ts` (non-SWC). If you use SWC (`@vitejs/plugin-react-swc` or template `react-swc-ts`), also set `erasableSyntaxOnly: false` under `compilerOptions`.
-
-Update `frontend/tsconfig.app.json` (non-SWC) to include at least:
-
-```json
-{
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false
-  }
-}
-```
-
-When using SWC, add:
-
-```json
-{
-  "compilerOptions": {
-    "erasableSyntaxOnly": false
-  }
-}
-```
-
-Note: If your tsconfig is layered, ensure these options are applied in the effective config for the app.
 
 ## 3. Reference Backend Example in Frontend Project
 

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res, Sse, Query } from '@nestjs/common';
+import { Controller, Post, Body, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { UIMessage } from 'ai';
 import { AiSdkService } from './ai-sdk.service';

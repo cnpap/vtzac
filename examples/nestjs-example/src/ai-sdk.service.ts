@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { streamText, UIMessage, convertToModelMessages } from 'ai';
 import { aliOpenAI } from './model';
 
