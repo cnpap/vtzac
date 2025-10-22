@@ -1,0 +1,13 @@
+# Enforce LF line endings in repository and working tree
+* text eol=lf
+
+# Mark binary files to avoid any EOL conversions
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz  binary
+*.exe binary

@@ -67,7 +67,7 @@ export class AskGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('askServer')
   handleAskServer(
     @MessageBody() data: { question: string },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket
   ): void {
     this.logger.log(`客户端 ${client.id} 询问服务端: ${data.question}`);
 
@@ -104,10 +104,10 @@ export class AskGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('askServerWithCallback')
   handleAskServerWithCallback(
     @MessageBody() data: { question: string },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket
   ): AskResponse {
     this.logger.log(
-      `客户端 ${client.id} 通过 callback 询问服务端: ${data.question}`,
+      `客户端 ${client.id} 通过 callback 询问服务端: ${data.question}`
     );
 
     // 模拟服务端处理逻辑
@@ -120,7 +120,7 @@ export class AskGateway implements OnGatewayConnection, OnGatewayDisconnect {
           .reduce(
             (a, b) =>
               Number.parseInt(a as unknown as string) + Number.parseInt(b),
-            0,
+            0
           );
         answer = `计算结果: ${numbers[0]} + ${numbers[1]} = ${sum}`;
       } else {
@@ -172,10 +172,10 @@ export class AskGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // 服务端使用 emitWithAck 向客户端发起询问
   @SubscribeMessage('triggerServerAskWithAck')
   async handleTriggerServerAskWithAck(
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket
   ): Promise<void> {
     this.logger.log(
-      `触发服务端通过 emitWithAck 向客户端 ${client.id} 发起询问`,
+      `触发服务端通过 emitWithAck 向客户端 ${client.id} 发起询问`
     );
 
     const questions = [
@@ -199,10 +199,10 @@ export class AskGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // 使用 emitWithAck 发送询问并等待客户端回答
     const response: AskResponse = (await client.emitWithAck(
       'serverAskWithAck',
-      request as unknown,
+      request as unknown
     )) as AskResponse;
     this.logger.log(
-      `客户端 ${client.id} 通过 emitWithAck 回答: ${JSON.stringify(response)}`,
+      `客户端 ${client.id} 通过 emitWithAck 回答: ${JSON.stringify(response)}`
     );
 
     // 向客户端确认收到回答
@@ -218,7 +218,7 @@ export class AskGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('answerServer')
   handleAnswerServer(
     @MessageBody() data: { requestId: string; answer: string },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket
   ): void {
     this.logger.log(`客户端 ${client.id} 回答服务端: ${data.answer}`);
 
@@ -234,10 +234,10 @@ export class AskGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('askServerWithAck')
   handleAskServerWithAck(
     @MessageBody() data: { question: string },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: Socket
   ): AskResponse {
     this.logger.log(
-      `客户端 ${client.id} 通过 emitWithAck 询问服务端: ${data.question}`,
+      `客户端 ${client.id} 通过 emitWithAck 询问服务端: ${data.question}`
     );
 
     // 模拟服务端处理逻辑

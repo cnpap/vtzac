@@ -10,12 +10,12 @@ const { emitter, createListener, socket, disconnect } = _socket(
     socketIoOptions: {
       transports: ['websocket'],
     },
-  },
+  }
 );
 
 async function demo(): Promise<void> {
   // 等待连接建立
-  await new Promise<void>((resolve) => {
+  await new Promise<void>(resolve => {
     socket.on('connect', () => {
       console.warn('Socket 连接已建立');
       resolve();
@@ -40,39 +40,39 @@ async function demo(): Promise<void> {
    */
   const _listener = createListener(WebSocketEventEmitter);
 
-  _listener.joinedChat((data) => {
+  _listener.joinedChat(data => {
     console.warn('加入聊天成功:', data);
   });
 
-  _listener.publicMessage((data) => {
+  _listener.publicMessage(data => {
     console.warn('收到公共消息:', data);
   });
 
-  _listener.privateMessage((data) => {
+  _listener.privateMessage(data => {
     console.warn('收到私聊消息:', data);
   });
 
-  _listener.onlineUsers((data) => {
+  _listener.onlineUsers(data => {
     console.warn('在线用户列表:', data);
   });
 
-  _listener.userJoined((data) => {
+  _listener.userJoined(data => {
     console.warn('用户加入:', data);
   });
 
-  _listener.userLeft((data) => {
+  _listener.userLeft(data => {
     console.warn('用户离开:', data);
   });
 
-  _listener.pong((data) => {
+  _listener.pong(data => {
     console.warn('心跳响应:', data);
   });
 
-  _listener.onlineCount((data) => {
+  _listener.onlineCount(data => {
     console.warn('在线人数:', data);
   });
 
-  _listener.error((data) => {
+  _listener.error(data => {
     console.error('Socket 错误:', data);
   });
 

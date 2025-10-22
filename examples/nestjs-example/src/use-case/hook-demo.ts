@@ -22,7 +22,7 @@ async function demo(): Promise<boolean> {
     '123',
     { name: 'test' },
     'v1.0',
-    'Bearer token',
+    'Bearer token'
   );
   const data = result._data!;
 

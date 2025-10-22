@@ -61,7 +61,7 @@ export class TestInputController {
   })
   testNamedQuery(
     @Query('page') _page?: string,
-    @Query('limit') _limit?: string,
+    @Query('limit') _limit?: string
   ): { success: boolean; type: string } {
     return { success: true, type: 'named-query' };
   }
@@ -95,7 +95,7 @@ export class TestInputController {
   })
   testNamedParam(
     @Param('userId') _userId: string,
-    @Param('postId') _postId: string,
+    @Param('postId') _postId: string
   ): { success: boolean; type: string } {
     return { success: true, type: 'named-param' };
   }
@@ -130,7 +130,7 @@ export class TestInputController {
   })
   testMixedParam(
     @Param('userId') _userId: string,
-    @Param() _allParams: any,
+    @Param() _allParams: any
   ): { success: boolean; type: string } {
     return { success: true, type: 'mixed-param' };
   }
@@ -153,7 +153,7 @@ export class TestInputController {
   })
   testHeaders(
     @Headers('authorization') _auth?: string,
-    @Headers() _headers?: any,
+    @Headers() _headers?: any
   ): { success: boolean; type: string } {
     return { success: true, type: 'headers' };
   }
@@ -193,7 +193,7 @@ export class TestInputController {
   })
   testSingleFileUpload(
     @UploadedFile() _file: Express.Multer.File,
-    @Body() _metadata?: any,
+    @Body() _metadata?: any
   ): { success: true; type: 'single-file-upload' } {
     return { success: true, type: 'single-file-upload' };
   }
@@ -234,7 +234,7 @@ export class TestInputController {
   })
   testMultipleFileUpload(
     @UploadedFiles() _files: Express.Multer.File[],
-    @Body() _metadata?: any,
+    @Body() _metadata?: any
   ): { success: true; type: 'multiple-file-upload' } {
     return { success: true, type: 'multiple-file-upload' };
   }
@@ -245,7 +245,7 @@ export class TestInputController {
     FileFieldsInterceptor([
       { name: 'documents', maxCount: 3 },
       { name: 'images', maxCount: 2 },
-    ]),
+    ])
   )
   @ApiOperation({
     summary: '具名多文件上传测试',
@@ -292,7 +292,7 @@ export class TestInputController {
       documents?: Express.Multer.File[];
       images?: Express.Multer.File[];
     },
-    @Body() _metadata?: any,
+    @Body() _metadata?: any
   ): { success: true; type: 'named-multiple-file-upload' } {
     return { success: true, type: 'named-multiple-file-upload' };
   }
@@ -338,7 +338,7 @@ export class TestInputController {
     @Body() _body: any,
     @Query('version') _version?: string,
     @Headers('authorization') _auth?: string,
-    @Req() _request?: Request,
+    @Req() _request?: Request
   ): { success: true; type: 'complex' } {
     return { success: true, type: 'complex' };
   }

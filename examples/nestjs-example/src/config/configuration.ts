@@ -20,8 +20,8 @@ export function validateConfig(config: Record<string, unknown>): ConfigType {
   if (!result.success) {
     throw new Error(
       `Configuration validation error: ${result.error.issues
-        .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
-        .join(', ')}`,
+        .map(issue => `${issue.path.join('.')}: ${issue.message}`)
+        .join(', ')}`
     );
   }
 
